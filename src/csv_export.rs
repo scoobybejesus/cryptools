@@ -10,11 +10,11 @@ use decimal::d128;
 
 use crate::transaction::{Transaction, ActionRecord, Polarity, TxType};
 use crate::account::{Account, RawAccount, Term};
-use crate::cli_user_choices::{LotProcessingChoices};
+use crate::cli_user_choices::{ImportProcessParameters};
 
 
 pub fn _1_account_sums_to_csv(
-    settings: &LotProcessingChoices,
+    settings: &ImportProcessParameters,
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>
 ) {
@@ -77,7 +77,7 @@ pub fn _1_account_sums_to_csv(
 
 pub fn _2_account_sums_nonzero_to_csv(
     acct_map: &HashMap<u16, Account>,
-    settings: &LotProcessingChoices,
+    settings: &ImportProcessParameters,
     raw_acct_map: &HashMap<u16, RawAccount>
 ) {
 
@@ -197,7 +197,7 @@ pub fn _2_account_sums_nonzero_to_csv(
 // }
 
 pub fn _5_transaction_mvmt_summaries_to_csv(
-    settings: &LotProcessingChoices,
+    settings: &ImportProcessParameters,
     ars: &HashMap<u32, ActionRecord>,
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,

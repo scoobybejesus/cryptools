@@ -26,7 +26,7 @@ mod csv_export;
 mod utils;
 mod tests;
 
-use crate::cli_user_choices::LotProcessingChoices;
+use crate::cli_user_choices::ImportProcessParameters;
 
 
 #[derive(StructOpt, Debug)]
@@ -144,7 +144,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let (like_kind_election, like_kind_cutoff_date) = cli_user_choices::elect_like_kind_treatment(&lk_cutoff_date_opt_string);
 
-        settings = LotProcessingChoices {
+        settings = ImportProcessParameters {
             export_path: output_dir_path,
             home_currency: home_currency_choice,
             costing_method: costing_method_choice,
@@ -168,7 +168,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         should_export = export_reports_to_output_dir(&mut settings);
 
-        fn export_reports_to_output_dir(settings: &mut LotProcessingChoices) -> bool {
+        fn export_reports_to_output_dir(settings: &mut ImportProcessParameters) -> bool {
 
             println!("\nThe directory currently selected for exporting reports is: {}", settings.export_path.to_str().unwrap());
 
@@ -182,7 +182,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Err(err) => { println!("Export choice error.  {}", err); process::exit(1); }
             };
 
-            fn _export(settings: &mut LotProcessingChoices) -> Result<(bool), Box<Error>> {
+            fn _export(settings: &mut ImportProcessParameters) -> Result<(bool), Box<Error>> {
 
                 let mut input = String::new();
                 let stdin = io::stdin();
@@ -234,7 +234,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let costing_method_choice = cli_user_choices::inv_costing_from_cmd_arg(args.inv_costing_method.into_string().unwrap());
 
-        settings = LotProcessingChoices {
+        settings = ImportProcessParameters {
             export_path: output_dir_path,
             home_currency: home_currency_choice,
             costing_method: costing_method_choice,

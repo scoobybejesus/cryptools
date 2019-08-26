@@ -12,7 +12,7 @@ use structopt::StructOpt;
 
 use crate::account::{Account, RawAccount, Lot};
 use crate::transaction::{Transaction, ActionRecord};
-use crate::cli_user_choices::{LotProcessingChoices, LikeKindSettings};
+use crate::cli_user_choices::{ImportProcessParameters, LikeKindSettings};
 use crate::import_accts_txns;
 use crate::import_cost_proceeds_etc;
 use crate::create_lots_mvmts;
@@ -31,7 +31,7 @@ pub enum InventoryCostingMethod {
 
 pub fn import_and_process_final(
     input_file_path: PathBuf,
-    settings: &LotProcessingChoices,
+    settings: &ImportProcessParameters,
 ) -> (
     HashMap<u16, Account>,
     HashMap<u16, RawAccount>,

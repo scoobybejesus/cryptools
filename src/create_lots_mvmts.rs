@@ -11,12 +11,12 @@ use chrono::NaiveDate;
 use crate::transaction::{Transaction, ActionRecord, TxType, Polarity, TxHasMargin};
 use crate::account::{Account, RawAccount, Lot, Movement};
 use crate::core_functions::InventoryCostingMethod;
-use crate::cli_user_choices::{LotProcessingChoices, LikeKindSettings};
+use crate::cli_user_choices::{ImportProcessParameters, LikeKindSettings};
 use crate::utils::{round_d128_1e8};
 
 pub fn create_lots_and_movements(
     txns_map: HashMap<u32, Transaction>,
-    settings: &LotProcessingChoices,
+    settings: &ImportProcessParameters,
     likekind_settings: &Option<LikeKindSettings>,
     ar_map: &HashMap<u32, ActionRecord>,
     raw_acct_map: &HashMap<u16, RawAccount>,
@@ -625,7 +625,7 @@ fn wrap_mvmt_and_push(
     this_mvmt: Movement,
     ar: &ActionRecord,
     lot: &Lot,
-    settings: &LotProcessingChoices,
+    settings: &ImportProcessParameters,
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
 ) {
@@ -656,7 +656,7 @@ fn fit_into_lots(
     list_of_lots_to_use: RefCell<Vec<Rc<Lot>>>,
     vec_of_ordered_index_values: Vec<usize>,
     index_position: usize,
-    settings: &LotProcessingChoices,
+    settings: &ImportProcessParameters,
     ar_map: &HashMap<u32, ActionRecord>,
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
@@ -789,7 +789,7 @@ fn process_multiple_incoming_lots_and_mvmts(
     txn_num: u32,
     outgoing_ar: &ActionRecord,
     incoming_ar: &ActionRecord,
-    settings: &LotProcessingChoices,
+    settings: &ImportProcessParameters,
     incoming_ar_key: u32,
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,

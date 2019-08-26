@@ -9,10 +9,10 @@ use decimal::d128;
 use crate::transaction::{Transaction, TxType, ActionRecord, Polarity};
 use crate::account::{Account, RawAccount};
 use crate::utils::{round_d128_1e2};
-use crate::cli_user_choices::{LotProcessingChoices};
+use crate::cli_user_choices::{ImportProcessParameters};
 
 pub fn add_cost_basis_to_movements(
-    settings: &LotProcessingChoices,
+    settings: &ImportProcessParameters,
     ars: &HashMap<u32, ActionRecord>,
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
@@ -199,7 +199,7 @@ pub fn add_proceeds_to_movements(
 
 pub fn apply_like_kind_treatment(
     cutoff_date: NaiveDate,
-    settings: &LotProcessingChoices,
+    settings: &ImportProcessParameters,
     ars: &HashMap<u32, ActionRecord>,
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
@@ -222,7 +222,7 @@ pub fn apply_like_kind_treatment(
 
 fn update_current_txn_for_prior_likekind_treatment(
     txn_num: u32,
-    settings: &LotProcessingChoices,
+    settings: &ImportProcessParameters,
     ars: &HashMap<u32, ActionRecord>,
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
@@ -286,7 +286,7 @@ fn update_current_txn_for_prior_likekind_treatment(
 
 fn perform_likekind_treatment_on_txn(
     txn_num: u32,
-    settings: &LotProcessingChoices,
+    settings: &ImportProcessParameters,
     ars: &HashMap<u32, ActionRecord>,
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
@@ -303,7 +303,7 @@ fn perform_likekind_treatment_on_txn(
     let raw_og_acct = raw_acct_map.get(&og_acct.raw_key).unwrap();
     let raw_ic_acct = raw_acct_map.get(&ic_acct.raw_key).unwrap();
 
-    fn both_are_non_home_curr(raw_og_acct: &RawAccount, raw_ic_acct: &RawAccount, settings: &LotProcessingChoices) -> bool {
+    fn both_are_non_home_curr(raw_og_acct: &RawAccount, raw_ic_acct: &RawAccount, settings: &ImportProcessParameters) -> bool {
         let og_is_home_curr = raw_og_acct.is_home_currency(&settings.home_currency);
         let ic_is_home_curr = raw_ic_acct.is_home_currency(&settings.home_currency);
         let both_are_non_home_curr = !ic_is_home_curr && !og_is_home_curr;

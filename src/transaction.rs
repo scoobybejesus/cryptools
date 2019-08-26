@@ -11,7 +11,7 @@ use decimal::d128;
 use chrono::NaiveDate;
 use serde_derive::{Serialize, Deserialize};
 
-use crate::cli_user_choices::LotProcessingChoices;
+use crate::cli_user_choices::ImportProcessParameters;
 use crate::account::{Account, Movement, RawAccount};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -147,7 +147,7 @@ impl Transaction {
 
 	pub fn get_outgoing_exchange_and_flow_mvmts(
         &self,
-        settings: &LotProcessingChoices,
+        settings: &ImportProcessParameters,
         ars: &HashMap<u32, ActionRecord>,
         raw_acct_map: &HashMap<u16, RawAccount>,
         acct_map: &HashMap<u16, Account>,
