@@ -4,7 +4,6 @@
 use std::path::PathBuf;
 use std::error::Error;
 use std::fs::File;
-use std::process;
 use std::collections::{HashMap};
 
 use chrono::NaiveDate;
@@ -45,13 +44,13 @@ pub struct ImportProcessParameters {
 pub fn import_and_process_final(
     input_file_path: PathBuf,
     settings: &ImportProcessParameters,
-) -> (
+) -> Result<(
     HashMap<u16, Account>,
     HashMap<u16, RawAccount>,
     HashMap<u32, ActionRecord>,
     HashMap<u32, Transaction>,
     Option<LikeKindSettings>
-) {
+), Box<Error>> {
 
     let mut transactions_map: HashMap<u32, Transaction> = HashMap::new();
     let mut action_records_map: HashMap<u32, ActionRecord> = HashMap::new();
@@ -67,7 +66,12 @@ pub fn import_and_process_final(
         &mut account_map
     ) {
         Ok(()) => { println!("Successfully imported csv file."); }
-        Err(err) => { println!("\nFailed to import accounts and transactions from CSV."); println!("{}", err); process::exit(1); }
+        Err(err) => {
+            println!("\nFailed to import accounts and transactions from CSV.");
+            println!("{}", err);
+
+            return Err(err);
+        }
     };
 
     pub fn import_from_csv(
@@ -169,5 +173,5 @@ pub fn import_and_process_final(
         println!("  Successfully applied like-kind treatment.");
     };
 
-    (account_map, raw_account_map, action_records_map, transactions_map, likekind_settings)
+    Ok((account_map, raw_account_map, action_records_map, transactions_map, likekind_settings))
 }

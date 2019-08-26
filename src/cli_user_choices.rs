@@ -142,7 +142,7 @@ pub fn choose_inventory_costing_method() -> InventoryCostingMethod {
 
     method
 }
-pub fn inv_costing_from_cmd_arg(arg: String) -> Result<(InventoryCostingMethod), &'static str> {
+pub fn inv_costing_from_cmd_arg(arg: String) -> Result<InventoryCostingMethod, &'static str> {
 
     match arg.trim() { // Without .trim(), there's a hidden \n or something preventing the match
         "1" => Ok(InventoryCostingMethod::LIFObyLotCreationDate),

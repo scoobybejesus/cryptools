@@ -152,13 +152,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             lk_cutoff_date_string: like_kind_cutoff_date,
         };
 
+        let res = core_functions::import_and_process_final(input_file_path, &settings);
+        if res.is_err() {
+            return Err(res.err().unwrap())
+        }
         let (
             account_map1,
             raw_acct_map1,
             action_records_map1,
             transactions_map1,
             like_kind_settings1
-        ) = core_functions::import_and_process_final(input_file_path, &settings);
+        ) = res.unwrap();
 
         account_map = account_map1;
         raw_acct_map = raw_acct_map1;
@@ -245,14 +249,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             enable_like_kind_treatment: like_kind_election,
             lk_cutoff_date_string: like_kind_cutoff_date_string,
         };
-
+        let res = core_functions::import_and_process_final(input_file_path, &settings);
+        if res.is_err() {
+            return Err(res.err().unwrap())
+        }
         let (
             account_map1,
             raw_acct_map1,
             action_records_map1,
             transactions_map1,
             like_kind_settings1
-        ) = core_functions::import_and_process_final(input_file_path, &settings);
+        ) = res.unwrap();
 
         account_map = account_map1;
         raw_acct_map = raw_acct_map1;
