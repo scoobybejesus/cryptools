@@ -8,7 +8,7 @@ use decimal::d128;
 
 use crate::account::{Account};
 use crate::transaction::{Transaction, ActionRecord};
-use crate::utils::*;
+use crate::decimal_utils::*;
 
 pub fn run_tests(
     transactions_map: &HashMap<u32, Transaction>,

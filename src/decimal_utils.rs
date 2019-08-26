@@ -23,12 +23,3 @@ pub fn round_d128_1e8(to_round: &d128) -> d128 {
         //  As you can see, the quantize is off by one.  Quantizing to 10 rounds off the nearest one.  Quantizing to 100 rounds off to nearest 10, etc.
 }
 
-
-pub fn trim_newline(s: &mut String) {
-    if s.ends_with('\n') {
-        s.pop();
-        if s.ends_with('\r') {
-            s.pop();
-        }
-    }
-}

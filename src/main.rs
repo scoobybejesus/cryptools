@@ -23,7 +23,8 @@ mod create_lots_mvmts;
 mod import_cost_proceeds_etc;
 mod cli_user_choices;
 mod csv_export;
-mod utils;
+mod string_utils;
+mod decimal_utils;
 mod tests;
 
 use crate::core_functions::ImportProcessParameters;

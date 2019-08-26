@@ -12,7 +12,7 @@ use decimal::d128;
 
 use crate::transaction::{Transaction, ActionRecord};
 use crate::account::{Account, RawAccount};
-use crate::utils::{round_d128_1e8};
+use crate::decimal_utils::{round_d128_1e8};
 
 
 pub fn import_accounts(

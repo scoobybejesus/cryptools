@@ -15,7 +15,7 @@ use rustyline::error::ReadlineError;
 use rustyline::highlight::{Highlighter};
 use crate::core_functions::InventoryCostingMethod;
 
-use crate::utils;
+use crate::string_utils;
 
 
 pub fn choose_file_for_import() -> PathBuf {
@@ -194,7 +194,7 @@ pub fn elect_like_kind_treatment(cutoff_date_arg: &Option<String>) -> (bool, Str
                     let mut input = String::new();
                     let stdin = io::stdin();
                     stdin.lock().read_line(&mut input)?;
-                    utils::trim_newline(&mut input);
+                    string_utils::trim_newline(&mut input);
                     let newly_chosen_date = NaiveDate::parse_from_str(&input, "%y-%m-%d")
                         .unwrap_or(NaiveDate::parse_from_str(&input, "%Y-%m-%d")
                         .expect("Date entered has an incorrect format. Program must abort."));
@@ -236,7 +236,7 @@ pub fn elect_like_kind_treatment(cutoff_date_arg: &Option<String>) -> (bool, Str
                     let mut input = String::new();
                     let stdin = io::stdin();
                     stdin.lock().read_line(&mut input)?;
-                    utils::trim_newline(&mut input);
+                    string_utils::trim_newline(&mut input);
 
                     let newly_chosen_date = NaiveDate::parse_from_str(&input, "%y-%m-%d")
                         .unwrap_or(NaiveDate::parse_from_str(&input, "%Y-%m-%d")
