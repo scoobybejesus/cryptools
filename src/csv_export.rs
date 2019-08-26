@@ -10,7 +10,7 @@ use decimal::d128;
 
 use crate::transaction::{Transaction, ActionRecord, Polarity, TxType};
 use crate::account::{Account, RawAccount, Term};
-use crate::cli_user_choices::{ImportProcessParameters};
+use crate::core_functions::{ImportProcessParameters};
 
 
 pub fn _1_account_sums_to_csv(

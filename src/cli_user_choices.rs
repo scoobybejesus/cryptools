@@ -260,18 +260,3 @@ pub fn elect_like_kind_treatment(cutoff_date_arg: &Option<String>) -> (bool, Str
     }
 }
 
-
-pub struct ImportProcessParameters {
-    pub export_path: PathBuf,
-    pub home_currency: String,
-    pub enable_like_kind_treatment: bool,
-    pub costing_method: InventoryCostingMethod,
-    pub lk_cutoff_date_string: String,
-}
-impl ImportProcessParameters {}
-
-#[derive(Clone)]
-pub struct LikeKindSettings {
-    pub like_kind_cutoff_date: NaiveDate,
-    pub like_kind_basis_date_preserved: bool,
-}

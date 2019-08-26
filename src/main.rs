@@ -26,7 +26,7 @@ mod csv_export;
 mod utils;
 mod tests;
 
-use crate::cli_user_choices::ImportProcessParameters;
+use crate::core_functions::ImportProcessParameters;
 
 
 #[derive(StructOpt, Debug)]

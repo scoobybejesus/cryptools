@@ -10,8 +10,7 @@ use chrono::NaiveDate;
 
 use crate::transaction::{Transaction, ActionRecord, TxType, Polarity, TxHasMargin};
 use crate::account::{Account, RawAccount, Lot, Movement};
-use crate::core_functions::InventoryCostingMethod;
-use crate::cli_user_choices::{ImportProcessParameters, LikeKindSettings};
+use crate::core_functions::{InventoryCostingMethod, LikeKindSettings, ImportProcessParameters};
 use crate::utils::{round_d128_1e8};
 
 pub fn create_lots_and_movements(

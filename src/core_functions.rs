@@ -12,7 +12,6 @@ use structopt::StructOpt;
 
 use crate::account::{Account, RawAccount, Lot};
 use crate::transaction::{Transaction, ActionRecord};
-use crate::cli_user_choices::{ImportProcessParameters, LikeKindSettings};
 use crate::import_accts_txns;
 use crate::import_cost_proceeds_etc;
 use crate::create_lots_mvmts;
@@ -27,6 +26,20 @@ pub enum InventoryCostingMethod {
     FIFObyLotCreationDate,
     /// 4. FIFO according to the basis date of the lot.
     FIFObyLotBasisDate,
+}
+
+#[derive(Clone)]
+pub struct LikeKindSettings {
+    pub like_kind_cutoff_date: NaiveDate,
+    pub like_kind_basis_date_preserved: bool,
+}
+
+pub struct ImportProcessParameters {
+    pub export_path: PathBuf,
+    pub home_currency: String,
+    pub enable_like_kind_treatment: bool,
+    pub costing_method: InventoryCostingMethod,
+    pub lk_cutoff_date_string: String,
 }
 
 pub fn import_and_process_final(

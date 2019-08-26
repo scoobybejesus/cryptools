@@ -11,7 +11,7 @@ use decimal::d128;
 use chrono::NaiveDate;
 use serde_derive::{Serialize, Deserialize};
 
-use crate::cli_user_choices::ImportProcessParameters;
+use crate::core_functions::ImportProcessParameters;
 use crate::account::{Account, Movement, RawAccount};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
