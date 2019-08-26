@@ -232,7 +232,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             _ => { println!("Invalid choice for inventory costing method. Exiting."); process::exit(0); }
         }
 
-        let costing_method_choice = cli_user_choices::inv_costing_from_cmd_arg(args.inv_costing_method.into_string().unwrap());
+        let costing_method_choice_r = cli_user_choices::inv_costing_from_cmd_arg(args.inv_costing_method.into_string().unwrap());
+        if costing_method_choice_r.is_err() {
+            process::exit(1)
+        }
+        let costing_method_choice = costing_method_choice_r.unwrap();
 
         settings = ImportProcessParameters {
             export_path: output_dir_path,

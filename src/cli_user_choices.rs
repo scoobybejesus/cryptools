@@ -142,25 +142,19 @@ pub fn choose_inventory_costing_method() -> InventoryCostingMethod {
 
     method
 }
-pub fn inv_costing_from_cmd_arg(arg: String) -> InventoryCostingMethod {
+pub fn inv_costing_from_cmd_arg(arg: String) -> Result<(InventoryCostingMethod), &'static str> {
 
-    let method = match _costing_method(arg) {
-        Ok(x) => {x},
-        Err(err) => { process::exit(1) }
-    };
-
-    fn _costing_method(input: String) -> Result<(InventoryCostingMethod), Box<Error>> {
-
-        match input.trim() { // Without .trim(), there's a hidden \n or something preventing the match
-            "1" => Ok(InventoryCostingMethod::LIFObyLotCreationDate),
-            "2" => Ok(InventoryCostingMethod::LIFObyLotBasisDate),
-            "3" => Ok(InventoryCostingMethod::FIFObyLotCreationDate),
-            "4" => Ok(InventoryCostingMethod::FIFObyLotBasisDate),
-            _   => { println!("Invalid choice.  Please enter a valid number."); _costing_method(input) }
+    match arg.trim() { // Without .trim(), there's a hidden \n or something preventing the match
+        "1" => Ok(InventoryCostingMethod::LIFObyLotCreationDate),
+        "2" => Ok(InventoryCostingMethod::LIFObyLotBasisDate),
+        "3" => Ok(InventoryCostingMethod::FIFObyLotCreationDate),
+        "4" => Ok(InventoryCostingMethod::FIFObyLotBasisDate),
+        _   => {
+            println!("Invalid choice.  Please enter a valid number.");
+            return Err("Invalid choice");
         }
     }
 
-    method
 }
 pub fn elect_like_kind_treatment(cutoff_date_arg: &Option<String>) -> (bool, String) {
     let election: bool;
