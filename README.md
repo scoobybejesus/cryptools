@@ -39,7 +39,7 @@ This field is ignored when the user's home currency is used to purchase cryptocu
 * **memo** is useful for evaluating the final output but isn't important.
 Currently, commas in the memo are **not** supported.
 
-After three column of transaction metadata, the *Account* columns follow.
+After three columns of transaction metadata, the *Account* columns follow.
 
 * *Accounts* (**1**, **2**, **3**, **4**, **5**, ...): the top row reflects the account number (which currently must start at 1 and increase sequentially).
 The three other values are the *name*, *ticker*, and *margin_bool*.
