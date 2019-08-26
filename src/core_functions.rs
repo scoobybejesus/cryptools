@@ -11,7 +11,7 @@ use structopt::StructOpt;
 
 use crate::account::{Account, RawAccount, Lot};
 use crate::transaction::{Transaction, ActionRecord};
-use crate::import_accts_txns;
+use crate::csv_import_accts_txns;
 use crate::import_cost_proceeds_etc;
 use crate::create_lots_mvmts;
 
@@ -88,12 +88,12 @@ pub fn import_and_process_final(
             .has_headers(true)
             .from_reader(file);
 
-        match import_accts_txns::import_accounts(&mut rdr, raw_acct_map, acct_map) {
+        match csv_import_accts_txns::import_accounts(&mut rdr, raw_acct_map, acct_map) {
             Ok(()) => {}
             Err(err) => { println!("\nFailed to import accounts from CSV."); println!("{}", err); }
         };
 
-        match import_accts_txns::import_transactions(
+        match csv_import_accts_txns::import_transactions(
             &mut rdr,
             transactions_map,
             action_records,

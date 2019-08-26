@@ -18,7 +18,7 @@ use std::error::Error;
 mod account;
 mod transaction;
 mod core_functions;
-mod import_accts_txns;
+mod csv_import_accts_txns;
 mod create_lots_mvmts;
 mod import_cost_proceeds_etc;
 mod cli_user_choices;
