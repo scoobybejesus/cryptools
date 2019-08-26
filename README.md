@@ -1,8 +1,8 @@
 # cryptools-rs
 
-### Accounting library for cryptocurrency transaction activity. 
+### Accounting library for cryptocurrency transaction activity.
 
-It provides a way to measure cryptocurrency activity in one's home currency (the default value is USD, but anything can be used). 
+It provides a way to measure cryptocurrency activity in one's home currency (the default value is USD, but anything can be used).
 Reports may be exported as CSV files that reflect income/expense/gains/losses.
 
 The activity that gets imported **must** be in a prescribed form that effectively looks like this:
@@ -31,20 +31,20 @@ The activity that gets imported **must** be in a prescribed form that effectivel
 
 * **txDate** is currently set to parse dates of the format MM/dd/YY.
 
-* **proceeds** may seem tricky. 
-The way to understand it, since it can apply to any transaction (aside from transfers from one owned-account to another owned-account), is that this is the value transferred in the transaction. 
+* **proceeds** may seem tricky.
+The way to understand it, since it can apply to any transaction (aside from transfers from one owned-account to another owned-account), is that this is the value transferred in the transaction.
 For example, if one spends 0.01 BTC for an item at a time when BTC/USD is $10,000/BTC, then the user received value of $100, therefore the proceeds of that transaction would be $100.
 This field is ignored when the user's home currency is used to purchase cryptocurrency.
 
-* **memo** is useful for evaluating the final output but isn't important. 
+* **memo** is useful for evaluating the final output but isn't important.
 Currently, commas in the memo are **not** supported.
 
 After three column of transaction metadata, the *Account* columns follow.
 
 * *Accounts* (**1**, **2**, **3**, **4**, **5**, ...): the top row reflects the account number (which currently must start at 1 and increase sequentially).
-The three other values are the *name*, *ticker*, and *margin_bool*. 
-*name* and *ticker* should be self-explanatory. 
-*margin_bool* is set usually set as 'no', 'non' (i.e., non-margin), or 'false.'  
+The three other values are the *name*, *ticker*, and *margin_bool*.
+*name* and *ticker* should be self-explanatory.
+*margin_bool* is set usually set as 'no', 'non' (i.e., non-margin), or 'false.'
 To indicate a margin account, set it as 'yes', 'margin' or 'true'.
 
 ###### Margin accounts
@@ -71,7 +71,8 @@ This will build `./cryptools-rs`.
 
 ## Usage
 
-Run `./cryptools-rs` with no arguments (or `--help`, or `-h`) to see usage.
+Run `./target/debug/cryptools-rs` with no arguments (or `--help`, or `-h`) to see usage.
+Alternatively, run `cargo run`, in which case command-line arguments for `cryptools-rs` may be entered following `--`, e.g., `cargo run -- -h`.
 
 ## Contributing
 
