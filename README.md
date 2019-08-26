@@ -67,7 +67,7 @@ For example, when using BTC to long XMR, the BTC account must be reflected with 
 
 1. `cargo build` (or include `--release` for a non-debug build)
 
-This will build `./cryptools-rs`.
+This will build `./target/debug/cryptools-rs`.
 
 ## Usage
 
