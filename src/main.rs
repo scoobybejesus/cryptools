@@ -41,7 +41,7 @@ struct Cli {
     #[structopt(name = "output directory", short, long = "output", default_value = ".", parse(from_os_str))]
     output_dir_path: PathBuf,
 
-    /// When the 'accept' flag is set, this program will ultimately export CSV files to either the default or chosen 'output directory' unless this flag is set.
+    /// This will prevent the program from writing the CSV to file. This will be ignored if -a is not set (the wizard will always ask to output).
     #[structopt(name = "suppress reports", short, long = "suppress")]
     suppress_reports: bool,
 
