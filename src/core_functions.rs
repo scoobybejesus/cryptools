@@ -8,6 +8,7 @@ use std::process;
 use std::collections::{HashMap};
 
 use chrono::NaiveDate;
+use structopt::StructOpt;
 
 use crate::account::{Account, RawAccount, Lot};
 use crate::transaction::{Transaction, ActionRecord};
@@ -15,6 +16,18 @@ use crate::cli_user_choices::{LotProcessingChoices, LikeKindSettings};
 use crate::import_accts_txns;
 use crate::import_cost_proceeds_etc;
 use crate::create_lots_mvmts;
+
+#[derive(Clone, Debug, PartialEq, StructOpt)]
+pub enum InventoryCostingMethod {
+    /// 1. LIFO according to the order the lot was created.
+    LIFObyLotCreationDate,
+    /// 2. LIFO according to the basis date of the lot.
+    LIFObyLotBasisDate,
+    /// 3. FIFO according to the order the lot was created.
+    FIFObyLotCreationDate,
+    /// 4. FIFO according to the basis date of the lot.
+    FIFObyLotBasisDate,
+}
 
 pub fn import_and_process_final(
     input_file_path: PathBuf,

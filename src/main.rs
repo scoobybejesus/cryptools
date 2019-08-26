@@ -132,7 +132,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             input_file_path = cli_user_choices::choose_file_for_import();
         }
 
-        costing_method_choice = LotProcessingChoices::choose_inventory_costing_method();
+        costing_method_choice = cli_user_choices::choose_inventory_costing_method();
 
         let lk_cutoff_date_opt_string;
 
@@ -142,7 +142,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             lk_cutoff_date_opt_string = None
         };
 
-        let (like_kind_election, like_kind_cutoff_date) = LotProcessingChoices::elect_like_kind_treatment(&lk_cutoff_date_opt_string);
+        let (like_kind_election, like_kind_cutoff_date) = cli_user_choices::elect_like_kind_treatment(&lk_cutoff_date_opt_string);
 
         settings = LotProcessingChoices {
             export_path: output_dir_path,
@@ -232,7 +232,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             _ => { println!("Invalid choice for inventory costing method. Exiting."); process::exit(0); }
         }
 
-        let costing_method_choice = LotProcessingChoices::inv_costing_from_cmd_arg(args.inv_costing_method.into_string().unwrap());
+        let costing_method_choice = cli_user_choices::inv_costing_from_cmd_arg(args.inv_costing_method.into_string().unwrap());
 
         settings = LotProcessingChoices {
             export_path: output_dir_path,
