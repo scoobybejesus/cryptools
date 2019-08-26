@@ -11,7 +11,6 @@ use decimal::d128;
 use chrono::NaiveDate;
 use serde_derive::{Serialize, Deserialize};
 
-use crate::core_functions::ImportProcessParameters;
 use crate::account::{Account, Movement, RawAccount};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -147,7 +146,7 @@ impl Transaction {
 
 	pub fn get_outgoing_exchange_and_flow_mvmts(
         &self,
-        settings: &ImportProcessParameters,
+        user_home_currency: &String,
         ars: &HashMap<u32, ActionRecord>,
         raw_acct_map: &HashMap<u16, RawAccount>,
         acct_map: &HashMap<u16, Account>,
@@ -162,7 +161,7 @@ impl Transaction {
             let acct = acct_map.get(&ar.account_key).unwrap();
             let raw_acct = raw_acct_map.get(&acct.raw_key).unwrap();
 
-            if !raw_acct.is_home_currency(&settings.home_currency) & !raw_acct.is_margin {
+            if !raw_acct.is_home_currency(user_home_currency) & !raw_acct.is_margin {
 
                 let movements = ar.get_mvmts_in_ar(acct_map, txns_map);
 

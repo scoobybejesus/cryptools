@@ -253,7 +253,7 @@ pub fn _5_transaction_mvmt_summaries_to_csv(
         let mut expense_lt = d128!(0);
 
         let flow_or_outgoing_exchange_movements = txn.get_outgoing_exchange_and_flow_mvmts(
-            settings,
+            &settings.home_currency,
             ars,
             raw_acct_map,
             acct_map,
