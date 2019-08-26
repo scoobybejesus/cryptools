@@ -8,23 +8,23 @@ Reports may be exported as CSV files that reflect income/expense/gains/losses.
 The activity that gets imported **must** be in a prescribed form that effectively looks like this:
 
 
-|txDate |proceeds|memo    |1     |2       |3       |4       |5           |
-|-------|--------|--------|------|--------|--------|--------|------------|
-|       |        |        |Bank  |Exchange|Exchange|Exchange|Simplewallet|
-|       |        |        |USD   |BTC     |BTC     |XMR     |XMR         |
-|       |        |        |non   |non     |non     |non     |non         |
-|2/1/16 |0       |FIRST   |-220  |0.25    |        |        |            |
-|3/1/16 |250     |SECOND  |      |-0.25   |        |180     |            |
-|4/1/16 |0       |THIRD   |      |        |        |-90     |90          |
-|5/1/16 |0       |FOURTH  |      |        |        |90      |-90         |
-|5/2/16 |160     |FIFTH   |      |0.3     |        |-90     |            |
-|6/1/16 |0       |SIXTH   |      |-0.3    |0.3     |        |            |
-|7/1/16 |200     |SEVENTH |      |        |0.7     |-90     |            |
-|8/1/16 |0       |EIGHTH  |      |0.5     |-0.5    |        |            |
-|9/1/16 |400     |NINTH   |      |        |-0.5    |200     |            |
-|10/1/16|900     |TENTH   |      |1       |        |-200    |            |
-|11/1/16|0       |ELEVENTH|      |-1.5    |1.5     |        |            |
-|12/1/16|2000    |TWELFTH |      |        |-1.5    |400     |            |
+|txDate |proceeds|memo    |1     |2       |3      |4       |5           |
+|-------|--------|--------|------|--------|-------|--------|------------|
+|       |        |        |Bank  |Exchange|Wallet |Exchange|Simplewallet|
+|       |        |        |USD   |BTC     |BTC    |XMR     |XMR         |
+|       |        |        |non   |non     |non    |non     |non         |
+|2/1/16 |0       |FIRST   |-220  |0.25    |       |        |            |
+|3/1/16 |250     |SECOND  |      |-0.25   |       |180     |            |
+|4/1/16 |0       |THIRD   |      |        |       |-90     |90          |
+|5/1/16 |0       |FOURTH  |      |        |       |90      |-90         |
+|5/2/16 |160     |FIFTH   |      |0.3     |       |-90     |            |
+|6/1/16 |0       |SIXTH   |      |-0.3    |0.3    |        |            |
+|7/1/16 |200     |SEVENTH |      |0.7     |       |-90     |            |
+|8/1/16 |0       |EIGHTH  |      |0.3     |-0.3   |        |            |
+|9/1/16 |400     |NINTH   |      |-0.5    |       |200     |            |
+|10/1/16|900     |TENTH   |      |1       |       |-200    |            |
+|11/1/16|0       |ELEVENTH|      |-1.5    |1.5    |        |            |
+|12/1/16|2000    |TWELFTH |      |        |-1.5   |        |400         |
 
 
 #### CSV file components
