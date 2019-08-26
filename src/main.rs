@@ -63,7 +63,7 @@ struct Cli {
     #[structopt(name = "home currency", short = "c", long = "currency", default_value = "USD", parse(from_os_str))]
     home_currency: OsString,
 
-    /// User is instructing the program to use the command line flags/options/arg they provide without confirming them during runtime. (Faster)
+    /// User is instructing the program to skip the data entry wizard. When set, program will error without required command-line args.
     #[structopt(name = "accept args", short, long = "accept")]
     accept_args: bool,
 }
