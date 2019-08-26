@@ -11,7 +11,7 @@ use chrono::NaiveDate;
 
 use crate::account::{Account, RawAccount, Lot};
 use crate::transaction::{Transaction, ActionRecord};
-use crate::user_choices::{LotProcessingChoices, LikeKindSettings};
+use crate::cli_user_choices::{LotProcessingChoices, LikeKindSettings};
 use crate::import_accts_txns;
 use crate::import_cost_proceeds_etc;
 use crate::create_lots_mvmts;

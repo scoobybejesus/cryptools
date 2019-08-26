@@ -9,7 +9,7 @@ use decimal::d128;
 use crate::transaction::{Transaction, TxType, ActionRecord, Polarity};
 use crate::account::{Account, RawAccount};
 use crate::utils::{round_d128_1e2};
-use crate::user_choices::{LotProcessingChoices};
+use crate::cli_user_choices::{LotProcessingChoices};
 
 pub fn add_cost_basis_to_movements(
     settings: &LotProcessingChoices,

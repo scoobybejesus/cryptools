@@ -21,12 +21,12 @@ mod core_functions;
 mod import_accts_txns;
 mod create_lots_mvmts;
 mod import_cost_proceeds_etc;
-mod user_choices;
-mod export;
+mod cli_user_choices;
+mod csv_export;
 mod utils;
 mod tests;
 
-use crate::user_choices::LotProcessingChoices;
+use crate::cli_user_choices::LotProcessingChoices;
 
 
 #[derive(StructOpt, Debug)]
@@ -129,7 +129,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         if let Some(file) = args.file_to_import {
             input_file_path = file
         } else {
-            input_file_path = user_choices::choose_file_for_import();
+            input_file_path = cli_user_choices::choose_file_for_import();
         }
 
         costing_method_choice = LotProcessingChoices::choose_inventory_costing_method();
@@ -193,7 +193,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     "y" | "ye" | "yes" | "" => { println!("Creating reports now."); Ok(true) },
                     "n" | "no" => { println!("Okay, no reports were created."); Ok(false) },
                     "c" | "change" => {
-                        let new_dir = user_choices::choose_export_dir();
+                        let new_dir = cli_user_choices::choose_export_dir();
                         settings.export_path = PathBuf::from(new_dir);
                         println!("Creating reports now in newly chosen path.");
                         Ok(true)
@@ -261,19 +261,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     if should_export {
 
-        export::_1_account_sums_to_csv(
+        csv_export::_1_account_sums_to_csv(
             &settings,
             &raw_acct_map,
             &account_map
         );
 
-        export::_2_account_sums_nonzero_to_csv(
+        csv_export::_2_account_sums_nonzero_to_csv(
             &account_map,
             &settings,
             &raw_acct_map
         );
 
-        export::_5_transaction_mvmt_summaries_to_csv(
+        csv_export::_5_transaction_mvmt_summaries_to_csv(
             &settings,
             &action_records_map,
             &raw_acct_map,
@@ -292,9 +292,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 
     Ok(())
-    // // export::transactions_to_csv(&transactions);
+    // // csv_export::transactions_to_csv(&transactions);
     // // println!("\nReturned from `fn transactions_to_csv`.  It worked!!  Right?");
 
-    // export::accounts_to_csv(&accounts);
+    // csv_export::accounts_to_csv(&accounts);
     // println!("\nReturned from `fn accounts_to_csv`.  It worked!!  Right?");
 }
