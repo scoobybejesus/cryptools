@@ -2,30 +2,32 @@
 
 ### Accounting library for cryptocurrency transaction activity.
 
-It provides a way to measure cryptocurrency activity in one's home currency (the default value is USD, but anything can be used).
-Reports may be exported as CSV files that reflect income/expense/gains/losses.
+The software provides a way to measure cryptocurrency activity in one's home currency (the default value is USD, but anything can be used). 
+Given a CSV file reflecting the user's entire cryptocurrency transaction history, the software will process that activity in a way that assigns cost basis at the date of purchase/exchange/receipt, preserves the character (date purchased and cost basis, most notably) of all holdings up until the time they are disposed, and when holdings are disposed the gain or loss from sale/exchange/disposal will be computed (including whether the gain or loss is short-term or long-term).
+Reports that reflect income/expense/gains/losses may be exported as CSV files, and the user can supply the desired relative or absolute path for where the reports are saved.
 
-The activity that gets imported **must** be in a prescribed form that effectively looks like this:
+The activity that gets imported **must** be in a prescribed form (a CSV file) that effectively looks like this:
 
 
-|txDate |proceeds|memo    |1     |2       |3       |4       |5           |
-|-------|--------|--------|------|--------|--------|--------|------------|
-|       |        |        |Bank  |Exchange|Exchange|Exchange|Simplewallet|
-|       |        |        |USD   |BTC     |BTC     |XMR     |XMR         |
-|       |        |        |non   |non     |non     |non     |non         |
-|2/1/16 |0       |FIRST   |-220  |0.25    |        |        |            |
-|3/1/16 |250     |SECOND  |      |-0.25   |        |180     |            |
-|4/1/16 |0       |THIRD   |      |        |        |-90     |90          |
-|5/1/16 |0       |FOURTH  |      |        |        |90      |-90         |
-|5/2/16 |160     |FIFTH   |      |0.3     |        |-90     |            |
-|6/1/16 |0       |SIXTH   |      |-0.3    |0.3     |        |            |
-|7/1/16 |200     |SEVENTH |      |        |0.7     |-90     |            |
-|8/1/16 |0       |EIGHTH  |      |0.5     |-0.5    |        |            |
-|9/1/16 |400     |NINTH   |      |        |-0.5    |200     |            |
-|10/1/16|900     |TENTH   |      |1       |        |-200    |            |
-|11/1/16|0       |ELEVENTH|      |-1.5    |1.5     |        |            |
-|12/1/16|2000    |TWELFTH |      |        |-1.5    |400     |            |
+|txDate |proceeds|memo    |1     |2       |3      |4       |5           |
+|-------|--------|--------|------|--------|-------|--------|------------|
+|       |        |        |Bank  |Exchange|Wallet |Exchange|Simplewallet|
+|       |        |        |USD   |BTC     |BTC    |XMR     |XMR         |
+|       |        |        |non   |non     |non    |non     |non         |
+|2/1/16 |0       |FIRST   |-220  |0.25    |       |        |            |
+|3/1/16 |250     |SECOND  |      |-0.25   |       |180     |            |
+|4/1/16 |0       |THIRD   |      |        |       |-90     |90          |
+|5/1/16 |0       |FOURTH  |      |        |       |90      |-90         |
+|5/2/16 |160     |FIFTH   |      |0.3     |       |-90     |            |
+|6/1/16 |0       |SIXTH   |      |-0.3    |0.3    |        |            |
+|7/1/16 |200     |SEVENTH |      |0.7     |       |-90     |            |
+|8/1/16 |0       |EIGHTH  |      |0.3     |-0.3   |        |            |
+|9/1/16 |400     |NINTH   |      |-0.5    |       |200     |            |
+|10/1/16|900     |TENTH   |      |1       |       |-200    |            |
+|11/1/16|0       |ELEVENTH|      |-1.5    |1.5    |        |            |
+|12/1/16|2000    |TWELFTH*|      |        |-1.5   |        |400         |
 
+\* this last transaction is an example of how a user might reflect an exchange via Shapeshift or similar services, where one currency is spent from one wallet and a different currency is received in another wallet.
 
 #### CSV file components
 
@@ -39,7 +41,7 @@ This field is ignored when the user's home currency is used to purchase cryptocu
 * **memo** is useful for evaluating the final output but isn't important.
 Currently, commas in the memo are **not** supported.
 
-After three column of transaction metadata, the *Account* columns follow.
+After three columns of transaction metadata, the *Account* columns follow.
 
 * *Accounts* (**1**, **2**, **3**, **4**, **5**, ...): the top row reflects the account number (which currently must start at 1 and increase sequentially).
 The three other values are the *name*, *ticker*, and *margin_bool*.
