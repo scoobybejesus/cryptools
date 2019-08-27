@@ -2,6 +2,7 @@
 // Redistributions must include the license: https://github.com/scoobybejesus/cryptools-rs/blob/master/LEGAL.txt
 
 use std::collections::{HashMap};
+use std::error::Error;
 
 use chrono::NaiveDate;
 use decimal::d128;
@@ -17,7 +18,7 @@ pub fn add_cost_basis_to_movements(
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
     txns_map: &HashMap<u32, Transaction>,
-) {
+) -> Result<(), Box<Error>> {
 
     let length = txns_map.len();
 
@@ -142,6 +143,8 @@ pub fn add_cost_basis_to_movements(
 
         basis
     };
+
+    Ok(())
 }
 
 pub fn add_proceeds_to_movements(
@@ -149,7 +152,7 @@ pub fn add_proceeds_to_movements(
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
     txns_map: &HashMap<u32, Transaction>,
-) {
+) -> Result<(), Box<Error>> {
 
     let length = txns_map.len();
 
@@ -195,6 +198,8 @@ pub fn add_proceeds_to_movements(
             }
         }
     }
+
+    Ok(())
 }
 
 pub fn apply_like_kind_treatment(
@@ -204,7 +209,7 @@ pub fn apply_like_kind_treatment(
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
     txns_map: &HashMap<u32, Transaction>,
-) {
+) -> Result<(), Box<Error>> {
 
     let length = txns_map.len();
     for txn_num in 1..=length {
@@ -212,12 +217,30 @@ pub fn apply_like_kind_treatment(
         let txn_num = txn_num as u32;
         let txn = txns_map.get(&(txn_num)).unwrap();
 
-        update_current_txn_for_prior_likekind_treatment(txn_num, &settings, &ars, &raw_acct_map, &acct_map, &txns_map);
+        match update_current_txn_for_prior_likekind_treatment(txn_num, &settings, &ars, &raw_acct_map, &acct_map, &txns_map) {
+            Ok(()) => {}
+            Err(err) => {
+                println!("\nFailed to update current transaction for prior like-kind treatment.");
+                println!("{}", err);
+
+                return Err(err)
+            }
+        };
 
         if txn.date <= cutoff_date {
-            perform_likekind_treatment_on_txn(txn_num, &settings, &ars, &raw_acct_map, &acct_map, &txns_map);
+            match perform_likekind_treatment_on_txn(txn_num, &settings, &ars, &raw_acct_map, &acct_map, &txns_map) {
+                Ok(()) => {}
+                Err(err) => {
+                    println!("\nFailed to perform like-kind treatment on transaction.");
+                    println!("{}", err);
+
+                    return Err(err)
+                }
+            };
         }
     }
+
+    Ok(())
 }
 
 fn update_current_txn_for_prior_likekind_treatment(
@@ -227,7 +250,7 @@ fn update_current_txn_for_prior_likekind_treatment(
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
     txns_map: &HashMap<u32, Transaction>,
-) {
+) -> Result<(), Box<Error>> {
 
     let mut sum_of_outgoing_cost_basis_in_ar = d128!(0);
     let txn = txns_map.get(&txn_num).unwrap();
@@ -282,6 +305,8 @@ fn update_current_txn_for_prior_likekind_treatment(
             }
         }
     }
+
+    Ok(())
 }
 
 fn perform_likekind_treatment_on_txn(
@@ -291,7 +316,7 @@ fn perform_likekind_treatment_on_txn(
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
     txns_map: &HashMap<u32, Transaction>,
-) {
+) -> Result<(), Box<Error>> {
 
     let txn = txns_map.get(&txn_num).unwrap();
     let tx_type = txn.transaction_type(ars, raw_acct_map, acct_map);
@@ -366,8 +391,8 @@ fn perform_likekind_treatment_on_txn(
                 }
             }
         }
-        TxType::ToSelf => {
-            return
-        }
+        TxType::ToSelf => {}
     }
+
+    Ok(())
 }

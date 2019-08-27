@@ -4,6 +4,7 @@
 use std::rc::{Rc};
 use std::cell::{RefCell, Ref, Cell};
 use std::collections::{HashMap};
+use std::error::Error;
 
 use decimal::d128;
 use chrono::NaiveDate;
@@ -21,7 +22,7 @@ pub fn create_lots_and_movements(
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
     lot_map: &HashMap<(RawAccount, u32), Lot>,
-) -> HashMap<u32,Transaction> {
+) -> Result<HashMap<u32,Transaction>, Box<Error>> {
 
     //  Set values to be referred to repeatedly, potentially, in Incoming Exchange transactions
     let multiple_incoming_mvmts_per_ar = match &likekind_settings {
@@ -569,7 +570,7 @@ pub fn create_lots_and_movements(
             }    //  end for ar in txn.actionrecords
         }   //  end of tx does not have marginness of TwoARs
     }   //  end for txn in transactions
-    txns_map
+    Ok(txns_map)
 }
 
 fn get_base_and_quote_acct_for_dual_actionrecord_flow_tx(
