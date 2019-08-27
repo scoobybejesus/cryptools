@@ -70,7 +70,7 @@ pub fn import_and_process_final(
             println!("\nFailed to import accounts and transactions from CSV.");
             println!("{}", err);
 
-            return Err(err);
+            return Err(err)
         }
     };
 
@@ -90,7 +90,12 @@ pub fn import_and_process_final(
 
         match csv_import_accts_txns::import_accounts(&mut rdr, raw_acct_map, acct_map) {
             Ok(()) => {}
-            Err(err) => { println!("\nFailed to import accounts from CSV."); println!("{}", err); }
+            Err(err) => {
+                println!("\nFailed to import accounts from CSV.");
+                println!("{}", err);
+
+                return Err(err)
+            }
         };
 
         match csv_import_accts_txns::import_transactions(
@@ -101,7 +106,12 @@ pub fn import_and_process_final(
             acct_map
         ) {
             Ok(()) => {}
-            Err(err) => { println!("\nFailed to import transactions from CSV."); println!("{}", err); }
+            Err(err) => {
+                println!("\nFailed to import transactions from CSV.");
+                println!("{}", err);
+
+                return Err(err)
+            }
         };
 
         Ok(())
@@ -136,7 +146,7 @@ pub fn import_and_process_final(
 
     println!("  Successfully created lots and movements.");
 
-   import_cost_proceeds_etc::add_cost_basis_to_movements(
+    import_cost_proceeds_etc::add_cost_basis_to_movements(
         &settings,
         &action_records_map,
         &raw_account_map,
