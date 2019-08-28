@@ -6,6 +6,7 @@ use std::cell::{RefCell};
 use std::process::exit;
 use std::fmt;
 use std::collections::{HashMap};
+use std::error::Error;
 
 use decimal::d128;
 use chrono::NaiveDate;
@@ -30,10 +31,10 @@ impl Transaction {
 		ars: &HashMap<u32, ActionRecord>,
 		raw_acct_map: &HashMap<u16, RawAccount>,
 		acct_map: &HashMap<u16, Account>,
-	) -> TxType {
+	) -> Result<TxType, Box<Error>> {
 
 		if self.action_record_idx_vec.len() == 1 {
-			TxType::Flow
+			Ok(TxType::Flow)
 		}
 		else if self.action_record_idx_vec.len() == 2 {
 			//	This exercise of splitting the strings is because of margin accounts, where BTC borrowed to buy XMR would reflect as BTC_xmr
@@ -55,14 +56,14 @@ impl Transaction {
 			}
 			if ar1_ticker == ar2_ticker {
 				if ar1_raw_acct.is_margin != ar2_raw_acct.is_margin {
-					TxType::Flow
+					Ok(TxType::Flow)
 				}
 				else {
-					TxType::ToSelf
+					Ok(TxType::ToSelf)
 				}
 			}
 			else {
-				TxType::Exchange
+				Ok(TxType::Exchange)
 			}
 		}
 		else if self.action_record_idx_vec.len() > 2 {
@@ -111,9 +112,9 @@ impl Transaction {
 		ars: &HashMap<u32, ActionRecord>,
 		raw_accts: &HashMap<u16, RawAccount>,
 		acct_map: &HashMap<u16, Account>
-	) -> (u16, u16) {
+	) -> Result<(u16, u16), Box<Error>> {
 
-		assert_eq!(self.transaction_type(ars, raw_accts, acct_map), TxType::Exchange,
+		assert_eq!(self.transaction_type(ars, raw_accts, acct_map)?, TxType::Exchange,
 			"This can only be called on exchange transactions.");
 
 		let first_ar = ars.get(&self.action_record_idx_vec[0]).unwrap();
@@ -134,11 +135,11 @@ impl Transaction {
         if first_raw_acct.ticker.contains('_') {
 			quote = first_acct_raw_key;
 			base = second_acct_raw_key;
-			(base, quote)
+			Ok((base, quote))
 		} else if second_raw_acct.ticker.contains('_') {
 			base = first_acct_raw_key;
 			quote = second_acct_raw_key;
-			(base, quote)
+			Ok((base, quote))
 		} else {
 			println!("{}", VariousErrors::MarginNoUnderbar); use std::process::exit; exit(1)
 		}
@@ -151,7 +152,7 @@ impl Transaction {
         raw_acct_map: &HashMap<u16, RawAccount>,
         acct_map: &HashMap<u16, Account>,
         txns_map: &HashMap<u32, Transaction>,
-    ) -> Vec<Rc<Movement>> {
+    ) -> Result<Vec<Rc<Movement>>, Box<Error>> {
 
 		let mut flow_or_outgoing_exchange_movements = [].to_vec();
 
@@ -165,7 +166,7 @@ impl Transaction {
 
                 let movements = ar.get_mvmts_in_ar(acct_map, txns_map);
 
-                match self.transaction_type(ars, raw_acct_map, acct_map) {
+                match self.transaction_type(ars, raw_acct_map, acct_map)? {
                     TxType::Exchange => {
                         if Polarity::Outgoing == ar.direction() {
                             for mvmt in movements.iter() {
@@ -182,7 +183,7 @@ impl Transaction {
                 }
             }
         }
-		flow_or_outgoing_exchange_movements
+		Ok(flow_or_outgoing_exchange_movements)
 	}
 }
 

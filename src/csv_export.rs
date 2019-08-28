@@ -4,6 +4,7 @@
 use std::fs::File;
 use std::collections::{HashMap};
 use std::path::PathBuf;
+use std::error::Error;
 
 use decimal::d128;
 
@@ -201,7 +202,7 @@ pub fn _5_transaction_mvmt_summaries_to_csv(
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
     txns_map: &HashMap<u32, Transaction>,
-) {
+) -> Result<(), Box<Error>> {
 
     let mut rows: Vec<Vec<String>> = [].to_vec();
     let mut header: Vec<String> = [].to_vec();
@@ -230,7 +231,7 @@ pub fn _5_transaction_mvmt_summaries_to_csv(
         let txn = txns_map.get(&(txn_num)).unwrap();
         let txn_date_string = txn.date.format("%Y/%m/%d").to_string();
         let tx_num_string = txn.tx_number.to_string();
-        let tx_type_string = txn.transaction_type(ars, &raw_acct_map, &acct_map).to_string();
+        let tx_type_string = txn.transaction_type(ars, &raw_acct_map, &acct_map)?.to_string();
         let tx_memo_string = txn.memo.to_string();
         let mut term_st: Option<Term> = None;
         let mut term_lt: Option<Term> = None;
@@ -257,7 +258,7 @@ pub fn _5_transaction_mvmt_summaries_to_csv(
             raw_acct_map,
             acct_map,
             txns_map
-        );
+        )?;
 
         for mvmt in flow_or_outgoing_exchange_movements.iter() {
             let lot = mvmt.get_lot(acct_map, ars);
@@ -294,7 +295,7 @@ pub fn _5_transaction_mvmt_summaries_to_csv(
             }
         }
 
-        if (txn.transaction_type(ars, &raw_acct_map, &acct_map) == TxType::Flow) & (polarity == Some(Polarity::Incoming)) {
+        if (txn.transaction_type(ars, &raw_acct_map, &acct_map)? == TxType::Flow) & (polarity == Some(Polarity::Incoming)) {
             // println!("Incoming flow {}", txn.tx_number);
             income_st = proceeds_st;
             proceeds_st = d128!(0);
@@ -304,7 +305,7 @@ pub fn _5_transaction_mvmt_summaries_to_csv(
             cost_basis_lt = d128!(0);
         }
 
-        if (txn.transaction_type(ars, &raw_acct_map, &acct_map) == TxType::Flow) & (polarity == Some(Polarity::Outgoing)) {
+        if (txn.transaction_type(ars, &raw_acct_map, &acct_map)? == TxType::Flow) & (polarity == Some(Polarity::Outgoing)) {
             // println!("Outgoing flow {}, proceeds_st {}, proceeds_lt {}", txn.tx_number, proceeds_st, proceeds_lt);
             expense_st -= proceeds_st;
             expense_lt -= proceeds_lt;
@@ -361,6 +362,8 @@ pub fn _5_transaction_mvmt_summaries_to_csv(
         wtr.write_record(row).expect("Could not write row to CSV file");
     }
     wtr.flush().expect("Could not flush Writer, though file should exist and be complete");
+
+    Ok(())
 }
 
 // pub fn accounts_to_csv(

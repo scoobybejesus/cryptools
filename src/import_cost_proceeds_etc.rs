@@ -37,7 +37,7 @@ pub fn add_cost_basis_to_movements(
             for mvmt in movements.iter() {
 
                 let polarity = ar.direction();
-                let tx_type = txn.transaction_type(ars, raw_acct_map, acct_map);
+                let tx_type = txn.transaction_type(ars, raw_acct_map, acct_map)?;
                 let is_home_curr = raw_acct.is_home_currency(&settings.home_currency);
                 let mvmt_copy = mvmt.clone();
                 let borrowed_mvmt = mvmt_copy.clone();
@@ -169,7 +169,7 @@ pub fn add_proceeds_to_movements(
             for mvmt in movements.iter() {
 
                 let polarity = ar.direction();
-                let tx_type = txn.transaction_type(ars, raw_acct_map, acct_map);
+                let tx_type = txn.transaction_type(ars, raw_acct_map, acct_map)?;
                 let mvmt_copy = mvmt.clone();
                 let borrowed_mvmt = mvmt_copy.clone();
 
@@ -249,7 +249,7 @@ fn update_current_txn_for_prior_likekind_treatment(
         for mvmt in movements.iter() {
 
             let polarity = ar.direction();
-            let tx_type = txn.transaction_type(ars, raw_acct_map, acct_map);
+            let tx_type = txn.transaction_type(ars, raw_acct_map, acct_map)?;
             let is_home_curr = raw_acct.is_home_currency(&settings.home_currency);
 
             let mvmt_copy = mvmt.clone();
@@ -303,7 +303,7 @@ fn perform_likekind_treatment_on_txn(
 ) -> Result<(), Box<Error>> {
 
     let txn = txns_map.get(&txn_num).unwrap();
-    let tx_type = txn.transaction_type(ars, raw_acct_map, acct_map);
+    let tx_type = txn.transaction_type(ars, raw_acct_map, acct_map)?;
 
     let og_ar = ars.get(&txn.action_record_idx_vec.first().unwrap()).unwrap();
     let ic_ar = ars.get(&txn.action_record_idx_vec.last().unwrap()).unwrap();

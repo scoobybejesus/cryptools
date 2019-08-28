@@ -49,10 +49,10 @@ pub fn create_lots_and_movements(
         let txn_num = num as u32;
         let txn = txns_map.get(&(txn_num)).expect("Couldn't get txn. Tx num invalid?");
         if txn.marginness(&ar_map, &raw_acct_map, &acct_map) == TxHasMargin::TwoARs {
-            assert_eq!(txn.transaction_type(&ar_map, &raw_acct_map, &acct_map), TxType::Exchange);
+            assert_eq!(txn.transaction_type(&ar_map, &raw_acct_map, &acct_map)?, TxType::Exchange);
             assert_eq!(txn.action_record_idx_vec.len(), 2);
 
-            let the_raw_pair_keys = txn.get_base_and_quote_raw_acct_keys(&ar_map, &raw_acct_map, &acct_map);
+            let the_raw_pair_keys = txn.get_base_and_quote_raw_acct_keys(&ar_map, &raw_acct_map, &acct_map)?;
             let base_acct = acct_map.get(&the_raw_pair_keys.0).expect("Couldn't get acct. Raw pair keys invalid?");
             let quote_acct = acct_map.get(&the_raw_pair_keys.1).expect("Couldn't get acct. Raw pair keys invalid?");
 
@@ -217,7 +217,7 @@ pub fn create_lots_and_movements(
                 }
                 //  Note: a_r is not in home currency if here or below
                 let polarity = ar.direction();
-                let tx_type = txn.transaction_type(&ar_map, &raw_acct_map, &acct_map);
+                let tx_type = txn.transaction_type(&ar_map, &raw_acct_map, &acct_map)?;
 
                 match polarity {
                     Polarity::Outgoing => {
@@ -409,7 +409,7 @@ pub fn create_lots_and_movements(
                                             &raw_acct_map,
                                             &acct_map,
                                             &txns_map,
-                                        );
+                                        )?;
 
                                         let base_acct = acct_map.get(&base_acct_key).unwrap();
                                         let base_acct_lot = base_acct.list_of_lots.borrow().last().unwrap().clone();
@@ -579,7 +579,7 @@ fn get_base_and_quote_acct_for_dual_actionrecord_flow_tx(
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
     txns_map: &HashMap<u32, Transaction>,
-) -> (u16, u16) {
+) -> Result<(u16, u16), Box<Error>> {
 
     let txn = txns_map.get(&txn_num).expect("Couldn't get txn. Tx num invalid?");
     let og_flow_ar = ar_map.get(txn.action_record_idx_vec.first().unwrap()).unwrap();
@@ -597,8 +597,8 @@ fn get_base_and_quote_acct_for_dual_actionrecord_flow_tx(
     let (base_key,quote_key) = txn_of_og_mvmt_lot_first_mvmt.get_base_and_quote_raw_acct_keys(
         ar_map,
         &raw_acct_map,
-        &acct_map); // TODO: should this panic on margin loss?
-	(base_key, quote_key)
+        &acct_map)?; // TODO: should this panic on margin loss?
+	Ok((base_key, quote_key))
 }
 
 fn get_base_and_quote_ar_idxs(

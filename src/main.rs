@@ -291,7 +291,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             &raw_acct_map,
             &account_map,
             &transactions_map
-        );
+        )?;
 
     }
 

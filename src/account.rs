@@ -5,6 +5,7 @@ use std::rc::{Rc, Weak};
 use std::cell::{Cell, RefCell};
 use std::fmt;
 use std::collections::{HashMap};
+use std::error::Error;
 
 use chrono::{NaiveDate, NaiveTime, NaiveDateTime, DateTime, Utc, TimeZone};
 use chrono_tz::US::Eastern;
@@ -178,19 +179,19 @@ impl Movement {
 		raw_accts: &HashMap<u16, RawAccount>,
 		acct_map: &HashMap<u16, Account>,
 		txns_map: &HashMap<u32, Transaction>,
-	)-> d128 {
+	)-> Result<d128, Box<Error>> {
 
 		let txn = txns_map.get(&self.transaction_key).expect("Couldn't get txn. Tx num invalid?");
-		match txn.transaction_type(ar_map, raw_accts, acct_map) {
+		match txn.transaction_type(ar_map, raw_accts, acct_map)? {
 			TxType::Flow => {
 				let ar = ar_map.get(&self.action_record_key).unwrap();
 				if ar.direction() == Polarity::Incoming {
-					self.proceeds.get()
+					Ok(self.proceeds.get())
 				}
-				else { d128!(0) }
+				else { Ok(d128!(0)) }
 			}
-			TxType::Exchange => { d128!(0) }
-			TxType::ToSelf => { d128!(0) }
+			TxType::Exchange => { Ok(d128!(0)) }
+			TxType::ToSelf => { Ok(d128!(0)) }
 		}
 	}
 
@@ -200,19 +201,19 @@ impl Movement {
 		raw_accts: &HashMap<u16, RawAccount>,
 		acct_map: &HashMap<u16, Account>,
 		txns_map: &HashMap<u32, Transaction>,
-	)-> d128 {
+	)-> Result<d128, Box<Error>> {
 
 		let txn = txns_map.get(&self.transaction_key).expect("Couldn't get txn. Tx num invalid?");
-		match txn.transaction_type(ar_map, raw_accts, acct_map) {
+		match txn.transaction_type(ar_map, raw_accts, acct_map)? {
 			TxType::Flow => {
 				let ar = ar_map.get(&self.action_record_key).unwrap();
 				if ar.direction() == Polarity::Outgoing {
-					self.proceeds.get()
+					Ok(self.proceeds.get())
 				}
-				else { d128!(0) }
+				else { Ok(d128!(0)) }
 			}
-			TxType::Exchange => { d128!(0) }
-			TxType::ToSelf => { d128!(0) }
+			TxType::Exchange => { Ok(d128!(0)) }
+			TxType::ToSelf => { Ok(d128!(0)) }
 		}
 	}
 
