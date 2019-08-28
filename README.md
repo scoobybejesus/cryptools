@@ -2,9 +2,10 @@
 
 ### Accounting library for cryptocurrency transaction activity.
 
-The software provides a way to measure cryptocurrency activity in one's home currency (the default value is USD, but anything can be used). 
-Given a CSV file reflecting the user's entire cryptocurrency transaction history, the software will process that activity in a way that assigns cost basis at the date of purchase/exchange/receipt, preserves the character (date purchased and cost basis, most notably) of all holdings up until the time they are disposed, and when holdings are disposed the gain or loss from sale/exchange/disposal will be computed (including whether the gain or loss is short-term or long-term).
-Reports that reflect income/expense/gains/losses may be exported as CSV files, and the user can supply the desired relative or absolute path for where the reports are saved.
+The software provides a way to measure cryptocurrency activity in one's home currency (the default value is USD, but anything can be used).
+
+Given a CSV file reflecting the user's entire cryptocurrency transaction history, the software will assign cost basis at the date of purchase/exchange/receipt, preserve the character (date purchased and cost basis, most notably) of all holdings up until the time they are disposed, and when holdings are disposed the gain or loss from sale/exchange/disposal will be computed (including whether the gain or loss is short-term or long-term).
+Reports that reflect income/expenses/gains/losses may be exported as CSV files, and the user can supply the desired relative or absolute path for where the reports are saved.
 
 The activity that gets imported **must** be in a prescribed form (a CSV file) that effectively looks like this:
 
@@ -33,10 +34,10 @@ The activity that gets imported **must** be in a prescribed form (a CSV file) th
 
 * **txDate** is currently set to parse dates of the format MM/dd/YY.
 
-* **proceeds** may seem tricky.
-The way to understand it, since it can apply to any transaction (aside from transfers from one owned-account to another owned-account), is that this is the value transferred in the transaction.
-For example, if one spends 0.01 BTC for an item at a time when BTC/USD is $10,000/BTC, then the user received value of $100, therefore the proceeds of that transaction would be $100.
-This field is ignored when the user's home currency is used to purchase cryptocurrency.
+* **proceeds** This is the value transferred in the transaction.
+For example, if one spends 0.01 BTC at a time when BTC/USD is $10,000/BTC, then the user received value of $100, therefore the proceeds of that transaction would be $100.
+When transfering to oneself (i.e.,  not changing currencies), this value is irrelevant and ignored.
+This value is also ignored when the user's home currency is spent.
 
 * **memo** is useful for evaluating the final output but isn't important.
 Currently, commas in the memo are **not** supported.
@@ -57,13 +58,16 @@ The quote account is the market.
 The quote account's ticker requires a different formatting.
 For example, when using BTC to long XMR, the BTC account must be reflected with the ticker BTC_xmr.
 
+* Margin gain or loss is accounted for when there is activity in the 'spot' account.
+For example, you won't reflect a loss until you actually spend your holdings to pay off your loans.
+
 #### Constraints
 
 * *All* cryptocurrency-related activity for the user generally must be included in the input CSV file.
 
 * There can only be either one or two accounts used in a given transaction (i.e., if a Counterparty token or Ethereum token transaction must be recorded, the XCP or ETH transaction fee must be reflected in a separate transaction/row).
 
-* Currently, manual adjustments may need to be made to the output files in cases, for example, when the user used cryptocurrency to make atax-deductible charitable contribution.
+* Currently, manual adjustments may need to be made to the output files in cases, for example, when the user used cryptocurrency to make a tax-deductible charitable contribution.
 
 ## Installation
 
@@ -75,6 +79,12 @@ This will build `./target/debug/cryptools-rs`.
 
 Run `./target/debug/cryptools-rs` with no arguments (or `--help`, or `-h`) to see usage.
 Alternatively, run `cargo run`, in which case command-line arguments for `cryptools-rs` may be entered following `--`, e.g., `cargo run -- -h`.
+
+## Development state
+
+As of summer 2019, the code is "feature complete" in the sense that it requires no additional features in order for it to serve the needs of the original author.
+At the same time, there are plenty of bells and whistles, creature comforts, etc. that may be added at any time.
+Additionally, the code could use factoring or general re-working in several areas.
 
 ## Contributing
 
