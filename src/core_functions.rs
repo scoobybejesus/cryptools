@@ -88,31 +88,15 @@ pub fn import_and_process_final(
             .has_headers(true)
             .from_reader(file);
 
-        match csv_import_accts_txns::import_accounts(&mut rdr, raw_acct_map, acct_map) {
-            Ok(()) => {}
-            Err(err) => {
-                println!("\nFailed to import accounts from CSV.");
-                println!("{}", err);
+        csv_import_accts_txns::import_accounts(&mut rdr, raw_acct_map, acct_map)?;
 
-                return Err(err)
-            }
-        };
-
-        match csv_import_accts_txns::import_transactions(
+        csv_import_accts_txns::import_transactions(
             &mut rdr,
             transactions_map,
             action_records,
             raw_acct_map,
             acct_map
-        ) {
-            Ok(()) => {}
-            Err(err) => {
-                println!("\nFailed to import transactions from CSV.");
-                println!("{}", err);
-
-                return Err(err)
-            }
-        };
+        )?;
 
         Ok(())
     }
@@ -134,7 +118,7 @@ pub fn import_and_process_final(
         None
     };
 
-    transactions_map = match create_lots_mvmts::create_lots_and_movements(
+    transactions_map = create_lots_mvmts::create_lots_and_movements(
         transactions_map,
         &settings,
         &likekind_settings,
@@ -142,50 +126,26 @@ pub fn import_and_process_final(
         &mut raw_account_map,
         &mut account_map,
         &mut lot_map,
-    ) {
-        Ok(txns_map) => {txns_map}
-        Err(err) => {
-            println!("\nFailed to add lots and movements to transactions hashmap.");
-            println!("{}", err);
-
-            return Err(err)
-        }
-    };
+    )?;
 
     println!("  Successfully created lots and movements.");
 
-    match import_cost_proceeds_etc::add_cost_basis_to_movements(
+    import_cost_proceeds_etc::add_cost_basis_to_movements(
         &settings,
         &action_records_map,
         &raw_account_map,
         &account_map,
         &transactions_map
-    ) {
-        Ok(()) => {}
-        Err(err) => {
-            println!("\nFailed to add cost basis to movements.");
-            println!("{}", err);
-
-            return Err(err)
-        }
-    };
+    )?;
 
     println!("  Successfully added cost basis to movements.");
 
-    match import_cost_proceeds_etc::add_proceeds_to_movements(
+    import_cost_proceeds_etc::add_proceeds_to_movements(
         &action_records_map,
         &raw_account_map,
         &account_map,
         &transactions_map
-    ) {
-        Ok(()) => {}
-        Err(err) => {
-            println!("\nFailed to add proceeds to movements.");
-            println!("{}", err);
-
-            return Err(err)
-        }
-    };
+    )?;
 
     println!("  Successfully added proceeds to movements.");
 
@@ -195,22 +155,14 @@ pub fn import_and_process_final(
         let cutoff_date = lk_settings.like_kind_cutoff_date;
         println!(" Applying like-kind treatment for cut-off date: {}.", cutoff_date);
 
-        match import_cost_proceeds_etc::apply_like_kind_treatment(
+        import_cost_proceeds_etc::apply_like_kind_treatment(
             cutoff_date,
             &settings,
             &action_records_map,
             &raw_account_map,
             &account_map,
             &transactions_map
-        ) {
-            Ok(()) => {}
-            Err(err) => {
-                println!("\nFailed to apply like-kind treatment to movements.");
-                println!("{}", err);
-
-                return Err(err)
-            }
-        };
+        )?;
 
         println!("  Successfully applied like-kind treatment.");
     };

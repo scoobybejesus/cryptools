@@ -217,26 +217,10 @@ pub fn apply_like_kind_treatment(
         let txn_num = txn_num as u32;
         let txn = txns_map.get(&(txn_num)).unwrap();
 
-        match update_current_txn_for_prior_likekind_treatment(txn_num, &settings, &ars, &raw_acct_map, &acct_map, &txns_map) {
-            Ok(()) => {}
-            Err(err) => {
-                println!("\nFailed to update current transaction for prior like-kind treatment.");
-                println!("{}", err);
-
-                return Err(err)
-            }
-        };
+        update_current_txn_for_prior_likekind_treatment(txn_num, &settings, &ars, &raw_acct_map, &acct_map, &txns_map)?;
 
         if txn.date <= cutoff_date {
-            match perform_likekind_treatment_on_txn(txn_num, &settings, &ars, &raw_acct_map, &acct_map, &txns_map) {
-                Ok(()) => {}
-                Err(err) => {
-                    println!("\nFailed to perform like-kind treatment on transaction.");
-                    println!("{}", err);
-
-                    return Err(err)
-                }
-            };
+            perform_likekind_treatment_on_txn(txn_num, &settings, &ars, &raw_acct_map, &acct_map, &txns_map)?;
         }
     }
 
