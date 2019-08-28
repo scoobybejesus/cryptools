@@ -305,8 +305,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     Ok(())
     // // csv_export::transactions_to_csv(&transactions);
-    // // println!("\nReturned from `fn transactions_to_csv`.  It worked!!  Right?");
 
     // csv_export::accounts_to_csv(&accounts);
-    // println!("\nReturned from `fn accounts_to_csv`.  It worked!!  Right?");
 }

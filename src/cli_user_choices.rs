@@ -22,8 +22,6 @@ pub fn choose_file_for_import() -> PathBuf {
 
     println!("Please input a file (absolute or relative path) to import: ");
 
-    // PathBuf::from("/Users/scoob/Documents/Repos/cryptools-rs/private/RawTxForImport-pycleaned.csv")
-
     let file_str = _get_path();
     PathBuf::from(file_str.unwrap())
 }
@@ -31,8 +29,6 @@ pub fn choose_file_for_import() -> PathBuf {
 pub fn choose_export_dir() -> PathBuf {
 
     println!("Please input a file path for exports: ");
-
-    // PathBuf::from("/Users/scoob/Documents/Testing/rust_exports/")
 
     let file_str = _get_path();
     PathBuf::from(file_str.unwrap())

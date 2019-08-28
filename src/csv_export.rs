@@ -1,7 +1,6 @@
 // Copyright (c) 2017-2019, scoobybejesus
 // Redistributions must include the license: https://github.com/scoobybejesus/cryptools-rs/blob/master/LEGAL.txt
 
-use std::rc::{Rc};
 use std::fs::File;
 use std::collections::{HashMap};
 use std::path::PathBuf;
@@ -188,7 +187,7 @@ pub fn _2_account_sums_nonzero_to_csv(
 //             rows.push(row);
 //         }
 //     }
-//     let buffer = File::create("/Users/scoob/Documents/Testing/rust_exports/test/txns-3rd-try.csv").unwrap();
+//     let buffer = File::create(full_path).unwrap();
 //     let mut wtr = csv::Writer::from_writer(buffer);
 //     for row in rows.iter() {
 //         wtr.write_record(row).expect("Could not write row to CSV file");
@@ -364,70 +363,73 @@ pub fn _5_transaction_mvmt_summaries_to_csv(
     wtr.flush().expect("Could not flush Writer, though file should exist and be complete");
 }
 
-pub fn accounts_to_csv(
-    accounts: &[Rc<Account>],
-    ars: &HashMap<u32, ActionRecord>,
-    raw_acct_map: &HashMap<u16, RawAccount>,
-    acct_map: &HashMap<u16, Account>,
-    txns_map: &HashMap<u32, Transaction>,
-) {
+// pub fn accounts_to_csv(
+//     accounts: &[Rc<Account>],
+//     ars: &HashMap<u32, ActionRecord>,
+//     raw_acct_map: &HashMap<u16, RawAccount>,
+//     acct_map: &HashMap<u16, Account>,
+//     txns_map: &HashMap<u32, Transaction>,
+// ) {
 
-    let mut rows: Vec<Vec<String>> = [].to_vec();
-    let mut header: Vec<String> = [].to_vec();
+//     let mut rows: Vec<Vec<String>> = [].to_vec();
+//     let mut header: Vec<String> = [].to_vec();
 
-    header.extend_from_slice(&[
-        "#".to_string(),
-        "Account".to_string(),
-        "Ticker".to_string(),
-        "Margin".to_string(),
-        "Date".to_string(),
-        "Txn#".to_string(),
-        "Type".to_string(),
-        "Memo".to_string(),
-        "Amount".to_string(),
-        "Proceeds".to_string(),
-        "Cost basis\n".to_string(),
-        "Gain/loss".to_string(),
-        "Term".to_string(),
-        "Income".to_string(),
-        "Expense".to_string(),
-    ]);
-    rows.push(header);
+//     header.extend_from_slice(&[
+//         "#".to_string(),
+//         "Account".to_string(),
+//         "Ticker".to_string(),
+//         "Margin".to_string(),
+//         "Date".to_string(),
+//         "Txn#".to_string(),
+//         "Type".to_string(),
+//         "Memo".to_string(),
+//         "Amount".to_string(),
+//         "Proceeds".to_string(),
+//         "Cost basis\n".to_string(),
+//         "Gain/loss".to_string(),
+//         "Term".to_string(),
+//         "Income".to_string(),
+//         "Expense".to_string(),
+//     ]);
+//     rows.push(header);
 
-    for acct in accounts {
-        for lot in acct.list_of_lots.borrow().iter() {
-            for mvmt in lot.movements.borrow().iter() {
+//     for acct in accounts {
+//         for lot in acct.list_of_lots.borrow().iter() {
+//             for mvmt in lot.movements.borrow().iter() {
 
-                let raw_acct = raw_acct_map.get(&acct.raw_key).unwrap();
-                let txn = txns_map.get(&mvmt.transaction_key).unwrap();
-                let mut row: Vec<String> = [].to_vec();
+//                 let raw_acct = raw_acct_map.get(&acct.raw_key).unwrap();
+//                 let txn = txns_map.get(&mvmt.transaction_key).unwrap();
+//                 let mut row: Vec<String> = [].to_vec();
 
-                row.push(raw_acct.account_num.to_string());
-                row.push(raw_acct.name.to_string());
-                row.push(raw_acct.ticker.to_string());
-                row.push(raw_acct.is_margin.to_string());
-                row.push(mvmt.date.format("%Y/%m/%d").to_string());
-                row.push(txn.tx_number.to_string());
-                row.push(txn.transaction_type(ars, &raw_acct_map, &acct_map).to_string());
-                row.push(txn.memo.to_string());
-                row.push(mvmt.amount.to_string());
-                row.push(mvmt.proceeds.get().to_string());
-                row.push(mvmt.cost_basis.get().to_string());
-                row.push(mvmt.get_gain_or_loss().to_string());
-                row.push(mvmt.get_term(acct_map, ars).to_string());
-                row.push(mvmt.get_income(ars, &raw_acct_map, &acct_map, &txns_map).to_string());
-                row.push(mvmt.get_expense(ars, &raw_acct_map, &acct_map, &txns_map).to_string());
+//                 row.push(raw_acct.account_num.to_string());
+//                 row.push(raw_acct.name.to_string());
+//                 row.push(raw_acct.ticker.to_string());
+//                 row.push(raw_acct.is_margin.to_string());
+//                 row.push(mvmt.date.format("%Y/%m/%d").to_string());
+//                 row.push(txn.tx_number.to_string());
+//                 row.push(txn.transaction_type(ars, &raw_acct_map, &acct_map).to_string());
+//                 row.push(txn.memo.to_string());
+//                 row.push(mvmt.amount.to_string());
+//                 row.push(mvmt.proceeds.get().to_string());
+//                 row.push(mvmt.cost_basis.get().to_string());
+//                 row.push(mvmt.get_gain_or_loss().to_string());
+//                 row.push(mvmt.get_term(acct_map, ars).to_string());
+//                 row.push(mvmt.get_income(ars, &raw_acct_map, &acct_map, &txns_map).to_string());
+//                 row.push(mvmt.get_expense(ars, &raw_acct_map, &acct_map, &txns_map).to_string());
 
-                rows.push(row);
-            }
-        }
-    }
+//                 rows.push(row);
+//             }
+//         }
+//     }
 
-    let buffer = File::create("/Users/scoob/Documents/Testing/rust_exports/test/accts-1st-try.csv").unwrap();
-    let mut wtr = csv::Writer::from_writer(buffer);
+//     let file_name = PathBuf::from("accounts_mvmts.csv");
+//     let path = PathBuf::from(&settings.export_path);
 
-    for row in rows.iter() {
-        wtr.write_record(row).expect("Could not write row to CSV file");
-    }
-    wtr.flush().expect("Could not flush Writer, though file should exist and be complete");
-}
+//     let buffer = File::create(full_path).unwrap();
+//     let mut wtr = csv::Writer::from_writer(buffer);
+
+//     for row in rows.iter() {
+//         wtr.write_record(row).expect("Could not write row to CSV file");
+//     }
+//     wtr.flush().expect("Could not flush Writer, though file should exist and be complete");
+// }
