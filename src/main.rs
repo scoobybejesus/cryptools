@@ -132,10 +132,10 @@ fn main() -> Result<(), Box<Error>> {
         if let Some(file) = args.file_to_import {
             input_file_path = file
         } else {
-            input_file_path = cli_user_choices::choose_file_for_import();
+            input_file_path = cli_user_choices::choose_file_for_import()?;
         }
 
-        costing_method_choice = cli_user_choices::choose_inventory_costing_method();
+        costing_method_choice = cli_user_choices::choose_inventory_costing_method()?;
 
         let lk_cutoff_date_opt_string;
 
@@ -145,7 +145,7 @@ fn main() -> Result<(), Box<Error>> {
             lk_cutoff_date_opt_string = None
         };
 
-        let (like_kind_election, like_kind_cutoff_date) = cli_user_choices::elect_like_kind_treatment(&lk_cutoff_date_opt_string);
+        let (like_kind_election, like_kind_cutoff_date) = cli_user_choices::elect_like_kind_treatment(&lk_cutoff_date_opt_string)?;
 
         settings = ImportProcessParameters {
             export_path: output_dir_path,
@@ -193,7 +193,7 @@ fn main() -> Result<(), Box<Error>> {
                     "y" | "ye" | "yes" | "" => { println!("Creating reports now."); Ok(true) },
                     "n" | "no" => { println!("Okay, no reports were created."); Ok(false) },
                     "c" | "change" => {
-                        let new_dir = cli_user_choices::choose_export_dir();
+                        let new_dir = cli_user_choices::choose_export_dir()?;
                         settings.export_path = PathBuf::from(new_dir);
                         println!("Creating reports now in newly chosen path.");
                         Ok(true)

@@ -18,20 +18,20 @@ use crate::core_functions::InventoryCostingMethod;
 use crate::string_utils;
 
 
-pub fn choose_file_for_import() -> PathBuf {
+pub fn choose_file_for_import() -> Result<PathBuf, Box<Error>> {
 
     println!("Please input a file (absolute or relative path) to import: ");
 
     let file_str = _get_path();
-    PathBuf::from(file_str.unwrap())
+    Ok( PathBuf::from(file_str.unwrap()) )
 }
 
-pub fn choose_export_dir() -> PathBuf {
+pub fn choose_export_dir() -> Result<PathBuf, Box<Error>> {
 
     println!("Please input a file path for exports: ");
 
     let file_str = _get_path();
-    PathBuf::from(file_str.unwrap())
+    Ok( PathBuf::from(file_str.unwrap()) )
 }
 
 fn _get_path() -> Result<(String), Box<Error>> {
@@ -108,7 +108,7 @@ fn _get_path() -> Result<(String), Box<Error>> {
 //     }
 // }
 
-pub fn choose_inventory_costing_method() -> InventoryCostingMethod {
+pub fn choose_inventory_costing_method() -> Result<InventoryCostingMethod, Box<Error>> {
 
     println!("Choose the lot inventory costing method. [Default: 1]");
     println!("1. LIFO according to the order the lot was created.");
@@ -116,12 +116,9 @@ pub fn choose_inventory_costing_method() -> InventoryCostingMethod {
     println!("3. FIFO according to the order the lot was created.");
     println!("4. FIFO according to the basis date of the lot.");
 
-    let method = match _costing_method() {
-        Ok(x) => {x},
-        Err(err) => { process::exit(1) }
-    };
+    let method = _costing_method()?;
 
-    fn _costing_method() -> Result<(InventoryCostingMethod), Box<Error>> {
+    fn _costing_method() -> Result<InventoryCostingMethod, Box<Error>> {
 
         let mut input = String::new();
         let stdin = io::stdin();
@@ -136,7 +133,7 @@ pub fn choose_inventory_costing_method() -> InventoryCostingMethod {
         }
     }
 
-    method
+    Ok(method)
 }
 pub fn inv_costing_from_cmd_arg(arg: String) -> Result<InventoryCostingMethod, &'static str> {
 
@@ -150,9 +147,10 @@ pub fn inv_costing_from_cmd_arg(arg: String) -> Result<InventoryCostingMethod, &
             return Err("Invalid choice");
         }
     }
-
 }
-pub fn elect_like_kind_treatment(cutoff_date_arg: &Option<String>) -> (bool, String) {
+
+pub fn elect_like_kind_treatment(cutoff_date_arg: &Option<String>) -> Result<(bool, String), Box<Error>> {
+
     let election: bool;
     let date: String;
 
@@ -164,10 +162,7 @@ pub fn elect_like_kind_treatment(cutoff_date_arg: &Option<String>) -> (bool, Str
 
         println!("\nUse like-kind exchange treatment through {}? [Y/n/c] ('c' to 'change') ", provided_date);
 
-        let (election, date) = match _elect_like_kind_arg(&cutoff_date_arg, provided_date) {
-            Ok(x) => {x},
-            Err(err) => { println!("Fatal error in fn elect_like_kind_treatment()."); process::exit(1) }
-        };
+        let (election, date) = _elect_like_kind_arg(&cutoff_date_arg, provided_date)?;
 
         fn _elect_like_kind_arg(cutoff_date_arg: &Option<String>, provided_date: NaiveDate) -> Result<(bool, String), Box<Error>> {
 
@@ -187,10 +182,12 @@ pub fn elect_like_kind_treatment(cutoff_date_arg: &Option<String>) -> (bool, Str
                 "c" | "change" => {
                     println!("Please enter your desired like-kind exchange treatment cutoff date.");
                     println!("  You must use the format %y-%m-%d (e.g., 2017-12-31, 17-12-31, and 9-6-1 are all acceptable).\n");
+
                     let mut input = String::new();
                     let stdin = io::stdin();
                     stdin.lock().read_line(&mut input)?;
                     string_utils::trim_newline(&mut input);
+
                     let newly_chosen_date = NaiveDate::parse_from_str(&input, "%y-%m-%d")
                         .unwrap_or(NaiveDate::parse_from_str(&input, "%Y-%m-%d")
                         .expect("Date entered has an incorrect format. Program must abort."));
@@ -205,16 +202,13 @@ pub fn elect_like_kind_treatment(cutoff_date_arg: &Option<String>) -> (bool, Str
             }
         }
 
-        return (election, date)
+        return Ok((election, date))
 
     } else {
 
         println!("\nContinue without like-kind exchange treatment? [Y/n] ");
 
-        let (election, date) = match _no_elect_like_kind_arg() {
-            Ok(x) => {x},
-            Err(err) => { println!("Fatal error in like_kind selection. Perhaps incorrect date format."); process::exit(1) }
-        };
+        let (election, date) = _no_elect_like_kind_arg()?;
 
         fn _no_elect_like_kind_arg() -> Result<(bool, String), Box<Error>> {
 
@@ -246,7 +240,7 @@ pub fn elect_like_kind_treatment(cutoff_date_arg: &Option<String>) -> (bool, Str
             }
         }
 
-        return (election, date)
+        return Ok((election, date))
     }
 }
 
