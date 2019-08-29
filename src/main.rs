@@ -70,7 +70,7 @@ struct Cli {
 }
 
 
-fn main() -> Result<(), Box<dyn Error>> {
+fn main() -> Result<(), Box<Error>> {
 
     let args = Cli::from_args();
 
@@ -96,22 +96,22 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut settings;
     let like_kind_settings;
 
-    let home_currency_choice = args.home_currency.into_string().expect("Home currency should be in the form of a ticker in CAPS.");
+    let home_currency_choice = args.home_currency
+                                    .into_string()
+                                    .expect("Home currency should be in the form of a ticker in CAPS.")
+                                    .to_uppercase();
     let costing_method_choice;
 
 
     if !args.accept_args {
 
-        shall_we_proceed();
+        shall_we_proceed()?;
 
-        fn shall_we_proceed() {
+        fn shall_we_proceed() -> Result<(), Box<Error>> {
 
             println!("Shall we proceed? [Y/n] ");
 
-            match _proceed() {
-                Ok(()) => {}
-                Err(err) => { println!("Failure to proceed.  {}", err); process::exit(1); }
-            };
+            _proceed()?;
 
             fn _proceed() -> Result<(), Box<Error>> {
 
@@ -125,6 +125,8 @@ fn main() -> Result<(), Box<dyn Error>> {
                     _   => { println!("Please respond with 'y' or 'n' (or 'yes' or 'no')."); _proceed() }
                 }
             }
+
+            Ok(())
         }
 
         if let Some(file) = args.file_to_import {
@@ -153,17 +155,13 @@ fn main() -> Result<(), Box<dyn Error>> {
             lk_cutoff_date_string: like_kind_cutoff_date,
         };
 
-        let res = core_functions::import_and_process_final(input_file_path, &settings);
-        if res.is_err() {
-            return Err(res.err().unwrap())
-        }
         let (
             account_map1,
             raw_acct_map1,
             action_records_map1,
             transactions_map1,
             like_kind_settings1
-        ) = res.unwrap();
+        ) = core_functions::import_and_process_final(input_file_path, &settings)?;
 
         account_map = account_map1;
         raw_acct_map = raw_acct_map1;
@@ -171,9 +169,9 @@ fn main() -> Result<(), Box<dyn Error>> {
         transactions_map = transactions_map1;
         like_kind_settings = like_kind_settings1;
 
-        should_export = export_reports_to_output_dir(&mut settings);
+        should_export = export_reports_to_output_dir(&mut settings)?;
 
-        fn export_reports_to_output_dir(settings: &mut ImportProcessParameters) -> bool {
+        fn export_reports_to_output_dir(settings: &mut ImportProcessParameters) -> Result<(bool), Box<Error>> {
 
             println!("\nThe directory currently selected for exporting reports is: {}", settings.export_path.to_str().unwrap());
 
@@ -182,10 +180,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             }
             println!("\nExport reports to selected directory? [Y/n/c] ('c' to 'change') ");
 
-            let choice = match _export(settings) {
-                Ok(choice) => { choice }
-                Err(err) => { println!("Export choice error.  {}", err); process::exit(1); }
-            };
+            let choice = _export(settings)?;
 
             fn _export(settings: &mut ImportProcessParameters) -> Result<(bool), Box<Error>> {
 
@@ -209,7 +204,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 }
             }
 
-            choice
+            Ok(choice)
         }
 
     } else {
@@ -218,7 +213,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             input_file_path = file
         } else {
             println!("Flag to 'accept args' was set, but 'file' is missing, though it is a required field. Exiting.");
-            process::exit(0);
+            process::exit(66);  // EX_NOINPUT (66) An input file (not a system file) did not exist or was not readable
         }
 
         let like_kind_election;
@@ -232,16 +227,13 @@ fn main() -> Result<(), Box<dyn Error>> {
             like_kind_cutoff_date_string = "1-1-1".to_string();
         };
 
-        match args.inv_costing_method.clone().into_string().expect("Invalid choice on costing method. Aborting.").trim() {
-            "1" | "2" | "3" | "4" => {}
-            _ => { println!("Invalid choice for inventory costing method. Exiting."); process::exit(0); }
-        }
+        let clean_inv_costing_arg = match args.inv_costing_method.clone().into_string().expect("Invalid choice on costing method. Aborting.").trim() {
+            "1" => {"1"} "2" => {"2"} "3" => {"3"} "4" => {"4"}
+            _ => { println!("WARN: Invalid command line arg passed for 'inv_costing_method'. Using default."); "1" }
+        };
+        let clean_inv_costing_arg_string = clean_inv_costing_arg.to_owned();
 
-        let costing_method_choice_r = cli_user_choices::inv_costing_from_cmd_arg(args.inv_costing_method.into_string().unwrap());
-        if costing_method_choice_r.is_err() {
-            process::exit(1)
-        }
-        let costing_method_choice = costing_method_choice_r.unwrap();
+        let costing_method_choice = cli_user_choices::inv_costing_from_cmd_arg(clean_inv_costing_arg_string)?;
 
         settings = ImportProcessParameters {
             export_path: output_dir_path,
@@ -250,17 +242,14 @@ fn main() -> Result<(), Box<dyn Error>> {
             enable_like_kind_treatment: like_kind_election,
             lk_cutoff_date_string: like_kind_cutoff_date_string,
         };
-        let res = core_functions::import_and_process_final(input_file_path, &settings);
-        if res.is_err() {
-            return Err(res.err().unwrap())
-        }
+
         let (
             account_map1,
             raw_acct_map1,
             action_records_map1,
             transactions_map1,
             like_kind_settings1
-        ) = res.unwrap();
+        ) = core_functions::import_and_process_final(input_file_path, &settings)?;
 
         account_map = account_map1;
         raw_acct_map = raw_acct_map1;
