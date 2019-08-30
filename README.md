@@ -2,10 +2,22 @@
 
 ### Accounting library for cryptocurrency transaction activity.
 
-The software provides a way to measure cryptocurrency activity in one's home currency (the default value is USD, but anything can be used).
+###### (Currently runs as a binary, not a library)
 
-Given a CSV file reflecting the user's entire cryptocurrency transaction history, the software will assign cost basis at the date of purchase/exchange/receipt, preserve the character (date purchased and cost basis, most notably) of all holdings up until the time they are disposed, and when holdings are disposed the gain or loss from sale/exchange/disposal will be computed (including whether the gain or loss is short-term or long-term).
-Reports that reflect income/expenses/gains/losses may be exported as CSV files, and the user can supply the desired relative or absolute path for where the reports are saved.
+The software measure one's cryptocurrency activity (i.e., denominates one's income/expenses/gains/losses) in their home currency.
+The default home currency is USD, but anything can be substituted.
+This type of tool may be useful, for example, when preparing to file taxes.
+
+Given an input CSV file reflecting the user's entire cryptocurrency transaction history, the software will:
+
+* assign cost basis as of the date of purchase/exchange/receipt
+* track the original acquisition date and cost basis until the time of disposal
+* compute gain or loss from the sale/exchange/disposal (including whether short-term or long-term)
+* record income for incoming transactions and expenses for outgoing transactions
+
+Reports (CSV file) may be exported that reflect income/expenses/gains/losses or cost basis of existing holdings.
+
+--
 
 The activity that gets imported **must** be in a prescribed form (a CSV file) that effectively looks like this:
 
@@ -28,7 +40,9 @@ The activity that gets imported **must** be in a prescribed form (a CSV file) th
 |11/1/16|0       |ELEVENTH|      |-1.5    |1.5    |        |            |
 |12/1/16|2000    |TWELFTH*|      |        |-1.5   |        |400         |
 
-\* this last transaction is an example of how a user might reflect an exchange via Shapeshift or similar services, where one currency is spent from one wallet and a different currency is received in another wallet.
+\* This last transaction is an example of how a user might reflect an exchange via Shapeshift or similar services, where one currency is spent from one wallet and a different currency is received in another wallet.
+
+--
 
 #### CSV file components
 
@@ -61,13 +75,21 @@ For example, when using BTC to long XMR, the BTC account must be reflected with 
 * Margin gain or loss is accounted for when there is activity in the 'spot' account.
 For example, you won't reflect a loss until you actually spend your holdings to pay off your loans.
 
+--
+
+#### Features
+
+* Two methods each of LIFO or FIFO (with intentions to add more)
+
+* Ability to perform like-kind exchange treatment
+
 #### Constraints
 
 * *All* cryptocurrency-related activity for the user generally must be included in the input CSV file.
 
 * There can only be either one or two accounts used in a given transaction (i.e., if a Counterparty token or Ethereum token transaction must be recorded, the XCP or ETH transaction fee must be reflected in a separate transaction/row).
 
-* Currently, manual adjustments may need to be made to the output files in cases, for example, when the user used cryptocurrency to make a tax-deductible charitable contribution.
+* Manual adjustments may need to be made to the output files in cases, for example, when the user used aprpeciated cryptocurrency to make a tax-deductible charitable contribution.
 
 ## Installation
 
@@ -80,11 +102,14 @@ This will build `./target/debug/cryptools-rs`.
 Run `./target/debug/cryptools-rs` with no arguments (or `--help`, or `-h`) to see usage.
 Alternatively, run `cargo run`, in which case command-line arguments for `cryptools-rs` may be entered following `--`, e.g., `cargo run -- -h`.
 
+Running with no arguments will lead the user through a wizard, or all required arguments can be passed as command-line flags/options/args.
+
 ## Development state
 
-As of summer 2019, the code is "feature complete" in the sense that it requires no additional features in order for it to serve the needs of the original author.
+As of summer 2019, the code is "feature complete" in the sense that it does not require additional features in order for it to serve the needs of the original author.
 At the same time, there are plenty of bells and whistles, creature comforts, etc. that may be added at any time.
 Additionally, the code could use factoring or general re-working in several areas.
+In fact, it may be nice to use the business logic as a library instead of running a full binary.
 
 ## Contributing
 
