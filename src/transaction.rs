@@ -31,7 +31,7 @@ impl Transaction {
 		ars: &HashMap<u32, ActionRecord>,
 		raw_acct_map: &HashMap<u16, RawAccount>,
 		acct_map: &HashMap<u16, Account>,
-	) -> Result<TxType, Box<Error>> {
+	) -> Result<TxType, Box<dyn Error>> {
 
 		if self.action_record_idx_vec.len() == 1 {
 			Ok(TxType::Flow)
@@ -112,7 +112,7 @@ impl Transaction {
 		ars: &HashMap<u32, ActionRecord>,
 		raw_accts: &HashMap<u16, RawAccount>,
 		acct_map: &HashMap<u16, Account>
-	) -> Result<(u16, u16), Box<Error>> {
+	) -> Result<(u16, u16), Box<dyn Error>> {
 
 		assert_eq!(self.transaction_type(ars, raw_accts, acct_map)?, TxType::Exchange,
 			"This can only be called on exchange transactions.");
@@ -152,7 +152,7 @@ impl Transaction {
         raw_acct_map: &HashMap<u16, RawAccount>,
         acct_map: &HashMap<u16, Account>,
         txns_map: &HashMap<u32, Transaction>,
-    ) -> Result<Vec<Rc<Movement>>, Box<Error>> {
+    ) -> Result<Vec<Rc<Movement>>, Box<dyn Error>> {
 
 		let mut flow_or_outgoing_exchange_movements = [].to_vec();
 

@@ -70,7 +70,7 @@ struct Cli {
 }
 
 
-fn main() -> Result<(), Box<Error>> {
+fn main() -> Result<(), Box<dyn Error>> {
 
     let args = Cli::from_args();
 
@@ -107,13 +107,13 @@ fn main() -> Result<(), Box<Error>> {
 
         shall_we_proceed()?;
 
-        fn shall_we_proceed() -> Result<(), Box<Error>> {
+        fn shall_we_proceed() -> Result<(), Box<dyn Error>> {
 
             println!("Shall we proceed? [Y/n] ");
 
             _proceed()?;
 
-            fn _proceed() -> Result<(), Box<Error>> {
+            fn _proceed() -> Result<(), Box<dyn Error>> {
 
                 let mut input = String::new();
                 let stdin = io::stdin();
@@ -171,7 +171,7 @@ fn main() -> Result<(), Box<Error>> {
 
         should_export = export_reports_to_output_dir(&mut settings)?;
 
-        fn export_reports_to_output_dir(settings: &mut ImportProcessParameters) -> Result<(bool), Box<Error>> {
+        fn export_reports_to_output_dir(settings: &mut ImportProcessParameters) -> Result<(bool), Box<dyn Error>> {
 
             println!("\nThe directory currently selected for exporting reports is: {}", settings.export_path.to_str().unwrap());
 
@@ -182,7 +182,7 @@ fn main() -> Result<(), Box<Error>> {
 
             let choice = _export(settings)?;
 
-            fn _export(settings: &mut ImportProcessParameters) -> Result<(bool), Box<Error>> {
+            fn _export(settings: &mut ImportProcessParameters) -> Result<(bool), Box<dyn Error>> {
 
                 let mut input = String::new();
                 let stdin = io::stdin();

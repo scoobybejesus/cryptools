@@ -202,7 +202,7 @@ pub fn _5_transaction_mvmt_summaries_to_csv(
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
     txns_map: &HashMap<u32, Transaction>,
-) -> Result<(), Box<Error>> {
+) -> Result<(), Box<dyn Error>> {
 
     let mut rows: Vec<Vec<String>> = [].to_vec();
     let mut header: Vec<String> = [].to_vec();

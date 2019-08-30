@@ -19,7 +19,7 @@ pub fn import_accounts(
     rdr: &mut csv::Reader<File>,
     raw_acct_map: &mut HashMap<u16, RawAccount>,
     acct_map: &mut HashMap<u16, Account>,
-) -> Result<(), Box<Error>> {
+) -> Result<(), Box<dyn Error>> {
 
     let header1: csv::StringRecord;
     header1 = rdr.headers()?.clone();   //  account_num
@@ -119,7 +119,7 @@ pub fn import_transactions(
     action_records: &mut HashMap<u32, ActionRecord>,
     raw_acct_map: &mut HashMap<u16, RawAccount>,
     acct_map: &mut HashMap<u16, Account>,
-) -> Result<(), Box<Error>> {
+) -> Result<(), Box<dyn Error>> {
 
     let mut this_tx_number = 0;
     let mut this_ar_number = 0;

@@ -50,7 +50,7 @@ pub fn import_and_process_final(
     HashMap<u32, ActionRecord>,
     HashMap<u32, Transaction>,
     Option<LikeKindSettings>
-), Box<Error>> {
+), Box<dyn Error>> {
 
     let mut transactions_map: HashMap<u32, Transaction> = HashMap::new();
     let mut action_records_map: HashMap<u32, ActionRecord> = HashMap::new();
@@ -80,7 +80,7 @@ pub fn import_and_process_final(
         action_records: &mut HashMap<u32, ActionRecord>,
         raw_acct_map: &mut HashMap<u16, RawAccount>,
         acct_map: &mut HashMap<u16, Account>,
-    ) -> Result<(), Box<Error>> {
+    ) -> Result<(), Box<dyn Error>> {
 
         let file = File::open(import_file_path)?; println!("CSV ledger file opened successfully.\n");
 

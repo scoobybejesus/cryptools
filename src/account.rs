@@ -179,7 +179,7 @@ impl Movement {
 		raw_accts: &HashMap<u16, RawAccount>,
 		acct_map: &HashMap<u16, Account>,
 		txns_map: &HashMap<u32, Transaction>,
-	)-> Result<d128, Box<Error>> {
+	)-> Result<d128, Box<dyn Error>> {
 
 		let txn = txns_map.get(&self.transaction_key).expect("Couldn't get txn. Tx num invalid?");
 		match txn.transaction_type(ar_map, raw_accts, acct_map)? {
@@ -201,7 +201,7 @@ impl Movement {
 		raw_accts: &HashMap<u16, RawAccount>,
 		acct_map: &HashMap<u16, Account>,
 		txns_map: &HashMap<u32, Transaction>,
-	)-> Result<d128, Box<Error>> {
+	)-> Result<d128, Box<dyn Error>> {
 
 		let txn = txns_map.get(&self.transaction_key).expect("Couldn't get txn. Tx num invalid?");
 		match txn.transaction_type(ar_map, raw_accts, acct_map)? {

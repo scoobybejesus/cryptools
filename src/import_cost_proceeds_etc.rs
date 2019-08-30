@@ -18,7 +18,7 @@ pub fn add_cost_basis_to_movements(
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
     txns_map: &HashMap<u32, Transaction>,
-) -> Result<(), Box<Error>> {
+) -> Result<(), Box<dyn Error>> {
 
     let length = txns_map.len();
 
@@ -152,7 +152,7 @@ pub fn add_proceeds_to_movements(
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
     txns_map: &HashMap<u32, Transaction>,
-) -> Result<(), Box<Error>> {
+) -> Result<(), Box<dyn Error>> {
 
     let length = txns_map.len();
 
@@ -209,7 +209,7 @@ pub fn apply_like_kind_treatment(
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
     txns_map: &HashMap<u32, Transaction>,
-) -> Result<(), Box<Error>> {
+) -> Result<(), Box<dyn Error>> {
 
     let length = txns_map.len();
     for txn_num in 1..=length {
@@ -234,7 +234,7 @@ fn update_current_txn_for_prior_likekind_treatment(
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
     txns_map: &HashMap<u32, Transaction>,
-) -> Result<(), Box<Error>> {
+) -> Result<(), Box<dyn Error>> {
 
     let mut sum_of_outgoing_cost_basis_in_ar = d128!(0);
     let txn = txns_map.get(&txn_num).unwrap();
@@ -300,7 +300,7 @@ fn perform_likekind_treatment_on_txn(
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
     txns_map: &HashMap<u32, Transaction>,
-) -> Result<(), Box<Error>> {
+) -> Result<(), Box<dyn Error>> {
 
     let txn = txns_map.get(&txn_num).unwrap();
     let tx_type = txn.transaction_type(ars, raw_acct_map, acct_map)?;

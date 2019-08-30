@@ -18,7 +18,7 @@ use crate::core_functions::InventoryCostingMethod;
 use crate::string_utils;
 
 
-pub fn choose_file_for_import() -> Result<PathBuf, Box<Error>> {
+pub fn choose_file_for_import() -> Result<PathBuf, Box<dyn Error>> {
 
     println!("Please input a file (absolute or relative path) to import: ");
 
@@ -26,7 +26,7 @@ pub fn choose_file_for_import() -> Result<PathBuf, Box<Error>> {
     Ok( PathBuf::from(file_str.unwrap()) )
 }
 
-pub fn choose_export_dir() -> Result<PathBuf, Box<Error>> {
+pub fn choose_export_dir() -> Result<PathBuf, Box<dyn Error>> {
 
     println!("Please input a file path for exports: ");
 
@@ -34,7 +34,7 @@ pub fn choose_export_dir() -> Result<PathBuf, Box<Error>> {
     Ok( PathBuf::from(file_str.unwrap()) )
 }
 
-fn _get_path() -> Result<(String), Box<Error>> {
+fn _get_path() -> Result<(String), Box<dyn Error>> {
 
     struct MyHelper {
         completer: FilenameCompleter,
@@ -108,7 +108,7 @@ fn _get_path() -> Result<(String), Box<Error>> {
 //     }
 // }
 
-pub fn choose_inventory_costing_method() -> Result<InventoryCostingMethod, Box<Error>> {
+pub fn choose_inventory_costing_method() -> Result<InventoryCostingMethod, Box<dyn Error>> {
 
     println!("Choose the lot inventory costing method. [Default: 1]");
     println!("1. LIFO according to the order the lot was created.");
@@ -118,7 +118,7 @@ pub fn choose_inventory_costing_method() -> Result<InventoryCostingMethod, Box<E
 
     let method = _costing_method()?;
 
-    fn _costing_method() -> Result<InventoryCostingMethod, Box<Error>> {
+    fn _costing_method() -> Result<InventoryCostingMethod, Box<dyn Error>> {
 
         let mut input = String::new();
         let stdin = io::stdin();
@@ -149,7 +149,7 @@ pub fn inv_costing_from_cmd_arg(arg: String) -> Result<InventoryCostingMethod, &
     }
 }
 
-pub fn elect_like_kind_treatment(cutoff_date_arg: &Option<String>) -> Result<(bool, String), Box<Error>> {
+pub fn elect_like_kind_treatment(cutoff_date_arg: &Option<String>) -> Result<(bool, String), Box<dyn Error>> {
 
     let election: bool;
     let date: String;
@@ -164,7 +164,7 @@ pub fn elect_like_kind_treatment(cutoff_date_arg: &Option<String>) -> Result<(bo
 
         let (election, date) = _elect_like_kind_arg(&cutoff_date_arg, provided_date)?;
 
-        fn _elect_like_kind_arg(cutoff_date_arg: &Option<String>, provided_date: NaiveDate) -> Result<(bool, String), Box<Error>> {
+        fn _elect_like_kind_arg(cutoff_date_arg: &Option<String>, provided_date: NaiveDate) -> Result<(bool, String), Box<dyn Error>> {
 
             let mut input = String::new();
             let stdin = io::stdin();
@@ -210,7 +210,7 @@ pub fn elect_like_kind_treatment(cutoff_date_arg: &Option<String>) -> Result<(bo
 
         let (election, date) = _no_elect_like_kind_arg()?;
 
-        fn _no_elect_like_kind_arg() -> Result<(bool, String), Box<Error>> {
+        fn _no_elect_like_kind_arg() -> Result<(bool, String), Box<dyn Error>> {
 
             let mut input = String::new();
             let stdin = io::stdin();

@@ -22,7 +22,7 @@ pub fn create_lots_and_movements(
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
     lot_map: &HashMap<(RawAccount, u32), Lot>,
-) -> Result<HashMap<u32,Transaction>, Box<Error>> {
+) -> Result<HashMap<u32,Transaction>, Box<dyn Error>> {
 
     //  Set values to be referred to repeatedly, potentially, in Incoming Exchange transactions
     let multiple_incoming_mvmts_per_ar = match &likekind_settings {
@@ -579,7 +579,7 @@ fn get_base_and_quote_acct_for_dual_actionrecord_flow_tx(
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
     txns_map: &HashMap<u32, Transaction>,
-) -> Result<(u16, u16), Box<Error>> {
+) -> Result<(u16, u16), Box<dyn Error>> {
 
     let txn = txns_map.get(&txn_num).expect("Couldn't get txn. Tx num invalid?");
     let og_flow_ar = ar_map.get(txn.action_record_idx_vec.first().unwrap()).unwrap();
