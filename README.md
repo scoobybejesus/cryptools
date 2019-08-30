@@ -17,7 +17,7 @@ Given an input CSV file reflecting the user's entire cryptocurrency transaction 
 
 Reports (CSV file) may be exported that reflect income/expenses/gains/losses or cost basis of existing holdings.
 
---
+---
 
 The activity that gets imported **must** be in a prescribed form (a CSV file) that effectively looks like this:
 
@@ -42,7 +42,7 @@ The activity that gets imported **must** be in a prescribed form (a CSV file) th
 
 \* This last transaction is an example of how a user might reflect an exchange via Shapeshift or similar services, where one currency is spent from one wallet and a different currency is received in another wallet.
 
---
+---
 
 #### CSV file components
 
@@ -75,7 +75,7 @@ For example, when using BTC to long XMR, the BTC account must be reflected with 
 * Margin gain or loss is accounted for when there is activity in the 'spot' account.
 For example, you won't reflect a loss until you actually spend your holdings to pay off your loans.
 
---
+---
 
 #### Features
 
