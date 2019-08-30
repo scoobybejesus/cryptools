@@ -3,7 +3,7 @@
 
 use std::rc::{Rc};
 use std::cell::{RefCell};
-use std::process::exit;
+use std::process;
 use std::fmt;
 use std::collections::{HashMap};
 use std::error::Error;
@@ -52,7 +52,7 @@ impl Transaction {
 			let ar2_ticker = ar2_ticker_comp[0];
 
 			if first_ar.direction() == second_ar.direction() {
-				println!("Program exiting. Found transaction with two actionRecords with the same polarity: {:?}", self); exit(1);
+				println!("Program exiting. Found transaction with two actionRecords with the same polarity: {:?}", self); process::exit(1);
 			}
 			if ar1_ticker == ar2_ticker {
 				if ar1_raw_acct.is_margin != ar2_raw_acct.is_margin {
@@ -67,10 +67,10 @@ impl Transaction {
 			}
 		}
 		else if self.action_record_idx_vec.len() > 2 {
-			println!("Program exiting. Found transaction with too many actionRecords: {:?}", self); exit(1);
+			println!("Program exiting. Found transaction with too many actionRecords: {:?}", self); process::exit(1);
 		}
 		else {
-			println!("Program exiting. Found transaction with no actionRecords: {:?}", self); exit(1);
+			println!("Program exiting. Found transaction with no actionRecords: {:?}", self); process::exit(1);
 		}
 	}
 
