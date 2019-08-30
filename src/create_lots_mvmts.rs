@@ -92,8 +92,8 @@ pub fn create_lots_and_movements(
                 acct_balances_are_zero = true
             }
 
-            let mut base_lot: Rc<Lot>;
-            let mut quote_lot: Rc<Lot>;
+            let base_lot: Rc<Lot>;
+            let quote_lot: Rc<Lot>;
 
             if acct_balances_are_zero {
                 base_lot =
@@ -349,7 +349,7 @@ pub fn create_lots_and_movements(
                         //     txn.tx_number, txn.transaction_type(), ar.amount, acct.ticker);
                         match tx_type {
                             TxType::Flow => {
-                                let mut lot: Rc<Lot>;
+                                let lot: Rc<Lot>;
                                 if raw_acct.is_margin {
                                     let this_acct = acct_map.get(&ar.account_key).unwrap();
                                     let lot_list = this_acct.list_of_lots.borrow_mut();
