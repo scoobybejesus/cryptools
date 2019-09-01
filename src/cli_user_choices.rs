@@ -22,16 +22,40 @@ pub fn choose_file_for_import() -> Result<PathBuf, Box<dyn Error>> {
 
     println!("Please input a file (absolute or relative path) to import: ");
 
-    let file_str = _get_path();
-    Ok( PathBuf::from(file_str.unwrap()) )
+    let file_string = _get_path()?;
+
+    let has_tilde = begins_with_tilde(&file_string);
+
+    if has_tilde {
+        println!("Unfortunately, the tilde '~' cannot be used as a shortcut for your home directory.\n");
+        choose_file_for_import()
+    } else {
+    Ok( PathBuf::from(file_string) )
+    }
 }
 
 pub fn choose_export_dir() -> Result<PathBuf, Box<dyn Error>> {
 
     println!("Please input a file path for exports: ");
 
-    let file_str = _get_path();
-    Ok( PathBuf::from(file_str.unwrap()) )
+    let file_string = _get_path()?;
+
+    let has_tilde = begins_with_tilde(&file_string);
+
+    if has_tilde {
+        println!("Unfortunately, the tilde '~' cannot be used as a shortcut for your home directory.\n");
+        choose_export_dir()
+    } else {
+    Ok( PathBuf::from(file_string) )
+    }
+}
+
+pub fn begins_with_tilde(unchecked_path: &String) -> bool {
+
+    match unchecked_path.find("~") {
+        Some(0) => return true,
+        _ => return false
+    }
 }
 
 fn _get_path() -> Result<(String), Box<dyn Error>> {
