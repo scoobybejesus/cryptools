@@ -1,0 +1,15 @@
+﻿txDate,proceeds,memo,1,2,3,4,5
+,,,Bank,Exchange,Wallet,Exchange,Simplewallet
+,,,USD,BTC,BTC,XMR,XMR
+,,,non,non,non,non,non
+2/1/16,220,Mining income,,0.25,,,
+3/1/16,25,Bought $25 Satoshi coffee mug,,-0.03,,,
+4/1/16,0,Bought back for less,-20,0.03,,,
+5/1/16,125,Traded for Monero,,-0.1,,600,
+5/2/16,0,Withdrew to my wallet,,,,-500,499.98
+6/1/16,150,Bought more Monero,,-0.1,,450,
+7/1/16,0,Withdrew to my wallet,,,,-400,399.98
+8/1/16,320,Remote tech support income,,0.2,,,
+9/1/16,700,Took Monero profit,,1.2,,-150,
+10/1/16,0,Withdrew to my wallet,,-1,1,,
+11/1/16,100,Contribute $100 worth to OSS project,,,,,-25

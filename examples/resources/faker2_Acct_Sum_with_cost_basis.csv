@@ -1,0 +1,6 @@
+Account,Balance,Ticker,Cost Basis,Total lots
+Bank,-20.0000000,USD,-20.0000000,1
+Exchange,0.4500000,BTC,480.6700000,4
+Wallet,1,BTC,583.33,1
+Exchange,0.00,XMR,0.00,2
+Simplewallet,874.9600000,XMR,229.17,2

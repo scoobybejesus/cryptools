@@ -1,0 +1,8 @@
+Date,Txn#,Type,Memo,Amount,Ticker,Term,Proceeds,Cost basis,Gain/loss,Income,Expense
+2/1/16,1,Flow,Mining income,0.25,BTC,LT,0,0,0,220,0
+3/1/16,2,Flow,Bought $25 Satoshi coffee mug,-0.03,BTC,ST,25,-26.4,-1.4,0,-25
+5/1/16,4,Exchange,Traded for Monero,-0.1,BTC,ST,125,-81.6,43.4,0,0
+6/1/16,6,Exchange,Bought more Monero,-0.1,BTC,ST,150,-88,62,0,0
+8/1/16,8,Flow,Remote tech support income,0.2,BTC,LT,0,0,0,320,0
+9/1/16,9,Exchange,Took Monero profit,-150,XMR,ST,700,-37.5,662.5,0,0
+11/1/16,11,Flow,Contribute $100 worth to OSS project,-25,XMR,ST,100,-8.33,91.67,0,-100
