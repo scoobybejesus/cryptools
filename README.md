@@ -4,7 +4,7 @@
 
 ###### (Currently runs as a binary, not a library)
 
-The software measure one's cryptocurrency activity (i.e., denominates one's income/expenses/gains/losses) in their home currency.
+The software measures one's cryptocurrency activity (i.e., denominates one's income/expenses/gains/losses) in their home currency.
 The default home currency is USD, but anything can be substituted.
 This type of tool may be useful, for example, when preparing to file taxes.
 
@@ -83,6 +83,8 @@ For example, you won't reflect a loss until you actually spend your holdings to 
 
 * Ability to perform like-kind exchange treatment
 
+* Compatible with any home currency
+
 #### Constraints
 
 * *All* cryptocurrency-related activity for the user generally must be included in the input CSV file.
@@ -95,7 +97,7 @@ For example, you won't reflect a loss until you actually spend your holdings to 
 
 1. `cargo build` (or include `--release` for a non-debug build)
 
-This will build `./target/debug/cryptools-rs`.
+This will build `./target/debug/cryptools-rs` (or `./target/rls/cryptools-rs` for a non-debug build).
 
 ## Usage
 
@@ -103,6 +105,7 @@ Run `./target/debug/cryptools-rs` with no arguments (or `--help`, or `-h`) to se
 Alternatively, run `cargo run`, in which case command-line arguments for `cryptools-rs` may be entered following `--`, e.g., `cargo run -- -h`.
 
 Running with no arguments will lead the user through a wizard, or all required arguments can be passed as command-line flags/options/args.
+See `/examples/` directory for further guidance.
 
 ## Development state
 
