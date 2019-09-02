@@ -274,6 +274,14 @@ fn main() -> Result<(), Box<dyn Error>> {
             &raw_acct_map
         );
 
+        csv_export::_4_transaction_mvmt_detail_to_csv(
+            &settings,
+            &action_records_map,
+            &raw_acct_map,
+            &account_map,
+            &transactions_map
+        )?;
+
         csv_export::_5_transaction_mvmt_summaries_to_csv(
             &settings,
             &action_records_map,

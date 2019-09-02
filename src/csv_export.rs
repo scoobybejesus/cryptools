@@ -143,58 +143,104 @@ pub fn _2_account_sums_nonzero_to_csv(
     wtr.flush().expect("Could not flush Writer, though file should exist and be complete");
 }
 
-// pub fn transactions_to_csv(
-//     transactions: &[Rc<Transaction>],
-//     ars: &HashMap<u32, ActionRecord>,
-//     raw_acct_map: &HashMap<u16, RawAccount>,
-//     acct_map: &HashMap<u16, Account>,
-//     txns_map: &HashMap<u32, Transaction>,) {
+pub fn _4_transaction_mvmt_detail_to_csv(
+    settings: &ImportProcessParameters,
+    ars: &HashMap<u32, ActionRecord>,
+    raw_acct_map: &HashMap<u16, RawAccount>,
+    acct_map: &HashMap<u16, Account>,
+    txns_map: &HashMap<u32, Transaction>,
+) -> Result<(), Box<dyn Error>> {
 
-//     let mut rows: Vec<Vec<String>> = [].to_vec();
-//     let mut header: Vec<String> = [].to_vec();
-//     header.extend_from_slice(&[
-//         "Date".to_string(),
-//         "Txn#".to_string(),
-//         "Type".to_string(),
-//         "Memo".to_string(),
-//         "Amount".to_string(),
-//         "Ticker".to_string(),
-//         "Proceeds".to_string(),
-//         "Cost basis".to_string(),
-//         "Gain/loss".to_string(),
-//         "Term".to_string(),
-//         "Income".to_string(),
-//         "Expense".to_string(),
-//     ]);
-//     rows.push(header);
-//     for txn in transactions {
-//         for mvmt in txn.flow_or_outgoing_exchange_movements.borrow().iter() {
-//             let lot = mvmt.borrow().get_lot(acct_map, ars);
-//             let acct = acct_map.get(&lot.account_key).unwrap();
-//             let raw_acct = raw_acct_map.get(&acct.raw_key).unwrap();
-//             let mut row: Vec<String> = [].to_vec();
-//             row.push(txn.date.format("%Y/%m/%d").to_string());
-//             row.push(txn.tx_number.to_string());
-//             row.push(txn.transaction_type(&ars, &raw_acct_map, &acct_map).to_string());
-//             row.push(txn.memo.to_string());
-//             row.push(mvmt.borrow().amount.to_string());
-//             row.push(raw_acct.ticker.to_string());
-//             row.push(mvmt.borrow().proceeds.to_string());
-//             row.push(mvmt.borrow().cost_basis.to_string());
-//             row.push(mvmt.borrow().get_gain_or_loss().to_string());
-//             row.push(mvmt.borrow().get_term(acct_map, ars).to_string());
-//             row.push(mvmt.borrow().get_income(ars, &raw_acct_map, &acct_map, &txns_map).to_string());
-//             row.push(mvmt.borrow().get_expense(ars, &raw_acct_map, &acct_map, &txns_map).to_string());
-//             rows.push(row);
-//         }
-//     }
-//     let buffer = File::create(full_path).unwrap();
-//     let mut wtr = csv::Writer::from_writer(buffer);
-//     for row in rows.iter() {
-//         wtr.write_record(row).expect("Could not write row to CSV file");
-//     }
-//     wtr.flush().expect("Could not flush Writer, though file should exist and be complete");
-// }
+    let mut rows: Vec<Vec<String>> = [].to_vec();
+    let mut header: Vec<String> = [].to_vec();
+    header.extend_from_slice(&[
+        "Date".to_string(),
+        "Txn#".to_string(),
+        "Type".to_string(),
+        "Memo".to_string(),
+        "Amount".to_string(),
+        "Ticker".to_string(),
+        "Term".to_string(),
+        "Proceeds".to_string(),
+        "Cost basis".to_string(),
+        "Gain/loss".to_string(),
+        "Income".to_string(),
+        "Expense".to_string(),
+    ]);
+    rows.push(header);
+
+    let length = txns_map.len();
+
+    for txn_num in 1..=length {
+
+        let txn_num = txn_num as u32;
+        let txn = txns_map.get(&(txn_num)).unwrap();
+
+        let flow_or_outgoing_exchange_movements = txn.get_outgoing_exchange_and_flow_mvmts(
+            &settings.home_currency,
+            ars,
+            raw_acct_map,
+            acct_map,
+            txns_map
+        )?;
+
+        for mvmt in flow_or_outgoing_exchange_movements.iter() {
+            let lot = mvmt.get_lot(acct_map, ars);
+            let acct = acct_map.get(&lot.account_key).unwrap();
+            let raw_acct = raw_acct_map.get(&acct.raw_key).unwrap();
+
+            let date = txn.date.format("%Y/%m/%d").to_string();
+            let tx_number = txn.tx_number.to_string();
+            let tx_type = txn.transaction_type(&ars, &raw_acct_map, &acct_map)?;
+            let memo = txn.memo.to_string();
+            let mut amount = d128!(0);
+            amount += mvmt.amount;   //  To prevent printing -5E+1 instead of 50, for example
+            let ticker = raw_acct.ticker.to_string();
+            let term = mvmt.get_term(acct_map, ars).to_string();
+            let mut proceeds = mvmt.proceeds.get();
+            let mut cost_basis = mvmt.cost_basis.get();
+            let mut gain_loss = mvmt.get_gain_or_loss();
+            let income = mvmt.get_income(ars, &raw_acct_map, &acct_map, &txns_map)?;
+            let expense = mvmt.get_expense(ars, &raw_acct_map, &acct_map, &txns_map)?;
+
+            if tx_type == TxType::Flow && amount > d128!(0) {
+                proceeds = d128!(0);
+                cost_basis = d128!(0);
+                gain_loss = d128!(0);
+            }
+
+            let mut row: Vec<String> = [].to_vec();
+
+            row.push(date);
+            row.push(tx_number);
+            row.push(tx_type.to_string());
+            row.push(memo);
+            row.push(amount.to_string());
+            row.push(ticker);
+            row.push(term);
+            row.push(proceeds.to_string());
+            row.push(cost_basis.to_string());
+            row.push(gain_loss.to_string());
+            row.push(income.to_string());
+            row.push(expense.to_string());
+            rows.push(row);
+        }
+    }
+
+    let file_name = PathBuf::from("4_Txns_mvmts_detail.csv");
+    let path = PathBuf::from(&settings.export_path);
+
+    let full_path: PathBuf = [path, file_name].iter().collect();
+    let buffer = File::create(full_path).unwrap();
+    let mut wtr = csv::Writer::from_writer(buffer);
+
+    for row in rows.iter() {
+        wtr.write_record(row).expect("Could not write row to CSV file");
+    }
+    wtr.flush().expect("Could not flush Writer, though file should exist and be complete");
+
+    Ok(())
+}
 
 pub fn _5_transaction_mvmt_summaries_to_csv(
     settings: &ImportProcessParameters,
@@ -295,8 +341,11 @@ pub fn _5_transaction_mvmt_summaries_to_csv(
             }
         }
 
-        if (txn.transaction_type(ars, &raw_acct_map, &acct_map)? == TxType::Flow) & (polarity == Some(Polarity::Incoming)) {
-            // println!("Incoming flow {}", txn.tx_number);
+        if (txn.transaction_type(
+            ars,
+            &raw_acct_map,
+            &acct_map)? == TxType::Flow
+        ) & (polarity == Some(Polarity::Incoming)) {
             income_st = proceeds_st;
             proceeds_st = d128!(0);
             cost_basis_st = d128!(0);
@@ -305,8 +354,11 @@ pub fn _5_transaction_mvmt_summaries_to_csv(
             cost_basis_lt = d128!(0);
         }
 
-        if (txn.transaction_type(ars, &raw_acct_map, &acct_map)? == TxType::Flow) & (polarity == Some(Polarity::Outgoing)) {
-            // println!("Outgoing flow {}, proceeds_st {}, proceeds_lt {}", txn.tx_number, proceeds_st, proceeds_lt);
+        if (txn.transaction_type(
+            ars,
+            &raw_acct_map,
+            &acct_map)? == TxType::Flow
+        ) & (polarity == Some(Polarity::Outgoing)) {
             expense_st -= proceeds_st;
             expense_lt -= proceeds_lt;
         }

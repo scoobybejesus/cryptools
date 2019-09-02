@@ -179,7 +179,7 @@ impl Movement {
 		raw_accts: &HashMap<u16, RawAccount>,
 		acct_map: &HashMap<u16, Account>,
 		txns_map: &HashMap<u32, Transaction>,
-	)-> Result<d128, Box<dyn Error>> {
+	)-> Result<d128, Box<dyn Error>> {  //  Returns 0 or positive number
 
 		let txn = txns_map.get(&self.transaction_key).expect("Couldn't get txn. Tx num invalid?");
 		match txn.transaction_type(ar_map, raw_accts, acct_map)? {
@@ -201,14 +201,15 @@ impl Movement {
 		raw_accts: &HashMap<u16, RawAccount>,
 		acct_map: &HashMap<u16, Account>,
 		txns_map: &HashMap<u32, Transaction>,
-	)-> Result<d128, Box<dyn Error>> {
+	)-> Result<d128, Box<dyn Error>> {  //  Returns 0 or negative number
 
 		let txn = txns_map.get(&self.transaction_key).expect("Couldn't get txn. Tx num invalid?");
 		match txn.transaction_type(ar_map, raw_accts, acct_map)? {
 			TxType::Flow => {
 				let ar = ar_map.get(&self.action_record_key).unwrap();
 				if ar.direction() == Polarity::Outgoing {
-					Ok(self.proceeds.get())
+                    let expense = -self.proceeds.get();
+					Ok(expense)
 				}
 				else { Ok(d128!(0)) }
 			}
