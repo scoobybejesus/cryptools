@@ -22,15 +22,12 @@ pub fn choose_file_for_import() -> Result<PathBuf, Box<dyn Error>> {
 
     println!("Please input a file (absolute or relative path) to import: ");
 
-    let file_string = _get_path()?;
-
-    let has_tilde = begins_with_tilde(&file_string);
+    let (file_string, has_tilde) = _get_path()?;
 
     if has_tilde {
-        println!("Unfortunately, the tilde '~' cannot be used as a shortcut for your home directory.\n");
         choose_file_for_import()
     } else {
-    Ok( PathBuf::from(file_string) )
+        Ok( PathBuf::from(file_string) )
     }
 }
 
@@ -38,27 +35,16 @@ pub fn choose_export_dir() -> Result<PathBuf, Box<dyn Error>> {
 
     println!("Please input a file path for exports: ");
 
-    let file_string = _get_path()?;
-
-    let has_tilde = begins_with_tilde(&file_string);
+    let (file_string, has_tilde) = _get_path()?;
 
     if has_tilde {
-        println!("Unfortunately, the tilde '~' cannot be used as a shortcut for your home directory.\n");
         choose_export_dir()
     } else {
-    Ok( PathBuf::from(file_string) )
+        Ok( PathBuf::from(file_string) )
     }
 }
 
-pub fn begins_with_tilde(unchecked_path: &String) -> bool {
-
-    match unchecked_path.find("~") {
-        Some(0) => return true,
-        _ => return false
-    }
-}
-
-fn _get_path() -> Result<(String), Box<dyn Error>> {
+fn _get_path() -> Result<(String, bool), Box<dyn Error>> {
 
     struct MyHelper {
         completer: FilenameCompleter,
@@ -102,11 +88,21 @@ fn _get_path() -> Result<(String), Box<dyn Error>> {
     rl.helper_mut().unwrap().colored_prompt = format!("\x1b[1;32m{}\x1b[0m", p);
     let readline = rl.readline(">> ");
 
+    fn begins_with_tilde(unchecked_path: &String) -> bool {
+        match unchecked_path.find("~") {
+            Some(0) => return true,
+            _ => return false
+        }
+    }
+
     match readline {
         Ok(line) => {
-            rl.add_history_entry(line.as_str());
             println!("");
-            Ok(line)
+            let has_tilde = begins_with_tilde(&line);
+            if has_tilde {
+                println!("Unfortunately, the tilde '~' cannot be used as a shortcut for your home directory.\n");
+            }
+            Ok((line, has_tilde))
         },
         Err(err) => {
             println!("Error during Rustyline: {:?}", err);
