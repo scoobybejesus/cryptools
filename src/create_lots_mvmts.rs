@@ -259,7 +259,7 @@ pub fn create_lots_and_movements(
 
                             fn get_lifo_by_creation_date(list_of_lots: &Ref<Vec<Rc<Lot>>>) -> Vec<usize> {
                                 let mut vec_of_indexes = [].to_vec();
-                                for (idx, lot) in list_of_lots.iter().enumerate() {
+                                for (idx, _lot) in list_of_lots.iter().enumerate() {
                                     vec_of_indexes.insert(0, idx)
                                 }
                                 let vec = vec_of_indexes;
@@ -277,7 +277,7 @@ pub fn create_lots_and_movements(
                                     }
                                 }
                                 let mut vec_of_indexes = [].to_vec();
-                                for (idx, lot) in reordered_vec.iter().enumerate() {
+                                for (idx, _lot) in reordered_vec.iter().enumerate() {
                                     vec_of_indexes.insert(0, idx)
                                 }
                                 let vec = vec_of_indexes;
@@ -286,7 +286,7 @@ pub fn create_lots_and_movements(
 
                             fn get_fifo_by_creation_date(list_of_lots: &Ref<Vec<Rc<Lot>>>) -> Vec<usize> {
                                 let mut vec_of_indexes = [].to_vec();
-                                for (idx, lot) in list_of_lots.iter().enumerate() {
+                                for (idx, _lot) in list_of_lots.iter().enumerate() {
                                     vec_of_indexes.push(idx)
                                 }
                                 let vec = vec_of_indexes;
@@ -304,7 +304,7 @@ pub fn create_lots_and_movements(
                                     }
                                 }
                                 let mut vec_of_indexes = [].to_vec();
-                                for (idx, lot) in reordered_vec.iter().enumerate() {
+                                for (idx, _lot) in reordered_vec.iter().enumerate() {
                                     vec_of_indexes.push(idx)
                                 }
                                 let vec = vec_of_indexes;
@@ -329,7 +329,6 @@ pub fn create_lots_and_movements(
                             };
 
                             fit_into_lots(
-                                acct.raw_key,
                                 txn_num,
                                 *ar_num,
                                 whole_mvmt,
@@ -649,7 +648,6 @@ fn wrap_mvmt_and_push(
 }
 
 fn fit_into_lots(
-    acct_key: u16,
     txn_num: u32,
     spawning_ar_key: u32,
     mvmt_to_fit: Movement,
@@ -660,7 +658,7 @@ fn fit_into_lots(
     ar_map: &HashMap<u32, ActionRecord>,
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
-    ) {
+) {
 
     let ar = ar_map.get(&spawning_ar_key).unwrap();
     let acct = acct_map.get(&ar.account_key).unwrap();
@@ -697,7 +695,6 @@ fn fit_into_lots(
             proceeds: Cell::new(d128!(0.0)),
         };
         fit_into_lots(
-            acct.raw_key,
             txn_num,
             spawning_ar_key,
             possible_mvmt_to_fit,
@@ -771,7 +768,6 @@ fn fit_into_lots(
     };
     assert!(current_index_position < vec_of_ordered_index_values.len());
     fit_into_lots(
-        acct.raw_key,
         txn_num,
         spawning_ar_key,
         remainder_mvmt_to_recurse,

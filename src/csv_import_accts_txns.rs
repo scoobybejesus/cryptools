@@ -117,8 +117,6 @@ pub fn import_transactions(
     rdr: &mut csv::Reader<File>,
     txns_map: &mut HashMap<u32, Transaction>,
     action_records: &mut HashMap<u32, ActionRecord>,
-    raw_acct_map: &mut HashMap<u16, RawAccount>,
-    acct_map: &mut HashMap<u16, Account>,
 ) -> Result<(), Box<dyn Error>> {
 
     let mut this_tx_number = 0;
@@ -138,7 +136,7 @@ pub fn import_transactions(
         let mut this_tx_date: &str = "";
         let mut this_proceeds: &str = "";
         let mut this_memo: &str = "";
-        let mut this: String = "".to_string();
+        let mut this: String;
 
         //  Next, create action_records.
         let mut action_records_map_keys_vec: Vec<u32> = [].to_vec();

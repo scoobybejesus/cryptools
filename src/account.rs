@@ -37,10 +37,10 @@ pub struct Account {
 
 impl Account {
 
-	pub fn is_home_currency(&self, compare: &String, raw_acct_map: &HashMap<u16, RawAccount>) -> bool {
-		let raw_acct = raw_acct_map.get(&self.raw_key).unwrap();
-		&raw_acct.ticker == compare
-	}
+	// pub fn is_home_currency(&self, compare: &String, raw_acct_map: &HashMap<u16, RawAccount>) -> bool {
+	// 	let raw_acct = raw_acct_map.get(&self.raw_key).unwrap();
+	// 	&raw_acct.ticker == compare
+	// }
 
 	pub fn get_sum_of_amts_in_lots(&self) -> d128 {
 		let lots = self.list_of_lots.borrow();
@@ -82,9 +82,11 @@ impl Lot {
 		self.movements.borrow().iter().for_each(|movement| amts += movement.amount);
 		amts
 	}
-	pub fn sum_of_amts_in_lot_is_zero(&self) -> bool {
-		d128!(0) == Self::get_sum_of_amts_in_lot(&self)
-	}
+
+	// pub fn sum_of_amts_in_lot_is_zero(&self) -> bool {
+	// 	d128!(0) == Self::get_sum_of_amts_in_lot(&self)
+	// }
+
 	pub fn get_sum_of_basis_in_lot(&self) -> d128 {
 		let mut amts = d128!(0);
 		self.movements.borrow().iter().for_each(|movement| amts += movement.cost_basis.get());
@@ -218,10 +220,10 @@ impl Movement {
 		}
 	}
 
-    pub fn direction(&self) -> Polarity {
-		if self.amount < d128!(0.0) { Polarity::Outgoing }
-		else { Polarity::Incoming }
-	}
+    // pub fn direction(&self) -> Polarity {
+	// 	if self.amount < d128!(0.0) { Polarity::Outgoing }
+	// 	else { Polarity::Incoming }
+	// }
 }
 
 #[derive(Clone, Debug, PartialEq)]

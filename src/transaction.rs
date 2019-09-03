@@ -203,16 +203,16 @@ impl ActionRecord {
 		else { Polarity::Incoming }
 	}
 
-	pub fn is_quote_acct_for_margin_exch(
-		&self,
-		raw_accts: &HashMap<u16, RawAccount>,
-		acct_map: &HashMap<u16, Account>
-	) -> bool {
+	// pub fn is_quote_acct_for_margin_exch(
+	// 	&self,
+	// 	raw_accts: &HashMap<u16, RawAccount>,
+	// 	acct_map: &HashMap<u16, Account>
+	// ) -> bool {
 
-		let acct = acct_map.get(&self.account_key).unwrap();
-		let raw_acct = raw_accts.get(&acct.raw_key).unwrap();
-		raw_acct.ticker.contains('_')
-	}
+	// 	let acct = acct_map.get(&self.account_key).unwrap();
+	// 	let raw_acct = raw_accts.get(&acct.raw_key).unwrap();
+	// 	raw_acct.ticker.contains('_')
+	// }
 
 	pub fn get_mvmts_in_ar(
         &self,
@@ -220,7 +220,7 @@ impl ActionRecord {
         txns_map: &HashMap<u32, Transaction>,
     ) -> Vec<Rc<Movement>> {
 
-        let polarity = Self::direction(self);
+        // let polarity = Self::direction(self);
         let txn = txns_map.get(&self.tx_key).unwrap();
         let mut movements_in_ar = [].to_vec();
         let acct = acct_map.get(&self.account_key).unwrap();

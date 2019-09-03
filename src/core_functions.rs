@@ -94,8 +94,6 @@ pub fn import_and_process_final(
             &mut rdr,
             transactions_map,
             action_records,
-            raw_acct_map,
-            acct_map
         )?;
 
         Ok(())

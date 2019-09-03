@@ -8,6 +8,7 @@ pub fn round_d128_generalized(to_round: &d128, places_past_decimal: d128) -> d12
     let rounded: d128 = ((to_round * d128!(10).scaleb(places_past_decimal)).quantize(d128!(1e1))) / d128!(10).scaleb(places_past_decimal);
     rounded//.reduce()
 }
+
 pub fn round_d128_1e2(to_round: &d128) -> d128 {
     let rounded: d128 = ((to_round * d128!(10).scaleb(d128!(2))).quantize(d128!(1e1))) / d128!(10).scaleb(d128!(2));
     rounded//.reduce()
