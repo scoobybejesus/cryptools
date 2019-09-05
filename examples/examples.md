@@ -23,7 +23,7 @@ Enter the following:
 
 Running that command takes you to the wizard.
 
-&nbsp;&nbsp;&nbsp;&nbsp; (Note: You can simply run **`cargo run`** instead, in which case after answering yes to "Shall we proceed," you will have to enter the absolute path of the input file, but it's easier to pass in the relative path.)
+&nbsp;&nbsp;&nbsp;&nbsp; (Note: You can simply run **`cargo run`** instead, in which case after answering yes to "Shall we proceed," you will have to enter the path of the input file.)
 
 ##### Type `<Enter>` to accept default responses to the first three prompts, which are:
 
@@ -42,6 +42,7 @@ Then tab-complete your way through `/Users/<your-username>/Documents`*, for exam
 ##### Now the program has ended, and you should have reports in the directory you provided.
 
 The reports should match those in the `examples/resources` directory.
+(Actually, new reports have been created, but you can match the existing reports by title.)
 
 
 ## Skipping the wizard
@@ -62,8 +63,8 @@ You'll see it's similar to the README example, except that there is a slightly w
 
 We bypassed the wizard because:
 
-1. The  required parameters were passed.
-2. Default values were used for parameters not passed.
+1. The required parameters were passed in.
+2. Default values were used for parameters not passed in.
 3. The `-a` flag was set which accepts all parameters without asking twice (i.e., skips the wizard).
 
 The only "required" parameter is the input file.
@@ -72,7 +73,7 @@ The default values may not be desirable for your use case, however.
 You may want FIFO instead of LIFO.
 You may need EUR instead of USD.
 You may want to apply like-kind exchange treatment through a particular date.
-These parameters can be set via command line parameters.
+These parameters can be set via command line options.
 
 ## Notes on the reports
 
@@ -88,22 +89,27 @@ There are two style of reports: Accounts and Transactions.
 
 * This style of report show you how your holdings performed (not including unrealized gains/losses).
 * *Transaction* reports reflect the result of each transaction (specifically, each transaction which results in a gain/loss or income/expense).
-* Future reports will be written that provide a more detailed breakdown of the income/expense/gain/loss from every movement (or possibly a more summarized version, too).
+* Future reports will be written that provide more detailed breakdowns of the income/expense/gain/loss from every movement (or possibly a more summarized version, too).
+For example, maybe the exchange rate will be included so you can quickly spot check whether the input file was correct.
 
 #### Other notes and limitations
 
 * There is no place where transaction fees are recorded.
-Whether in an exchange transaction or when sending to yourself, in the input file you simply reflect the net amount leaving one account and the net amount entering the other account.
-That "cost" simply remains as cost basis until the holding is disposed.
+Whether in an exchange transaction or when sending to yourself, in the input file you simply reflect the net amount
+leaving one account and the other net amount entering the other account.
+That "cost" (the transaction fee or exchange fee) simply remains as cost basis until the holding is disposed.
 * Transactions in which cryptocurrency is spent reflect a gain/loss ***and*** an expense.
-Perhaps your goverment does not require you to reflect any gain or loss resulting from purchases, in which case you would presumably separate expense those rows from the rest.
+Perhaps your goverment does not require you to reflect any gain or loss resulting from purchases,
+in which case you would presumably manually separate expense those rows from the rest.
 * There is currently no way to provide sub-classifications for income and expenses.
-For example, in `faker2`, there is mining income and there is remote tech support income.  Also, there is a coffee mug purchase and a donation.
+For example, in `faker2`, there is mining income and there is remote tech support income.
+Also, there is a coffee mug purchase and a donation.
 The details are easily found in the memo field, but it is up to the user to "parse" those items for their use.
 * As noted in the README, adjustments occasionally may need to be made to the output reports.
 For example, in `faker2`, a donation was made.
 You may choose (or your accountant may decide) that this transaction (#11) is analogous to donating an appreciated security.
-In that case, you may decide to manually adjust the **Proceeds** to match the **Cost basis**, and then update the **Gain/loss** to be zero.
+In that case, you may decide to manually adjust the **Proceeds** to match the **Cost basis**,
+and then update the **Gain/loss** to be zero.
 * You can't spend or exchange something that you don't have.
 The program is designed to crash if you try to do this.
 That is, the program is unable to function properly if your holdings appear to go negative.
