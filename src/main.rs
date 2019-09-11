@@ -23,6 +23,7 @@ mod create_lots_mvmts;
 mod import_cost_proceeds_etc;
 mod cli_user_choices;
 mod csv_export;
+mod txt_export;
 mod string_utils;
 mod decimal_utils;
 mod tests;
@@ -288,6 +289,14 @@ fn main() -> Result<(), Box<dyn Error>> {
             &raw_acct_map,
             &account_map,
             &transactions_map
+        )?;
+
+        txt_export::_1_account_lot_detail_to_txt(
+            &settings,
+            &raw_acct_map,
+            &account_map,
+            &transactions_map,
+            &action_records_map
         )?;
 
     }

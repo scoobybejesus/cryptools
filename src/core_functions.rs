@@ -5,6 +5,7 @@ use std::path::PathBuf;
 use std::error::Error;
 use std::fs::File;
 use std::collections::{HashMap};
+use std::fmt;
 
 use chrono::NaiveDate;
 use structopt::StructOpt;
@@ -25,6 +26,18 @@ pub enum InventoryCostingMethod {
     FIFObyLotCreationDate,
     /// 4. FIFO according to the basis date of the lot.
     FIFObyLotBasisDate,
+}
+
+impl fmt::Display for InventoryCostingMethod {
+
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+           InventoryCostingMethod::LIFObyLotCreationDate => write!(f, "LIFO by lot creation date"),
+           InventoryCostingMethod::LIFObyLotBasisDate => write!(f, "LIFO by lot basis date"),
+           InventoryCostingMethod::FIFObyLotCreationDate => write!(f, "FIFO by lot creation date"),
+           InventoryCostingMethod::FIFObyLotBasisDate => write!(f, "FIFO by lot basis date"),
+       }
+    }
 }
 
 #[derive(Clone)]
