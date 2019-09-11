@@ -299,6 +299,18 @@ fn main() -> Result<(), Box<dyn Error>> {
             &action_records_map
         )?;
 
+        txt_export::_2_account_lot_summary_to_txt(
+            &settings,
+            &raw_acct_map,
+            &account_map,
+        )?;
+
+        txt_export::_3_account_lot_summary_non_zero_to_txt(
+            &settings,
+            &raw_acct_map,
+            &account_map,
+        )?;
+
     }
 
     // use tests::test;
