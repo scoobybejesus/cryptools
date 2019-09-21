@@ -288,7 +288,7 @@ pub fn _4_transaction_mvmt_detail_to_csv(
             let mut row: Vec<String> = [].to_vec();
 
             row.push(date);
-            row.push(tx_number);
+            row.push("Txn ".to_string() + &tx_number);
             row.push(tx_type.to_string());
             row.push(memo);
             row.push(amount.to_string());
@@ -352,7 +352,7 @@ pub fn _5_transaction_mvmt_summaries_to_csv(
         let txn_num = txn_num as u32;
         let txn = txns_map.get(&(txn_num)).unwrap();
         let txn_date_string = txn.date.format("%Y/%m/%d").to_string();
-        let tx_num_string = txn.tx_number.to_string();
+        let tx_num_string = "Txn ".to_string() + &txn.tx_number.to_string();
         let tx_type_string = txn.transaction_type(ars, &raw_acct_map, &acct_map)?.to_string();
         let tx_memo_string = txn.memo.to_string();
         let mut term_st: Option<Term> = None;
@@ -572,7 +572,7 @@ pub fn _6_transaction_mvmt_detail_to_csv_w_orig(
             let mut row: Vec<String> = [].to_vec();
 
             row.push(date);
-            row.push(tx_number);
+            row.push("Txn ".to_string() + &tx_number);
             row.push(tx_type.to_string());
             row.push(memo);
             row.push(amount.to_string());

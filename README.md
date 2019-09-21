@@ -22,7 +22,7 @@ Given an input CSV file reflecting the user's entire cryptocurrency transaction 
 
 Read up on the [CSV input file](https://github.com/scoobybejesus/cryptools/blob/master/InputFile_CSV.md).
 
-Reports may be exported (as CSV files) that reflect income/expenses/gains/losses or amount and cost basis of existing holdings.
+Reports may be exported as CSV and/or TXT files reflecting income/expenses/gains/losses or amount and cost basis of existing holdings.
 
 ---
 
