@@ -52,11 +52,21 @@ impl Account {
 		total_amount
 	}
 
-	pub fn get_sum_of_basis_in_lots(&self) -> d128 {
+	pub fn get_sum_of_lk_basis_in_lots(&self) -> d128 {
 		let lots = self.list_of_lots.borrow();
 		let mut total_amount = d128!(0);
 			for lot in lots.iter() {
-				let sum = lot.get_sum_of_basis_in_lot();
+				let sum = lot.get_sum_of_lk_basis_in_lot();
+				total_amount += sum;
+			}
+		total_amount
+	}
+
+	pub fn get_sum_of_orig_basis_in_lots(&self) -> d128 {
+		let lots = self.list_of_lots.borrow();
+		let mut total_amount = d128!(0);
+			for lot in lots.iter() {
+				let sum = lot.get_sum_of_orig_basis_in_lot();
 				total_amount += sum;
 			}
 		total_amount
@@ -87,7 +97,13 @@ impl Lot {
 	// 	d128!(0) == Self::get_sum_of_amts_in_lot(&self)
 	// }
 
-	pub fn get_sum_of_basis_in_lot(&self) -> d128 {
+	pub fn get_sum_of_lk_basis_in_lot(&self) -> d128 {
+		let mut amts = d128!(0);
+		self.movements.borrow().iter().for_each(|movement| amts += movement.cost_basis_lk.get());
+		amts
+	}
+
+	pub fn get_sum_of_orig_basis_in_lot(&self) -> d128 {
 		let mut amts = d128!(0);
 		self.movements.borrow().iter().for_each(|movement| amts += movement.cost_basis.get());
 		amts
@@ -106,6 +122,8 @@ pub struct Movement {
 	pub ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell<d128>,	//	Set in wrap_mvmt_and_push()
 	pub lot_num: u32,
 	pub proceeds: Cell<d128>,	//	Initialized with 0. Set in add_proceeds_to_movements()
+    pub proceeds_lk: Cell<d128>,
+    pub cost_basis_lk: Cell<d128>,
 }
 
 impl Movement {
@@ -126,17 +144,67 @@ impl Movement {
         acct_map: &HashMap<u16, Account>,
         ar_map: &HashMap<u32, ActionRecord>
     ) -> d128 {
-		// println!("Lot #: {}", self.lot.lot_number);
-		let ar = ar_map.get(&self.action_record_key).unwrap();
-		let acct = acct_map.get(&ar.account_key).unwrap();
-		let lot = &acct.list_of_lots.borrow()[self.lot_num as usize - 1];	//	lots start at 1 and indexes at 0
-		let borrowed_mvmt_list = lot.movements.borrow();
-		let ratio = self.amount / borrowed_mvmt_list.first().unwrap().amount;
-		// println!("ratio_of_amt_to_lots_first_mvmt: {}", ratio.abs());
+		// // println!("Lot #: {}", self.lot.lot_number);
+		// let ar = ar_map.get(&self.action_record_key).unwrap();
+		// let acct = acct_map.get(&ar.account_key).unwrap();
+		// let lot = &acct.list_of_lots.borrow()[self.lot_num as usize - 1];	//	lots start at 1 and indexes at 0
+        let lot = self.get_lot(acct_map, ar_map);
+		let list_of_lot_mvmts = lot.movements.borrow();
+		let ratio = self.amount / list_of_lot_mvmts.first().unwrap().amount;
+
 		ratio.abs()
 	}
 
-	pub fn get_gain_or_loss(&self) -> d128 {
+    pub fn get_lk_cost_basis_of_lots_first_mvmt(
+        &self,
+        acct_map: &HashMap<u16, Account>,
+        ar_map: &HashMap<u32, ActionRecord>
+    ) -> d128 {
+		// let ar = ar_map.get(&self.action_record_key).unwrap();
+		// let acct = acct_map.get(&ar.account_key).unwrap();
+		// let lot = &acct.list_of_lots.borrow()[self.lot_num as usize - 1];	//	lots start at 1 and indexes at 0
+        let lot = self.get_lot(acct_map, ar_map);
+		let list_of_lot_mvmts = lot.movements.borrow();
+		let cost_basis_lk = list_of_lot_mvmts.first().unwrap().cost_basis_lk.get();
+
+		cost_basis_lk
+	}
+
+    pub fn get_cost_basis_of_lots_first_mvmt(
+        &self,
+        acct_map: &HashMap<u16, Account>,
+        ar_map: &HashMap<u32, ActionRecord>
+    ) -> d128 {
+		// let ar = ar_map.get(&self.action_record_key).unwrap();
+		// let acct = acct_map.get(&ar.account_key).unwrap();
+		// let lot = &acct.list_of_lots.borrow()[self.lot_num as usize - 1];	//	lots start at 1 and indexes at 0
+		// let borrowed_mvmt_list = lot.movements.borrow();
+        let lot = self.get_lot(acct_map, ar_map);
+		let list_of_lot_mvmts = lot.movements.borrow();
+		let cost_basis = list_of_lot_mvmts.first().unwrap().cost_basis.get();
+
+		cost_basis
+	}
+
+    // pub fn get_lk_proceeds_of_lots_first_mvmt(
+    //     &self,
+    //     acct_map: &HashMap<u16, Account>,
+    //     ar_map: &HashMap<u32, ActionRecord>
+    // ) -> d128 {
+	// 	let ar = ar_map.get(&self.action_record_key).unwrap();
+	// 	let acct = acct_map.get(&ar.account_key).unwrap();
+	// 	let lot = &acct.list_of_lots.borrow()[self.lot_num as usize - 1];	//	lots start at 1 and indexes at 0
+	// 	let borrowed_mvmt_list = lot.movements.borrow();
+	// 	let proceeds_lk = borrowed_mvmt_list.first().unwrap().proceeds_lk.get();
+
+	// 	proceeds_lk
+	// }
+
+	pub fn get_lk_gain_or_loss(&self) -> d128 {    //  Returns proceeds*2 for Incoming+Flow txns
+		self.proceeds_lk.get() + self.cost_basis_lk.get()
+	}
+
+    pub fn get_orig_gain_or_loss(&self) -> d128 {    //  Returns proceeds*2 for Incoming+Flow txns
 		self.proceeds.get() + self.cost_basis.get()
 	}
 
@@ -147,20 +215,28 @@ impl Movement {
 		let lot = Self::get_lot(&self, acct_map, ar_map);
 
     	match ar.direction() {
+
 			Polarity::Incoming => {
 				let today = Utc::now();
-				let utc_lot_date = Self::create_date_time_from_atlantic(lot.date_for_basis_purposes, NaiveTime::from_hms_milli(12, 34, 56, 789));
+				let utc_lot_date = Self::create_date_time_from_atlantic(
+                    lot.date_for_basis_purposes,
+                    NaiveTime::from_hms_milli(12, 34, 56, 789)
+                );
 				// if today.signed_duration_since(self.lot.date_for_basis_purposes) > 365
-				if (today - utc_lot_date) > Duration::days(365) {	//	TODO: figure out how to instantiate today's date and convert it to compare to NaiveDate
+				if (today - utc_lot_date) > Duration::days(365) {
+                    //	TODO: figure out how to instantiate today's date and convert it to compare to NaiveDate
 					Term::LT
 				}
 				else {
 					Term::ST
 				}
 			}
+
 			Polarity::Outgoing => {
+
 				let lot_date_for_basis_purposes = lot.date_for_basis_purposes;
-				if self.date.signed_duration_since(lot_date_for_basis_purposes) > Duration::days(365) {
+
+                if self.date.signed_duration_since(lot_date_for_basis_purposes) > Duration::days(365) {
 					return Term::LT
 				}
 				Term::ST
@@ -169,9 +245,11 @@ impl Movement {
 	}
 
 	pub fn create_date_time_from_atlantic(date: NaiveDate, time: NaiveTime) -> DateTime<Utc> {
+
 		let naive_datetime = NaiveDateTime::new(date, time);
 		let east_time = Eastern.from_local_datetime(&naive_datetime).unwrap();
-		east_time.with_timezone(&Utc)
+
+        east_time.with_timezone(&Utc)
 	}
 
 	pub fn get_income(
@@ -184,11 +262,15 @@ impl Movement {
 	)-> Result<d128, Box<dyn Error>> {  //  Returns 0 or positive number
 
 		let txn = txns_map.get(&self.transaction_key).expect("Couldn't get txn. Tx num invalid?");
+
 		match txn.transaction_type(ar_map, raw_accts, acct_map)? {
+
 			TxType::Flow => {
+
 				let ar = ar_map.get(&self.action_record_key).unwrap();
-				if ar.direction() == Polarity::Incoming {
-					Ok(self.proceeds.get())
+
+                if ar.direction() == Polarity::Incoming {
+					Ok(-self.proceeds_lk.get())
 				}
 				else { Ok(d128!(0)) }
 			}
@@ -206,11 +288,15 @@ impl Movement {
 	)-> Result<d128, Box<dyn Error>> {  //  Returns 0 or negative number
 
 		let txn = txns_map.get(&self.transaction_key).expect("Couldn't get txn. Tx num invalid?");
+
 		match txn.transaction_type(ar_map, raw_accts, acct_map)? {
+
 			TxType::Flow => {
+
 				let ar = ar_map.get(&self.action_record_key).unwrap();
-				if ar.direction() == Polarity::Outgoing {
-                    let expense = -self.proceeds.get();
+
+                if ar.direction() == Polarity::Outgoing {
+                    let expense = -self.proceeds_lk.get();
 					Ok(expense)
 				}
 				else { Ok(d128!(0)) }
@@ -245,9 +331,9 @@ impl Term {
 impl fmt::Display for Term {
 
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-       match *self {
+        match *self {
            Term::LT => write!(f, "LT"),
            Term::ST => write!(f, "ST"),
-       }
+        }
     }
 }

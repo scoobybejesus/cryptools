@@ -9,7 +9,7 @@ use std::io::prelude::Write;
 
 use decimal::d128;
 
-use crate::transaction::{Transaction, ActionRecord, TxType};
+use crate::transaction::{Transaction, ActionRecord};
 use crate::account::{Account, RawAccount};
 use crate::core_functions::{ImportProcessParameters};
 
@@ -60,7 +60,7 @@ pub fn _1_account_lot_detail_to_txt(
 
 
 
-    let file_name = PathBuf::from("1_Acct_lot_detail.txt");
+    let file_name = PathBuf::from("T1_Acct_lot_detail.txt");
     let path = PathBuf::from(&settings.export_path.clone());
     let full_path: PathBuf = [path, file_name].iter().collect();
 
@@ -99,14 +99,16 @@ Enable like-kind treatment: {}",
             writeln!(file, "Account balance: {} {}; Total cost basis: {}",
                 acct.get_sum_of_amts_in_lots(),
                 raw_acct.ticker,
-                acct.get_sum_of_basis_in_lots()
+                acct.get_sum_of_lk_basis_in_lots()
             )?;
+        } else {
+            continue
         }
         if raw_acct.is_margin { writeln!(file, "Margin Account")?; }
 
         for (lot_idx, lot) in acct.list_of_lots.borrow().iter().enumerate() {
 
-            let lot_basis = lot.get_sum_of_basis_in_lot();
+            let lk_lot_basis = lot.get_sum_of_lk_basis_in_lot();
             let movements_sum = lot.get_sum_of_amts_in_lot();
 
             if acct.list_of_lots.borrow().len() > 0 {
@@ -115,7 +117,7 @@ Enable like-kind treatment: {}",
                 writeln!(file, "  Lot {}", (lot_idx+1))?;
                 writeln!(file, "\t• Σ: {}, with remaining cost basis of {} and basis date of {}",
                     movements_sum,
-                    lot_basis,
+                    lk_lot_basis,
                     lot.date_for_basis_purposes
                 )?;
                 writeln!(file, "\t Movements:")?;
@@ -137,26 +139,27 @@ Enable like-kind treatment: {}",
 
                     writeln!(file, "{}", description_str)?;
 
-                    let proceeds = mvmt.proceeds.get();
-                    let cost_basis = mvmt.cost_basis.get();
+                    let lk_proceeds = mvmt.proceeds_lk.get();
+                    let lk_cost_basis = mvmt.cost_basis_lk.get();
                     let gain_loss: d128;
 
-                    if mvmt.amount > d128!(0) { // Can't have a gain on an incoming txn
+                    // if mvmt.amount > d128!(0) { // Can't have a gain on an incoming txn
+                    //     gain_loss = d128!(0)
+                    // } else
+                    if raw_acct.is_home_currency(&settings.home_currency) {  //  Can't have a gain disposing home currency
                         gain_loss = d128!(0)
-                    } else if raw_acct.is_home_currency(&settings.home_currency) {  //  Can't have a gain disposing home currency
-                        gain_loss = d128!(0)
-                    } else if tx_type == TxType::ToSelf {   //  Can't have a gain sending to yourself
-                        gain_loss = d128!(0)
+                    // } else if tx_type == TxType::ToSelf {   //  Can't have a gain sending to yourself
+                    //     gain_loss = d128!(0)
                     } else {
-                        gain_loss = proceeds + cost_basis
+                        gain_loss = lk_proceeds + lk_cost_basis;
                     }
 
                     let income = mvmt.get_income(ars, raw_acct_map,	acct_map, txns_map)?;
                     let expense = mvmt.get_expense(ars, raw_acct_map, acct_map, txns_map)?;
 
                     let activity_str = format!("\t\t\tProceeds: {}; Cost basis: {}; for Gain/loss: {} {}; Inc.: {}; Exp.: {}.",
-                        proceeds,
-                        cost_basis,
+                        lk_proceeds,
+                        lk_cost_basis,
                         mvmt.get_term(acct_map, ars),
                         gain_loss,
                         income,
@@ -166,8 +169,8 @@ Enable like-kind treatment: {}",
                     writeln!(file, "{}", activity_str)?;
 
                     // if settings.enable_like_kind_treatment {
-                    //     let dg_prev = mvmt.deferred_gain_prev.get();
-                    //     let dg_curr = mvmt.deferred_gain_curr.get();
+                    //     let dg_prev = mvmt.proceeds_lk.get();
+                    //     let dg_curr = mvmt.cost_basis_lk.get();
 
                     //     let activity_str = format!("\t\t\tGain deferred in this txn: {}; Accumulated in prior txns: {}",
                     //         dg_curr,
@@ -205,7 +208,7 @@ pub fn _2_account_lot_summary_to_txt(
 
 
 
-    let file_name = PathBuf::from("2_Acct_lot_summary.txt");
+    let file_name = PathBuf::from("T2_Acct_lot_summary.txt");
     let path = PathBuf::from(&settings.export_path.clone());
     let full_path: PathBuf = [path, file_name].iter().collect();
 
@@ -244,14 +247,14 @@ Enable like-kind treatment: {}",
             writeln!(file, "Account balance: {} {}; Total cost basis: {}",
                 acct.get_sum_of_amts_in_lots(),
                 raw_acct.ticker,
-                acct.get_sum_of_basis_in_lots()
+                acct.get_sum_of_lk_basis_in_lots()
             )?;
         }
         if raw_acct.is_margin { writeln!(file, "Margin Account")?; }
 
         for (lot_idx, lot) in acct.list_of_lots.borrow().iter().enumerate() {
 
-            let lot_basis = lot.get_sum_of_basis_in_lot();
+            let lk_lot_basis = lot.get_sum_of_lk_basis_in_lot();
             let movements_sum = lot.get_sum_of_amts_in_lot();
 
             if acct.list_of_lots.borrow().len() > 0 {
@@ -259,7 +262,7 @@ Enable like-kind treatment: {}",
                 writeln!(file, "  Lot {} • Σ: {}, with remaining cost basis of {} and basis date of {}",
                     (lot_idx+1),
                     movements_sum,
-                    lot_basis,
+                    lk_lot_basis,
                     lot.date_for_basis_purposes
                 )?;
             }
@@ -287,7 +290,7 @@ pub fn _3_account_lot_summary_non_zero_to_txt(
 
 
 
-    let file_name = PathBuf::from("3_Acct_lot_summary_non_zero.txt");
+    let file_name = PathBuf::from("T3_Acct_lot_summary_non_zero.txt");
     let path = PathBuf::from(&settings.export_path.clone());
     let full_path: PathBuf = [path, file_name].iter().collect();
 
@@ -328,7 +331,7 @@ Enable like-kind treatment: {}",
                 writeln!(file, "Account balance: {} {}; Total cost basis: {}",
                     amt_in_acct,
                     raw_acct.ticker,
-                    acct.get_sum_of_basis_in_lots()
+                    acct.get_sum_of_lk_basis_in_lots()
                 )?;
             } else {
                 continue
@@ -338,7 +341,7 @@ Enable like-kind treatment: {}",
 
         for (lot_idx, lot) in acct.list_of_lots.borrow().iter().enumerate() {
 
-            let lot_basis = lot.get_sum_of_basis_in_lot();
+            let lk_lot_basis = lot.get_sum_of_lk_basis_in_lot();
             let movements_sum = lot.get_sum_of_amts_in_lot();
 
             if acct.list_of_lots.borrow().len() > 0 {
@@ -347,7 +350,7 @@ Enable like-kind treatment: {}",
                     writeln!(file, "  Lot {} • Σ: {}, with remaining cost basis of {} and basis date of {}",
                         (lot_idx+1),
                         movements_sum,
-                        lot_basis,
+                        lk_lot_basis,
                         lot.date_for_basis_purposes
                     )?;
                 }

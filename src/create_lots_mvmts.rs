@@ -136,6 +136,8 @@ pub fn create_lots_and_movements(
                 ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
                 lot_num: base_lot.lot_number,
                 proceeds: Cell::new(d128!(0.0)),
+                proceeds_lk: Cell::new(d128!(0.0)),
+                cost_basis_lk: Cell::new(d128!(0.0)),
             };
             wrap_mvmt_and_push(base_mvmt, &base_ar, &base_lot, &settings, &raw_acct_map, &acct_map);
 
@@ -150,6 +152,8 @@ pub fn create_lots_and_movements(
                 ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
                 lot_num: quote_lot.lot_number,
                 proceeds: Cell::new(d128!(0.0)),
+                proceeds_lk: Cell::new(d128!(0.0)),
+                cost_basis_lk: Cell::new(d128!(0.0)),
             };
             wrap_mvmt_and_push(quote_mvmt, &quote_ar, &quote_lot, &settings, &raw_acct_map, &acct_map);
 
@@ -191,6 +195,8 @@ pub fn create_lots_and_movements(
                             ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
                             lot_num: lot.lot_number,
                             proceeds: Cell::new(d128!(0.0)),
+                            proceeds_lk: Cell::new(d128!(0.0)),
+                            cost_basis_lk: Cell::new(d128!(0.0)),
                         };
                         wrap_mvmt_and_push(whole_mvmt, &ar, &lot, &settings, &raw_acct_map, &acct_map);
                         acct.list_of_lots.borrow_mut().push(lot);
@@ -210,6 +216,8 @@ pub fn create_lots_and_movements(
                             ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
                             lot_num: lot.lot_number,
                             proceeds: Cell::new(d128!(0.0)),
+                            proceeds_lk: Cell::new(d128!(0.0)),
+                            cost_basis_lk: Cell::new(d128!(0.0)),
                         };
                         wrap_mvmt_and_push(whole_mvmt, &ar, &lot, &settings, &raw_acct_map, &acct_map);
                         continue
@@ -239,6 +247,8 @@ pub fn create_lots_and_movements(
                                 ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
                                 lot_num: lot.lot_number,
                                 proceeds: Cell::new(d128!(0.0)),
+                                proceeds_lk: Cell::new(d128!(0.0)),
+                                cost_basis_lk: Cell::new(d128!(0.0)),
                             };
                             wrap_mvmt_and_push(whole_mvmt, &ar, &lot, &settings, &raw_acct_map, &acct_map);
                             continue
@@ -326,6 +336,8 @@ pub fn create_lots_and_movements(
                                 ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
                                 lot_num: lot_to_use.lot_number,
                                 proceeds: Cell::new(d128!(0.0)),
+                                proceeds_lk: Cell::new(d128!(0.0)),
+                                cost_basis_lk: Cell::new(d128!(0.0)),
                             };
 
                             fit_into_lots(
@@ -365,6 +377,8 @@ pub fn create_lots_and_movements(
                                         ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
                                         lot_num: lot.lot_number,
                                         proceeds: Cell::new(d128!(0.0)),
+                                        proceeds_lk: Cell::new(d128!(0.0)),
+                                        cost_basis_lk: Cell::new(d128!(0.0)),
                                     };
                                     wrap_mvmt_and_push(mvmt, &ar, &lot, &settings, &raw_acct_map, &acct_map);
                                     continue
@@ -395,6 +409,8 @@ pub fn create_lots_and_movements(
                                             ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
                                             lot_num: lot.lot_number,
                                             proceeds: Cell::new(d128!(0.0)),
+                                            proceeds_lk: Cell::new(d128!(0.0)),
+                                            cost_basis_lk: Cell::new(d128!(0.0)),
                                         };
                                     } else {
                                         assert_eq!(txn.action_record_idx_vec.len(), 2);
@@ -451,6 +467,8 @@ pub fn create_lots_and_movements(
                                                 ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
                                                 lot_num: inner_lot.lot_number,
                                                 proceeds: Cell::new(d128!(0.0)),
+                                                proceeds_lk: Cell::new(d128!(0.0)),
+                                                cost_basis_lk: Cell::new(d128!(0.0)),
                                             };
                                             wrap_mvmt_and_push(inner_mvmt, &ar, &inner_lot, &settings, &raw_acct_map, &acct_map);
                                             acct.list_of_lots.borrow_mut().push(inner_lot);
@@ -483,6 +501,8 @@ pub fn create_lots_and_movements(
                                             ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
                                             lot_num: lot.lot_number,
                                             proceeds: Cell::new(d128!(0.0)),
+                                            proceeds_lk: Cell::new(d128!(0.0)),
+                                            cost_basis_lk: Cell::new(d128!(0.0)),
                                         };
                                     }
                                     wrap_mvmt_and_push(mvmt, &ar, &lot, &settings, &raw_acct_map, &acct_map);
@@ -539,6 +559,8 @@ pub fn create_lots_and_movements(
                                         ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
                                         lot_num: lot.lot_number,
                                         proceeds: Cell::new(d128!(0.0)),
+                                        proceeds_lk: Cell::new(d128!(0.0)),
+                                        cost_basis_lk: Cell::new(d128!(0.0)),
                                     };
                                     wrap_mvmt_and_push(whole_mvmt, &ar, &lot, &settings, &raw_acct_map, &acct_map);
                                     acct.list_of_lots.borrow_mut().push(lot);
@@ -693,6 +715,8 @@ fn fit_into_lots(
             ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
             lot_num: newly_chosen_lot.lot_number,
             proceeds: Cell::new(d128!(0.0)),
+            proceeds_lk: Cell::new(d128!(0.0)),
+            cost_basis_lk: Cell::new(d128!(0.0)),
         };
         fit_into_lots(
             txn_num,
@@ -710,8 +734,6 @@ fn fit_into_lots(
     }
     assert!(sum_of_mvmts_in_lot > d128!(0.0));
     let remainder_amt = mvmt_to_fit.amount;
-    // println!("Sum of mvmts in lot: {}; Remainder amount: {}; Net: {}",
-    //     sum_of_mvmts_in_lot, remainder_amt, sum_of_mvmts_in_lot + remainder_amt);
 
     let does_remainder_fit: bool = (sum_of_mvmts_in_lot + remainder_amt) >= d128!(0.0);
 
@@ -727,6 +749,8 @@ fn fit_into_lots(
             ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
             lot_num: lot.lot_number,
             proceeds: Cell::new(d128!(0.0)),
+            proceeds_lk: Cell::new(d128!(0.0)),
+            cost_basis_lk: Cell::new(d128!(0.0)),
         };
         wrap_mvmt_and_push(remainder_that_fits, &spawning_ar, &lot, &settings, &raw_acct_map, &acct_map);
         return  //  And we're done
@@ -746,6 +770,8 @@ fn fit_into_lots(
         ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
         lot_num: lot.lot_number,
         proceeds: Cell::new(d128!(0.0)),
+        proceeds_lk: Cell::new(d128!(0.0)),
+        cost_basis_lk: Cell::new(d128!(0.0)),
     };
     wrap_mvmt_and_push(mvmt_that_fits_in_lot, &spawning_ar, &lot, &settings, &raw_acct_map, &acct_map);
     let remainder_amt_to_recurse = remainder_amt + sum_of_mvmts_in_lot;
@@ -765,6 +791,8 @@ fn fit_into_lots(
         ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)), //  This acts as a dummy value.
         lot_num: newly_chosen_lot.lot_number,
         proceeds: Cell::new(d128!(0.0)),
+        proceeds_lk: Cell::new(d128!(0.0)),
+        cost_basis_lk: Cell::new(d128!(0.0)),
     };
     assert!(current_index_position < vec_of_ordered_index_values.len());
     fit_into_lots(
@@ -841,6 +869,8 @@ fn process_multiple_incoming_lots_and_mvmts(
             ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
             lot_num: lot.lot_number,
             proceeds: Cell::new(d128!(0.0)),
+            proceeds_lk: Cell::new(d128!(0.0)),
+            cost_basis_lk: Cell::new(d128!(0.0)),
         };
         // println!("From first set of incoming movements, amount: {} {} to account: {}",
         //     incoming_mvmt.amount, acct_incoming_ar.ticker, acct_incoming_ar.account_num);
@@ -878,6 +908,8 @@ fn process_multiple_incoming_lots_and_mvmts(
         ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
         lot_num: lot.lot_number,
         proceeds: Cell::new(d128!(0.0)),
+        proceeds_lk: Cell::new(d128!(0.0)),
+        cost_basis_lk: Cell::new(d128!(0.0)),
     };
     // println!("Final incoming mvmt for this actionrecord, amount: {} {} to account: {}",
     //     incoming_mvmt.amount, acct_incoming_ar.ticker, acct_incoming_ar.account_num);

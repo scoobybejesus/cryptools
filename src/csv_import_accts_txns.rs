@@ -137,6 +137,7 @@ pub fn import_transactions(
         let mut this_proceeds: &str = "";
         let mut this_memo: &str = "";
         let mut this: String;
+        let mut proceeds_parsed = 0f32;
 
         //  Next, create action_records.
         let mut action_records_map_keys_vec: Vec<u32> = [].to_vec();
@@ -152,6 +153,7 @@ pub fn import_transactions(
             else if idx == 1 {
                 this = field.replace(",", "");
                 this_proceeds = this.as_str();
+                proceeds_parsed = this_proceeds.parse::<f32>()?;
             }
             else if idx == 2 { this_memo = field; }
 
@@ -213,7 +215,7 @@ pub fn import_transactions(
             date_as_string: this_tx_date.to_string(),
             date: tx_date,
             memo: this_memo.to_string(),
-            proceeds: this_proceeds.parse::<f32>()?,
+            proceeds: proceeds_parsed,
             action_record_idx_vec: action_records_map_keys_vec,
         };
 
