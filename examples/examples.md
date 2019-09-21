@@ -1,10 +1,10 @@
 // Copyright (c) 2017-2019, scoobybejesus
 
-// Redistributions must include the license: https://github.com/scoobybejesus/cryptools-rs/blob/master/LEGAL.txt
+// Redistributions must include the license: https://github.com/scoobybejesus/cryptools/blob/master/LEGAL.txt
 
 ---
 
-# Examples for using cryptools-rs
+# Examples for using cryptools
 
 The sample input files and the resulting reports are in the `/examples/resources/` directory.
 

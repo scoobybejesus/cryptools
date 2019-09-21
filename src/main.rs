@@ -1,5 +1,5 @@
 // Copyright (c) 2017-2019, scoobybejesus
-// Redistributions must include the license: https://github.com/scoobybejesus/cryptools-rs/blob/master/LEGAL.txt
+// Redistributions must include the license: https://github.com/scoobybejesus/cryptools/blob/master/LEGAL.txt
 
 #![allow(dead_code)]
 #![allow(unused_variables)]
@@ -32,7 +32,7 @@ use crate::core_functions::ImportProcessParameters;
 
 
 #[derive(StructOpt, Debug)]
-#[structopt(name = "cryptools-rs")]
+#[structopt(name = "cryptools")]
 struct Cli {
 
     /// File to be imported.  (Currently, the only supported date format is %m/%d/%y.)
@@ -77,7 +77,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     println!(
     "
-    Hello, crypto-folk!  Welcome to cryptools-rs!
+    Hello, crypto-folk!  Welcome to cryptools!
 
     This software will import your csv file's ledger of cryptocurrency transactions.
     It will then process it by creating 'lots' and posting 'movements' to those lots.

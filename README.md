@@ -1,4 +1,4 @@
-# cryptools-rs
+# cryptools
 
 ### Accounting library for cryptocurrency transaction activity.
 
@@ -138,16 +138,16 @@ Until you sell, it's simply an unrealized loss.
 
 1. `cargo build` (or include `--release` for a non-debug build)
 
-This will build `./target/debug/cryptools-rs` (or `./target/rls/cryptools-rs` for a non-debug build).
+This will build `./target/debug/cryptools` (or `./target/rls/cryptools` for a non-debug build).
 
 ## Usage
 
-Run `./target/debug/cryptools-rs` with no arguments (or `--help`, or `-h`) to see usage.
-Alternatively, run `cargo run`, in which case command-line arguments for `cryptools-rs` may be entered following `--`, e.g., `cargo run -- -h`.
+Run `./target/debug/cryptools` with no arguments (or `--help`, or `-h`) to see usage.
+Alternatively, run `cargo run`, in which case command-line arguments for `cryptools` may be entered following `--`, e.g., `cargo run -- -h`.
 
 Running with no arguments will lead the user through a wizard, or all required arguments can be passed as command-line flags/options/args.
 See `/examples/` directory for further guidance,
-or jump directly to the [examples.md](https://github.com/scoobybejesus/cryptools-rs/blob/master/examples/examples.md) file.
+or jump directly to the [examples.md](https://github.com/scoobybejesus/cryptools/blob/master/examples/examples.md) file.
 
 ## Development state
 
@@ -160,7 +160,7 @@ In fact, it may be nice to use the business logic as a library instead of runnin
 
 * Contributors welcome. New authors should add themselves to the `AUTHORS` file.
 
-* Roadmap and todos: we're working through items in [Issues](https://github.com/scoobybejesus/cryptools-rs/issues); feel free to tackle or add issues.
+* Roadmap and todos: we're working through items in [Issues](https://github.com/scoobybejesus/cryptools/issues); feel free to tackle or add issues.
 
 ## Legal
 
