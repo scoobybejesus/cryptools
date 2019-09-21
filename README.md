@@ -20,6 +20,8 @@ Given an input CSV file reflecting the user's entire cryptocurrency transaction 
 * compute gain or loss from the sale/exchange/disposal (including whether short-term or long-term)
 * record income for incoming transactions and expenses for outgoing transactions
 
+Read up on the [CSV input file](https://github.com/scoobybejesus/cryptools/blob/master/InputFile_CSV.md).
+
 Reports may be exported (as CSV files) that reflect income/expenses/gains/losses or amount and cost basis of existing holdings.
 
 ---
