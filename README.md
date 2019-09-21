@@ -8,6 +8,11 @@ The software measures one's cryptocurrency activity (i.e., denominates one's inc
 The default home currency is USD, but anything can be substituted.
 This type of tool may be useful, for example, when preparing to file taxes.
 
+The software has been tested on Mac and Linux.
+Testers/users are encouraged and welcome.
+
+---
+
 Given an input CSV file reflecting the user's entire cryptocurrency transaction history, the software will:
 
 * assign cost basis as of the date of purchase/exchange/receipt

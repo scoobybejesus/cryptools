@@ -8,9 +8,12 @@
 
 The sample input files and the resulting reports are in the `/examples/resources/` directory.
 
+(Note: new reports have been added since the write-up below was written.
+Nevertheless, evaluating the reports should mostly be self-explanatory.)
+
 ## Using the wizard
 
-##### First, preview the input file `faker1__sample_input.csv`.
+##### First, preview the input file `faker1__sample_input.csv` in your editor/viewer of choice.
 
 &nbsp;&nbsp;&nbsp;&nbsp; (You'll see it is the same (or roughly the same) as the README example.)
 
@@ -21,7 +24,7 @@ Enter the following:
 
 &nbsp;&nbsp;&nbsp;&nbsp; (Substitute a Windows-style file path, if necessary.)
 
-Running that command takes you to the wizard.
+Running the command above takes you through the wizard.
 
 &nbsp;&nbsp;&nbsp;&nbsp; (Note: You can simply run **`cargo run`** instead, in which case after answering yes to "Shall we proceed," you will have to enter the path of the input file.)
 
@@ -42,16 +45,17 @@ Then tab-complete your way through `/Users/<your-username>/Documents`*, for exam
 ##### Now the program has ended, and you should have reports in the directory you provided.
 
 The reports should match those in the `examples/resources` directory.
-(Actually, new reports have been created, but you can match the existing reports by title.)
+(Additional reports are created too, but you can generally match the existing reports by title.)
 
 
 ## Skipping the wizard
 
-This time around, we'll pass command-line parameters to skip past the wizard.
+Let's run the program again.
+This time around, we'll pass command-line parameters to skip the wizard.
 
 ##### Again, preview the input file `faker2__sample_input.csv`.
 
-You'll see it's similar to the README example, except that there is a slightly wider variety of transactions, plus the memos are more descriptive.
+You'll see it's similar to the README example, except that there is a wider variety of transactions, plus the memos are more descriptive.
 
 ##### Run **`cargo run -- --help`** to see descriptions for the parameters we can use, or just enter:
 
@@ -61,7 +65,7 @@ You'll see it's similar to the README example, except that there is a slightly w
 
 ##### Again, the program runs, and you should have reports in the location you provided.
 
-We bypassed the wizard because:
+We were able to bypass the wizard because:
 
 1. The required parameters were passed in.
 2. Default values were used for parameters not passed in.
@@ -70,10 +74,11 @@ We bypassed the wizard because:
 The only "required" parameter is the input file.
 All other parameters have default values.
 The default values may not be desirable for your use case, however.
-You may want FIFO instead of LIFO.
-You may need EUR instead of USD.
-You may want to apply like-kind exchange treatment through a particular date.
-These parameters can be set via command line options.
+For example, you may want FIFO instead of LIFO,
+or you may set your home currency to EUR instead of USD.
+Or maybe you may want to apply like-kind exchange treatment through a particular date.
+These parameters can all be set via command line options.
+See the `--help` screen for all the options.
 
 ## Notes on the reports
 
@@ -82,14 +87,20 @@ There are two style of reports: Accounts and Transactions.
 ### Accounts
 
 * This style of report shows you what you have.
-* *Account* reports reflect the balances in each account along with the cost basis of those holdings.  (The exception being the home currency accounts.  In that case, it merely reflects the net of how much was deposited/spent.)
-* Future reports will be written that provide details of every deposit and every withdrawal, on a movement-by-movement basis, into and out of every lot, for each account.
+* *Account* reports reflect the balances in each account along with the cost basis of those holdings.
+(The exception being the home currency accounts.
+In that case, it merely reflects the net of how much was deposited/spent.)
+* Future reports will be written that provide details of every deposit and every withdrawal,
+on a movement-by-movement basis, into and out of every lot, for each account.
+Some of these reports already exist.
 
 ### Transactions
 
 * This style of report show you how your holdings performed (not including unrealized gains/losses).
-* *Transaction* reports reflect the result of each transaction (specifically, each transaction which results in a gain/loss or income/expense).
-* Future reports will be written that provide more detailed breakdowns of the income/expense/gain/loss from every movement (or possibly a more summarized version, too).
+* *Transaction* reports reflect the result of each transaction
+(specifically, each transaction which results in a gain/loss or income/expense).
+* Future reports will be written that provide more detailed breakdowns of the income/expense/gain/loss
+from every movement (or possibly a more summarized version, too).
 For example, maybe the exchange rate will be included so you can quickly spot check whether the input file was correct.
 
 #### Other notes and limitations
