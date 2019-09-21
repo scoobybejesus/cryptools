@@ -11,7 +11,7 @@ The sample input files and the resulting reports are in the `/examples/resources
 (Note: new reports have been added since the write-up below was written.
 Nevertheless, evaluating the reports should mostly be self-explanatory.)
 
-## Using the wizard
+## 1. Using the wizard
 
 ##### First, preview the input file `faker1__sample_input.csv` in your editor/viewer of choice.
 
@@ -26,7 +26,8 @@ Enter the following:
 
 Running the command above takes you through the wizard.
 
-&nbsp;&nbsp;&nbsp;&nbsp; (Note: You can simply run **`cargo run`** instead, in which case after answering yes to "Shall we proceed," you will have to enter the path of the input file.)
+&nbsp;&nbsp;&nbsp;&nbsp; (Note: You can simply run **`cargo run`** instead,
+in which case after answering yes to "Shall we proceed," you will have to enter the path of the input file.)
 
 ##### Type `<Enter>` to accept default responses to the first three prompts, which are:
 
@@ -48,20 +49,22 @@ The reports should match those in the `examples/resources` directory.
 (Additional reports are created too, but you can generally match the existing reports by title.)
 
 
-## Skipping the wizard
+## 2. Skipping the wizard
 
 Let's run the program again.
 This time around, we'll pass command-line parameters to skip the wizard.
 
 ##### Again, preview the input file `faker2__sample_input.csv`.
 
-You'll see it's similar to the README example, except that there is a wider variety of transactions, plus the memos are more descriptive.
+You'll see it's similar to the README example, except that there is a wider variety of transactions,
+plus the memos are more descriptive.
 
 ##### Run **`cargo run -- --help`** to see descriptions for the parameters we can use, or just enter:
 
 ##### &nbsp;&nbsp;&nbsp;&nbsp;`cargo run -- -a -o ~/Documents ./examples/resources/faker2__sample_input.csv`
 
-&nbsp;&nbsp;&nbsp;&nbsp;\* Substitute `~/Documents` with your desired output directory. Substitute a Windows-style file path, if necessary.
+&nbsp;&nbsp;&nbsp;&nbsp;\* Substitute `~/Documents` with your desired output directory.
+Substitute a Windows-style file path, if necessary.
 
 ##### Again, the program runs, and you should have reports in the location you provided.
 
@@ -118,7 +121,7 @@ Also, there is a coffee mug purchase and a donation.
 The details are easily found in the memo field, but it is up to the user to "parse" those items for their use.
 * As noted in the README, adjustments occasionally may need to be made to the output reports.
 For example, in `faker2`, a donation was made.
-You may choose (or your accountant may decide) that this transaction (#11) is analogous to donating an appreciated security.
+Your accountant may decide that this transaction (#11) is analogous to donating an appreciated security.
 In that case, you may decide to manually adjust the **Proceeds** to match the **Cost basis**,
 and then update the **Gain/loss** to be zero.
 * You can't spend or exchange something that you don't have.
