@@ -34,7 +34,7 @@ pub(crate) fn wizard(args: super::Cli) -> Result<(
 
     let output_dir_path = args.output_dir_path;
 
-    let costing_method_choice = cli_user_choices::choose_inventory_costing_method()?;
+    let costing_method_choice = cli_user_choices::choose_inventory_costing_method(args.inv_costing_method)?;
 
     let home_currency_choice = args.home_currency.into_string().unwrap().to_uppercase();
 

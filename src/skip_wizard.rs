@@ -44,13 +44,7 @@ pub(crate) fn skip_wizard(args: super::Cli) -> Result<(
         like_kind_cutoff_date_string = "1-1-1".to_string();
     };
 
-    let clean_inv_costing_arg = match args.inv_costing_method.clone().into_string().expect("Invalid choice on costing method. Aborting.").trim() {
-        "1" => {"1"} "2" => {"2"} "3" => {"3"} "4" => {"4"}
-        _ => { println!("WARN: Invalid command line arg passed for 'inv_costing_method'. Using default."); "1" }
-    };
-    let clean_inv_costing_arg_string = clean_inv_costing_arg.to_owned();
-
-    let costing_method_choice = cli_user_choices::inv_costing_from_cmd_arg(clean_inv_costing_arg_string)?;
+    let costing_method_choice = cli_user_choices::inv_costing_from_cmd_arg(args.inv_costing_method)?;
 
     let settings = ImportProcessParameters {
         export_path: output_dir_path,
