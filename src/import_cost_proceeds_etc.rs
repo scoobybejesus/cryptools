@@ -12,7 +12,7 @@ use crate::account::{Account, RawAccount};
 use crate::decimal_utils::{round_d128_1e2};
 use crate::core_functions::{ImportProcessParameters};
 
-pub fn add_cost_basis_to_movements(
+pub(crate) fn add_cost_basis_to_movements(
     settings: &ImportProcessParameters,
     ars: &HashMap<u32, ActionRecord>,
     raw_acct_map: &HashMap<u16, RawAccount>,
@@ -187,7 +187,7 @@ pub fn add_cost_basis_to_movements(
     Ok(())
 }
 
-pub fn add_proceeds_to_movements(
+pub(crate) fn add_proceeds_to_movements(
     ars: &HashMap<u32, ActionRecord>,
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
@@ -261,7 +261,7 @@ pub fn add_proceeds_to_movements(
     Ok(())
 }
 
-pub fn apply_like_kind_treatment(
+pub(crate) fn apply_like_kind_treatment(
     cutoff_date: NaiveDate,
     settings: &ImportProcessParameters,
     ars: &HashMap<u32, ActionRecord>,

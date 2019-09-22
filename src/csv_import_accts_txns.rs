@@ -15,7 +15,7 @@ use crate::account::{Account, RawAccount};
 use crate::decimal_utils::{round_d128_1e8};
 
 
-pub fn import_accounts(
+pub(crate) fn import_accounts(
     rdr: &mut csv::Reader<File>,
     raw_acct_map: &mut HashMap<u16, RawAccount>,
     acct_map: &mut HashMap<u16, Account>,
@@ -113,7 +113,7 @@ pub fn import_accounts(
     Ok(())
 }
 
-pub fn import_transactions(
+pub(crate) fn import_transactions(
     rdr: &mut csv::Reader<File>,
     txns_map: &mut HashMap<u32, Transaction>,
     action_records: &mut HashMap<u32, ActionRecord>,

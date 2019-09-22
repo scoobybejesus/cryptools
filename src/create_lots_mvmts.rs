@@ -14,7 +14,7 @@ use crate::account::{Account, RawAccount, Lot, Movement};
 use crate::core_functions::{InventoryCostingMethod, LikeKindSettings, ImportProcessParameters};
 use crate::decimal_utils::{round_d128_1e8};
 
-pub fn create_lots_and_movements(
+pub(crate) fn create_lots_and_movements(
     txns_map: HashMap<u32, Transaction>,
     settings: &ImportProcessParameters,
     likekind_settings: &Option<LikeKindSettings>,

@@ -54,7 +54,7 @@ pub struct ImportProcessParameters {
     pub lk_cutoff_date_string: String,
 }
 
-pub fn import_and_process_final(
+pub(crate) fn import_and_process_final(
     input_file_path: PathBuf,
     settings: &ImportProcessParameters,
 ) -> Result<(
@@ -87,7 +87,7 @@ pub fn import_and_process_final(
         }
     };
 
-    pub fn import_from_csv(
+    pub(crate) fn import_from_csv(
         import_file_path: PathBuf,
         transactions_map: &mut HashMap<u32, Transaction>,
         action_records: &mut HashMap<u32, ActionRecord>,

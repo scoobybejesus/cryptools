@@ -169,7 +169,7 @@ pub fn inv_costing_from_cmd_arg(arg: String) -> Result<InventoryCostingMethod, &
     }
 }
 
-pub fn elect_like_kind_treatment(cutoff_date_arg: &Option<String>) -> Result<(bool, String), Box<dyn Error>> {
+pub(crate) fn elect_like_kind_treatment(cutoff_date_arg: &Option<String>) -> Result<(bool, String), Box<dyn Error>> {
 
     match cutoff_date_arg {
 
