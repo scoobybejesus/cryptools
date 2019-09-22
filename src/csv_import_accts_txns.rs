@@ -21,28 +21,19 @@ pub(crate) fn import_accounts(
     acct_map: &mut HashMap<u16, Account>,
 ) -> Result<(), Box<dyn Error>> {
 
-    let header1: csv::StringRecord;
-    header1 = rdr.headers()?.clone();   //  account_num
-
-    // Declare remaining headers, and initialize with None
+    let header1 = rdr.headers()?.clone();   //  account_num
     let mut header2: Option<csv::StringRecord> = None;  //  name
     let mut header3: Option<csv::StringRecord> = None;  //  ticker
     let header4: csv::StringRecord; //  is_margin
 
-    // Declare string vector (array) to which [all but the first three] Strings of the header row will be appended
+    // A StringRecord doesn't accept the same range indexing we need below, so we create our own
     let mut headerstrings: Vec<String> = [].to_vec();
 
-    // Basically, append three empty strings, and then the list of account numbers one by one
     for element in header1.into_iter() {
-        match element { // Previously had `let element_str: String = element.to_string();` and then `match &*element_str`
-            "txDate" => { headerstrings.push("".to_string()) },
-            "proceeds" => { headerstrings.push("".to_string()) },
-            "memo" => { headerstrings.push("".to_string()) },
-            _ => headerstrings.push(element.to_string())
-        };
-    }   // End result is headerstrings = ["","","",1,2,3...n]
+        headerstrings.push(element.to_string())
+    }
 
-    // Account Creation loop.  Iterate through 'data' records. We set hasheaders() to true above, so the first record here is the second row of the CSV
+    // Account Creation loop.  We set hasheaders() to true above, so the first record here is the second row of the CSV
     for result in rdr.records() {
         //  This initial iteration through records will break after the 4th row, after accounts have been created
         let record = result?;
@@ -58,7 +49,9 @@ pub(crate) fn import_accounts(
             header4 = record.clone();
             // println!("Assigned last header, record: {:?}", record);
 
-            let warn = "FATAL: Transactions will not import correctly if account numbers in the CSV import file aren't ordered chronologically (i.e., beginning in column 4 - the 1st account column - the values should be 1.  The next column should be 2, then 3, etc, until the final account).";
+            let warn = "FATAL: Transactions will not import correctly if account numbers in the CSV import file aren't
+ordered chronologically (i.e., beginning in column 4 - the 1st account column - the value should be 1.
+The next column's value should be 2, then 3, etc, until the final account).";
 
             // We've got all our header rows.  It's now that we set up the accounts.
             println!("Attempting to create accounts...");
@@ -81,6 +74,7 @@ pub(crate) fn import_accounts(
                 let ind = idx+3; // Add three because the idx skips the first three 'key' columns
                 let account_num = item.parse::<u16>()?;
                 assert_eq!((idx + 1) as u16, account_num, "Found improper Account Number usage: {}", warn);
+
                 let name:String = header2.clone().unwrap()[ind].trim().to_string();
                 let ticker:String = header3.clone().unwrap()[ind].trim().to_string();   //  no .to_uppercase() b/c margin...
                 let margin_string = &header4.clone()[ind];
