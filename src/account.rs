@@ -200,11 +200,11 @@ impl Movement {
 	// 	proceeds_lk
 	// }
 
-	pub fn get_lk_gain_or_loss(&self) -> d128 {    //  Returns proceeds*2 for Incoming+Flow txns
+	pub fn get_lk_gain_or_loss(&self) -> d128 {
 		self.proceeds_lk.get() + self.cost_basis_lk.get()
 	}
 
-    pub fn get_orig_gain_or_loss(&self) -> d128 {    //  Returns proceeds*2 for Incoming+Flow txns
+    pub fn get_orig_gain_or_loss(&self) -> d128 {
 		self.proceeds.get() + self.cost_basis.get()
 	}
 
