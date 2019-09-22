@@ -82,7 +82,7 @@ pub(crate) fn import_accounts(
                 let account_num = item.parse::<u16>()?;
                 assert_eq!((idx + 1) as u16, account_num, "Found improper Account Number usage: {}", warn);
                 let name:String = header2.clone().unwrap()[ind].trim().to_string();
-                let ticker:String = header3.clone().unwrap()[ind].trim().to_string();
+                let ticker:String = header3.clone().unwrap()[ind].trim().to_string();   //  no .to_uppercase() b/c margin...
                 let margin_string = &header4.clone()[ind];
 
                 let is_margin:bool = match margin_string.trim().to_lowercase().as_str() {

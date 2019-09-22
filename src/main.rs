@@ -11,8 +11,6 @@
 use std::ffi::OsString;
 use structopt::StructOpt;
 use std::path::PathBuf;
-use std::process;
-use std::io::{self, BufRead};
 use std::error::Error;
 
 mod account;
@@ -27,13 +25,13 @@ mod txt_export;
 mod string_utils;
 mod decimal_utils;
 mod tests;
-
-use crate::core_functions::ImportProcessParameters;
+mod wizard;
+mod skip_wizard;
 
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "cryptools")]
-struct Cli {
+pub(crate) struct Cli {
 
     /// File to be imported.  (Currently, the only supported date format is %m/%d/%y.)
     #[structopt(name = "file", parse(from_os_str))]
@@ -86,182 +84,59 @@ fn main() -> Result<(), Box<dyn Error>> {
     Note: it is designed to import a full history. Gains and losses may be incorrect otherwise.
     ");
 
-    let input_file_path;
-    let output_dir_path = args.output_dir_path;
-    let should_export;
-
     let account_map;
     let raw_acct_map;
     let action_records_map;
     let transactions_map;
-    let mut settings;
+    let settings;
     let like_kind_settings;
-
-    let home_currency_choice = args.home_currency
-                                    .into_string()
-                                    .expect("Home currency should be in the form of a ticker in CAPS.")
-                                    .to_uppercase();
-    let costing_method_choice;
-
+    let should_export;
 
     if !args.accept_args {
 
-        shall_we_proceed()?;
-
-        fn shall_we_proceed() -> Result<(), Box<dyn Error>> {
-
-            println!("Shall we proceed? [Y/n] ");
-
-            _proceed()?;
-
-            fn _proceed() -> Result<(), Box<dyn Error>> {
-
-                let mut input = String::new();
-                let stdin = io::stdin();
-                stdin.lock().read_line(&mut input)?;
-
-                match input.trim().to_ascii_lowercase().as_str() {
-                    "y" | "ye" | "yes" | "" => { Ok(()) },
-                    "n" | "no" => { println!("We have NOT proceeded..."); process::exit(0); },
-                    _   => { println!("Please respond with 'y' or 'n' (or 'yes' or 'no')."); _proceed() }
-                }
-            }
-
-            Ok(())
-        }
-
-        if let Some(file) = args.file_to_import {
-            input_file_path = file
-        } else {
-            input_file_path = cli_user_choices::choose_file_for_import()?;
-        }
-
-        costing_method_choice = cli_user_choices::choose_inventory_costing_method()?;
-
-        let lk_cutoff_date_opt_string;
-
-        if let Some(lk_cutoff) = args.cutoff_date {
-            lk_cutoff_date_opt_string = Some(lk_cutoff.into_string().unwrap())
-        } else {
-            lk_cutoff_date_opt_string = None
-        };
-
-        let (like_kind_election, like_kind_cutoff_date) = cli_user_choices::elect_like_kind_treatment(&lk_cutoff_date_opt_string)?;
-
-        settings = ImportProcessParameters {
-            export_path: output_dir_path,
-            home_currency: home_currency_choice,
-            costing_method: costing_method_choice,
-            enable_like_kind_treatment: like_kind_election,
-            lk_cutoff_date_string: like_kind_cutoff_date,
-        };
-
         let (
             account_map1,
             raw_acct_map1,
             action_records_map1,
             transactions_map1,
-            like_kind_settings1
-        ) = core_functions::import_and_process_final(input_file_path, &settings)?;
+            like_kind_settings1,
+            settings1,
+            should_export1
+        ) = wizard::wizard(args)?;
 
         account_map = account_map1;
         raw_acct_map = raw_acct_map1;
         action_records_map = action_records_map1;
         transactions_map = transactions_map1;
+        settings = settings1;
         like_kind_settings = like_kind_settings1;
-
-        should_export = export_reports_to_output_dir(&mut settings)?;
-
-        fn export_reports_to_output_dir(settings: &mut ImportProcessParameters) -> Result<(bool), Box<dyn Error>> {
-
-            println!("\nThe directory currently selected for exporting reports is: {}", settings.export_path.to_str().unwrap());
-
-            if &settings.export_path.to_str().unwrap() == &"." {
-                println!("  (A 'dot' denotes the default value: current working directory.)");
-            }
-            println!("\nExport reports to selected directory? [Y/n/c] ('c' to 'change') ");
-
-            let choice = _export(settings)?;
-
-            fn _export(settings: &mut ImportProcessParameters) -> Result<(bool), Box<dyn Error>> {
-
-                let mut input = String::new();
-                let stdin = io::stdin();
-                stdin.lock().read_line(&mut input)?;
-
-                match input.trim().to_ascii_lowercase().as_str() {
-
-                    "y" | "ye" | "yes" | "" => { println!("Creating reports now."); Ok(true) },
-                    "n" | "no" => { println!("Okay, no reports were created."); Ok(false) },
-                    "c" | "change" => {
-                        let new_dir = cli_user_choices::choose_export_dir()?;
-                        settings.export_path = PathBuf::from(new_dir);
-                        println!("Creating reports now in newly chosen path.");
-                        Ok(true)
-                    },
-                    _   => { println!("Please respond with 'y', 'n', or 'c' (or 'yes' or 'no' or 'change').");
-                        _export(settings)
-                    }
-                }
-            }
-
-            Ok(choice)
-        }
+        should_export = should_export1;
 
     } else {
 
-        if let Some(file) = args.file_to_import {
-            input_file_path = file
-        } else {
-            println!("Flag to 'accept args' was set, but 'file' is missing, though it is a required field. Exiting.");
-            process::exit(66);  // EX_NOINPUT (66) An input file (not a system file) did not exist or was not readable
-        }
-
-        let like_kind_election;
-        let like_kind_cutoff_date_string: String;
-
-        if let Some(date) = args.cutoff_date {
-            like_kind_election = true;
-            like_kind_cutoff_date_string = date.into_string().unwrap();
-        } else {
-            like_kind_election = false;
-            like_kind_cutoff_date_string = "1-1-1".to_string();
-        };
-
-        let clean_inv_costing_arg = match args.inv_costing_method.clone().into_string().expect("Invalid choice on costing method. Aborting.").trim() {
-            "1" => {"1"} "2" => {"2"} "3" => {"3"} "4" => {"4"}
-            _ => { println!("WARN: Invalid command line arg passed for 'inv_costing_method'. Using default."); "1" }
-        };
-        let clean_inv_costing_arg_string = clean_inv_costing_arg.to_owned();
-
-        let costing_method_choice = cli_user_choices::inv_costing_from_cmd_arg(clean_inv_costing_arg_string)?;
-
-        settings = ImportProcessParameters {
-            export_path: output_dir_path,
-            home_currency: home_currency_choice,
-            costing_method: costing_method_choice,
-            enable_like_kind_treatment: like_kind_election,
-            lk_cutoff_date_string: like_kind_cutoff_date_string,
-        };
-
         let (
             account_map1,
             raw_acct_map1,
             action_records_map1,
             transactions_map1,
-            like_kind_settings1
-        ) = core_functions::import_and_process_final(input_file_path, &settings)?;
+            like_kind_settings1,
+            settings1,
+            should_export1
+        ) = skip_wizard::skip_wizard(args)?;
 
         account_map = account_map1;
         raw_acct_map = raw_acct_map1;
         action_records_map = action_records_map1;
         transactions_map = transactions_map1;
+        settings = settings1;
         like_kind_settings = like_kind_settings1;
+        should_export = should_export1;
 
-        should_export = !args.suppress_reports;
     }
 
     if should_export {
+
+        println!("Creating reports now.");
 
         csv_export::_1_account_sums_to_csv(
             &settings,
@@ -336,7 +211,5 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 
     Ok(())
-    // // csv_export::transactions_to_csv(&transactions);
 
-    // csv_export::accounts_to_csv(&accounts);
 }
