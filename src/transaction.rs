@@ -185,6 +185,30 @@ impl Transaction {
         }
 		Ok(flow_or_outgoing_exchange_movements)
 	}
+
+    pub fn both_exch_ars_are_non_home_curr(
+        &self,
+        ars: &HashMap<u32, ActionRecord>,
+        raw_acct_map: &HashMap<u16, RawAccount>,
+        acct_map: &HashMap<u16, Account>,
+        home_currency: &String,
+    ) -> Result<bool, Box<dyn Error>> {
+
+        assert_eq!(self.action_record_idx_vec.len(), (2 as usize));
+
+        let og_ar = ars.get(&self.action_record_idx_vec.first().unwrap()).unwrap();
+        let ic_ar = ars.get(&self.action_record_idx_vec.last().unwrap()).unwrap();
+        let og_acct = acct_map.get(&og_ar.account_key).unwrap();
+        let ic_acct = acct_map.get(&ic_ar.account_key).unwrap();
+        let raw_og_acct = raw_acct_map.get(&og_acct.raw_key).unwrap();
+        let raw_ic_acct = raw_acct_map.get(&ic_acct.raw_key).unwrap();
+
+        let og_is_home_curr = raw_og_acct.is_home_currency(&home_currency);
+        let ic_is_home_curr = raw_ic_acct.is_home_currency(&home_currency);
+        let both_are_non_home_curr = !ic_is_home_curr && !og_is_home_curr;
+
+        Ok(both_are_non_home_curr)
+    }
 }
 
 #[derive(Clone, Debug)]

@@ -393,19 +393,13 @@ fn perform_likekind_treatment_on_txn(
 
     let txn = txns_map.get(&txn_num).unwrap();
     let tx_type = txn.transaction_type(ars, raw_acct_map, acct_map)?;
+    let home_currency = &settings.home_currency;
 
     match tx_type {
 
         TxType::Exchange => {
 
-            let og_ar = ars.get(&txn.action_record_idx_vec.first().unwrap()).unwrap();
-            let ic_ar = ars.get(&txn.action_record_idx_vec.last().unwrap()).unwrap();
-            let og_acct = acct_map.get(&og_ar.account_key).unwrap();
-            let ic_acct = acct_map.get(&ic_ar.account_key).unwrap();
-            let raw_og_acct = raw_acct_map.get(&og_acct.raw_key).unwrap();
-            let raw_ic_acct = raw_acct_map.get(&ic_acct.raw_key).unwrap();
-
-            if _both_are_non_home_curr(raw_og_acct, raw_ic_acct, settings) {
+            if txn.both_exch_ars_are_non_home_curr(ars, raw_acct_map, acct_map, home_currency)? {
 
                 let mut sum_of_outgoing_lk_cost_basis_in_ar = d128!(0);
 
@@ -485,19 +479,6 @@ fn perform_likekind_treatment_on_txn(
         TxType::ToSelf => {
             // Like-kind "exchange," so do nothing.
         }
-    }
-
-    fn _both_are_non_home_curr(
-        raw_og_acct: &RawAccount,
-        raw_ic_acct: &RawAccount,
-        settings: &ImportProcessParameters
-    ) -> bool {
-
-        let og_is_home_curr = raw_og_acct.is_home_currency(&settings.home_currency);
-        let ic_is_home_curr = raw_ic_acct.is_home_currency(&settings.home_currency);
-        let both_are_non_home_curr = !ic_is_home_curr && !og_is_home_curr;
-
-        both_are_non_home_curr
     }
 
     Ok(())
