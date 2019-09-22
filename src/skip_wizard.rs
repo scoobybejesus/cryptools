@@ -2,7 +2,6 @@
 // Redistributions must include the license: https://github.com/scoobybejesus/cryptools/blob/master/LEGAL.txt
 
 use std::error::Error;
-use std::process;
 use std::collections::{HashMap};
 
 use crate::cli_user_choices;
@@ -25,13 +24,15 @@ pub(crate) fn skip_wizard(args: super::Cli) -> Result<(
     if let Some(file) = args.file_to_import {
         input_file_path = file
     } else {
-        println!("Flag to 'accept args' was set, but 'file' is missing, though it is a required field. Exiting.");
-        process::exit(66);  // EX_NOINPUT (66) An input file (not a system file) did not exist or was not readable
+        println!("WARN: Flag to 'accept args' was set, but 'file' is missing. It is a required field.\n");
+        input_file_path = cli_user_choices::choose_file_for_import()?;
     }
 
-    let home_currency_choice = args.home_currency.into_string().unwrap().to_uppercase();
-
     let output_dir_path = args.output_dir_path;
+
+    let costing_method_choice = cli_user_choices::inv_costing_from_cmd_arg(args.inv_costing_method)?;
+
+    let home_currency_choice = args.home_currency.into_string().unwrap().to_uppercase();
 
     let like_kind_election;
     let like_kind_cutoff_date_string: String;
@@ -43,8 +44,6 @@ pub(crate) fn skip_wizard(args: super::Cli) -> Result<(
         like_kind_election = false;
         like_kind_cutoff_date_string = "1-1-1".to_string();
     };
-
-    let costing_method_choice = cli_user_choices::inv_costing_from_cmd_arg(args.inv_costing_method)?;
 
     let settings = ImportProcessParameters {
         export_path: output_dir_path,
