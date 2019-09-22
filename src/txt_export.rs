@@ -220,7 +220,7 @@ pub fn _2_account_lot_summary_to_txt(
 
     let length = acct_map.len();
 
-    writeln!(file, "Account Listing - All Lots - All Movements - with high level of detail.
+    writeln!(file, "Account Listing - All Lots - No Movements - Summary detail.
 \nCosting method used: {}.
 Home currency: {}
 Enable like-kind treatment: {}",
@@ -302,7 +302,7 @@ pub fn _3_account_lot_summary_non_zero_to_txt(
 
     let length = acct_map.len();
 
-    writeln!(file, "Account Listing - All Lots - All Movements - with high level of detail.
+    writeln!(file, "Account Listing - Non-zero Lots - No Movements - Summary detail.
 \nCosting method used: {}.
 Home currency: {}
 Enable like-kind treatment: {}",
