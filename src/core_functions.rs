@@ -111,7 +111,6 @@ pub(crate) fn import_and_process_final(
 
         Ok(())
     }
-    // println!("like_kind_cutoff_date is: {}...", like_kind_cutoff_date);
 
     let likekind_settings: Option<LikeKindSettings> = if settings.enable_like_kind_treatment {
 

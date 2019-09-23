@@ -58,10 +58,6 @@ pub(crate) fn add_cost_basis_to_movements(
 
                             } else {
 
-                                // let mvmt_lot = mvmt_copy.get_lot(acct_map, ars);
-                                // let borrowed_mvmt_list = mvmt_lot.movements.borrow().clone();
-                                // let lots_first_mvmt = borrowed_mvmt_list.first().unwrap().clone();
-                                // let cb_of_lots_first_mvmt = lots_first_mvmt.cost_basis.get();
                                 let cb_of_lots_first_mvmt = mvmt_copy.get_cost_basis_of_lots_first_mvmt(acct_map, ars);
                                 let ratio_of_amt_to_lots_first_mvmt = borrowed_mvmt.ratio_of_amt_to_lots_first_mvmt(acct_map, ars);
                                 let unrounded_basis = -(cb_of_lots_first_mvmt * ratio_of_amt_to_lots_first_mvmt);
@@ -126,10 +122,7 @@ pub(crate) fn add_cost_basis_to_movements(
                                             txns_map,
                                             acct_map
                                         );
-                                        // let this_ratio = ratio_of_amt_to_incoming_mvmts_in_a_r
-                                        //     .to_string()
-                                        //     .parse::<d128>()
-                                        //     .unwrap();   //  I don't recall why this was once needed in the next line.
+
                                         let unrounded_basis = cb_outgoing_ar * ratio_of_amt_to_incoming_mvmts_in_a_r;
                                         let rounded_basis = round_d128_1e2(&unrounded_basis);
 
@@ -240,13 +233,6 @@ pub(crate) fn add_proceeds_to_movements(
                         }
                     }
 
-                    // TxType::Flow => {
-                    //     let ratio = borrowed_mvmt.amount / ar.amount;
-                    //     let proceeds_unrounded = txn.proceeds.to_string().parse::<d128>().unwrap() * ratio;
-                    //     let proceeds_rounded = round_d128_1e2(&proceeds_unrounded);
-                    //     mvmt.proceeds.set(proceeds_rounded);
-                    // }
-
                     TxType::ToSelf => {
                         // Originally did nothing. Now explicity creating a condition where a report containing
                         // ToSelf txns would reflect a $0 gain/loss.
@@ -281,9 +267,6 @@ pub(crate) fn apply_like_kind_treatment(
         if txn.date <= cutoff_date {
             perform_likekind_treatment_on_txn(txn_num, &settings, &ars, &raw_acct_map, &acct_map, &txns_map)?;
         }
-        // else {
-        //     // carry_forward_deferred_gains(txn_num, &settings, &ars, &raw_acct_map, &acct_map, &txns_map)?;
-        // }
     }
 
     Ok(())
@@ -325,9 +308,6 @@ fn update_current_txn_for_prior_likekind_treatment(
 
                         if !is_home_curr {
 
-                            // let borrowed_mvmt_lot = borrowed_mvmt.get_lot(acct_map, ars);
-                            // let borrowed_mvmt_list = borrowed_mvmt_lot.movements.borrow();
-                            // let lk_cb_of_lots_first_mvmt = borrowed_mvmt_list.first().unwrap().cost_basis_lk.get();
                             let lk_cb_of_lots_first_mvmt = borrowed_mvmt.get_lk_cost_basis_of_lots_first_mvmt(acct_map, ars);
                             let ratio_of_amt_to_lots_first_mvmt = borrowed_mvmt.ratio_of_amt_to_lots_first_mvmt(acct_map, ars);
                             let unrounded_lk_basis = -(lk_cb_of_lots_first_mvmt * ratio_of_amt_to_lots_first_mvmt);

@@ -37,11 +37,6 @@ pub struct Account {
 
 impl Account {
 
-	// pub fn is_home_currency(&self, compare: &String, raw_acct_map: &HashMap<u16, RawAccount>) -> bool {
-	// 	let raw_acct = raw_acct_map.get(&self.raw_key).unwrap();
-	// 	&raw_acct.ticker == compare
-	// }
-
 	pub fn get_sum_of_amts_in_lots(&self) -> d128 {
 		let lots = self.list_of_lots.borrow();
 		let mut total_amount = d128!(0);

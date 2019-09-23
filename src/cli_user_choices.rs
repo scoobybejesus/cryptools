@@ -112,23 +112,6 @@ fn _get_path() -> Result<(String, bool), Box<dyn Error>> {
     }
 }
 
-
-// impl std::convert::From<OsStr> for InventoryCostingMethod {
-//     fn from(osstr: OsStr) -> InventoryCostingMethod {
-//         let osstring1 = OsString::from(Box::<osstr>);
-//         let new_string = osstr.into_string().expect("Invalid input. Could not convert to string.");
-//         let method = match new_string.trim() {
-//             "1" => InventoryCostingMethod::LIFObyLotCreationDate,
-//             "2" => InventoryCostingMethod::LIFObyLotBasisDate,
-//             "3" => InventoryCostingMethod::FIFObyLotCreationDate,
-//             "4" => InventoryCostingMethod::FIFObyLotBasisDate,
-//             _   => { println!("Invalid choice.  Could not convert."); process::exit(1)
-//             }
-//         };
-//         method
-//     }
-// }
-
 pub fn choose_inventory_costing_method(cmd_line_arg: OsString) -> Result<InventoryCostingMethod, Box<dyn Error>> {
 
     println!("Choose the lot inventory costing method. [Default/Chosen: {:?}]", cmd_line_arg);

@@ -472,7 +472,6 @@ pub(crate) fn create_lots_and_movements(
                                             };
                                             wrap_mvmt_and_push(inner_mvmt, &ar, &inner_lot, &settings, &raw_acct_map, &acct_map);
                                             acct.list_of_lots.borrow_mut().push(inner_lot);
-                                            // acct.push_lot(inner_lot);
                                             amounts_used += amount_used;
                                             percentages_used += percentage_used;
                                         }
@@ -662,7 +661,6 @@ fn wrap_mvmt_and_push(
     let amt = this_mvmt.amount;
     let amt2 = round_d128_1e8(&amt);
     assert_eq!(amt, amt2);
-    // println!("Unrounded: {}; Rounded: {}; on {}", amt, amt2, mvmt_ref.borrow().date);
 
     let mvmt = Rc::from(this_mvmt);
     lot.movements.borrow_mut().push(mvmt.clone());
