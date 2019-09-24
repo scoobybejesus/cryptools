@@ -268,7 +268,7 @@ pub fn _4_transaction_mvmt_detail_to_csv(
             let date = txn.date.format("%Y/%m/%d").to_string();
             let tx_number = txn.tx_number.to_string();
             let tx_type = txn.transaction_type(&ars, &raw_acct_map, &acct_map)?;
-            let memo = txn.memo.to_string();
+            let memo = txn.user_memo.to_string();
             let mut amount = d128!(0);
             amount += mvmt.amount;   //  To prevent printing -5E+1 instead of 50, for example
             let ticker = raw_acct.ticker.to_string();
@@ -354,7 +354,7 @@ pub fn _5_transaction_mvmt_summaries_to_csv(
         let txn_date_string = txn.date.format("%Y/%m/%d").to_string();
         let tx_num_string = "Txn ".to_string() + &txn.tx_number.to_string();
         let tx_type_string = txn.transaction_type(ars, &raw_acct_map, &acct_map)?.to_string();
-        let tx_memo_string = txn.memo.to_string();
+        let tx_memo_string = txn.user_memo.to_string();
         let mut term_st: Option<Term> = None;
         let mut term_lt: Option<Term> = None;
         let mut ticker: Option<String> = None;
@@ -508,7 +508,8 @@ pub fn _6_transaction_mvmt_detail_to_csv_w_orig(
         "Date".to_string(),
         "Txn#".to_string(),
         "Type".to_string(),
-        "Memo".to_string(),
+        "User Memo".to_string(),
+        "Auto Memo".to_string(),
         "Amount".to_string(),
         "Ticker".to_string(),
         "Term".to_string(),
@@ -546,7 +547,8 @@ pub fn _6_transaction_mvmt_detail_to_csv_w_orig(
             let date = txn.date.format("%Y/%m/%d").to_string();
             let tx_number = txn.tx_number.to_string();
             let tx_type = txn.transaction_type(&ars, &raw_acct_map, &acct_map)?;
-            let memo = txn.memo.to_string();
+            let user_memo = txn.user_memo.to_string();
+            let auto_memo = txn.get_auto_memo(ars, raw_acct_map,acct_map)?;
             let mut amount = d128!(0);
             amount += mvmt.amount;   //  To prevent printing -5E+1 instead of 50, for example
             let ticker = raw_acct.ticker.to_string();
@@ -574,7 +576,8 @@ pub fn _6_transaction_mvmt_detail_to_csv_w_orig(
             row.push(date);
             row.push("Txn ".to_string() + &tx_number);
             row.push(tx_type.to_string());
-            row.push(memo);
+            row.push(user_memo);
+            row.push(auto_memo);
             row.push(amount.to_string());
             row.push(ticker);
             row.push(term);

@@ -134,7 +134,7 @@ Enable like-kind treatment: {}",
                         mvmt.transaction_key,
                         tx_type,
                         mvmt.date_as_string,
-                        txn.memo
+                        txn.user_memo
                     );
 
                     writeln!(file, "{}", description_str)?;

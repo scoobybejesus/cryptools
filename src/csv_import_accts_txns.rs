@@ -208,7 +208,7 @@ pub(crate) fn import_transactions(
             tx_number: this_tx_number,
             date_as_string: this_tx_date.to_string(),
             date: tx_date,
-            memo: this_memo.to_string(),
+            user_memo: this_memo.to_string(),
             proceeds: proceeds_parsed,
             action_record_idx_vec: action_records_map_keys_vec,
         };

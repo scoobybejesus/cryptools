@@ -19,7 +19,7 @@ pub struct Transaction {
 	pub tx_number: u32,	//	Does NOT start at zero.  First txn is 1.
 	pub date_as_string: String,
 	pub date: NaiveDate,
-	pub memo: String,
+	pub user_memo: String,
 	pub proceeds: f32,
 	pub action_record_idx_vec: Vec<u32>,
 }
@@ -208,6 +208,60 @@ impl Transaction {
         let both_are_non_home_curr = !ic_is_home_curr && !og_is_home_curr;
 
         Ok(both_are_non_home_curr)
+    }
+
+    pub fn get_auto_memo(
+		&self,
+		ars: &HashMap<u32, ActionRecord>,
+		raw_accts: &HashMap<u16, RawAccount>,
+		acct_map: &HashMap<u16, Account>
+	) -> Result<String, Box<dyn Error>> {
+
+        let auto_memo = if self.action_record_idx_vec.len() == 2 {
+
+            let marginness = self.marginness(ars, raw_accts, acct_map);
+
+            if (marginness == TxHasMargin::NoARs) | (marginness == TxHasMargin::TwoARs)  {
+
+                let og_amt = ars.get(&self.action_record_idx_vec[0]).unwrap().amount;
+                let og_acct_key = ars.get(&self.action_record_idx_vec[0]).unwrap().account_key;
+                let og_acct = acct_map.get(&og_acct_key).unwrap();
+                let og_raw_acct = raw_accts.get(&og_acct.raw_key).unwrap();
+                let og_ticker = &og_raw_acct.ticker;
+
+                let ic_amt = ars.get(&self.action_record_idx_vec[1]).unwrap().amount;
+                let ic_acct_key = ars.get(&self.action_record_idx_vec[1]).unwrap().account_key;
+                let ic_acct = acct_map.get(&ic_acct_key).unwrap();
+                let ic_raw_acct = raw_accts.get(&ic_acct.raw_key).unwrap();
+                let ic_ticker = &ic_raw_acct.ticker;
+
+                format!("Paid {} {} for {} {}", og_amt, og_ticker, ic_amt, ic_ticker)
+
+            } else {
+
+                format!("Margin profit or loss")
+            }
+
+        } else {
+
+            let amt = ars.get(&self.action_record_idx_vec[0]).unwrap().amount;
+            let acct_key = ars.get(&self.action_record_idx_vec[0]).unwrap().account_key;
+            let acct = acct_map.get(&acct_key).unwrap();
+            let raw_acct = raw_accts.get(&acct.raw_key).unwrap();
+            let ticker = &raw_acct.ticker;
+
+            if amt > d128!(0.0) {
+
+                format!("Received {} {}", amt, ticker)
+
+            } else {
+
+                format!("Spent {} {}", amt, ticker)
+
+            }
+        };
+
+        Ok(auto_memo)
     }
 }
 
