@@ -19,8 +19,8 @@ pub fn _1_account_sums_to_csv(
     acct_map: &HashMap<u16, Account>
 ) {
 
-    let mut rows: Vec<Vec<String>> = [].to_vec();
-    let mut header: Vec<String> = [].to_vec();
+    let mut rows: Vec<Vec<String>> = Vec::with_capacity(acct_map.len());
+    let mut header: Vec<String> = Vec::with_capacity(5);
 
     header.extend_from_slice(&[
         "Account".to_string(),
@@ -36,7 +36,7 @@ pub fn _1_account_sums_to_csv(
     for j in 1..=length {
 
         let acct = acct_map.get(&(j as u16)).unwrap();
-        let mut row: Vec<String> = [].to_vec();
+        let mut row: Vec<String> = Vec::with_capacity(5);
 
         let balance: String;
         let tentative_balance = acct.get_sum_of_amts_in_lots();
@@ -81,8 +81,8 @@ pub fn _2_account_sums_nonzero_to_csv(
     raw_acct_map: &HashMap<u16, RawAccount>
 ) {
 
-    let mut rows: Vec<Vec<String>> = [].to_vec();
-    let mut header: Vec<String> = [].to_vec();
+    let mut rows: Vec<Vec<String>> = Vec::with_capacity(acct_map.len());    //  more than needed...
+    let mut header: Vec<String> = Vec::with_capacity(5);
 
     header.extend_from_slice(&[
         "Account".to_string(),
@@ -98,7 +98,7 @@ pub fn _2_account_sums_nonzero_to_csv(
     for j in 1..=length {
 
         let acct = acct_map.get(&(j as u16)).unwrap();
-        let mut row: Vec<String> = [].to_vec();
+        let mut row: Vec<String> = Vec::with_capacity(5);
 
         let raw_acct = raw_acct_map.get(&acct.raw_key).unwrap();
         let name = raw_acct.name.to_string();
@@ -149,8 +149,8 @@ pub fn _3_account_sums_to_csv_with_orig_basis(
     acct_map: &HashMap<u16, Account>
 ) {
 
-    let mut rows: Vec<Vec<String>> = [].to_vec();
-    let mut header: Vec<String> = [].to_vec();
+    let mut rows: Vec<Vec<String>> = Vec::with_capacity(acct_map.len());
+    let mut header: Vec<String> = Vec::with_capacity(6);
 
     header.extend_from_slice(&[
         "Account".to_string(),
@@ -167,7 +167,7 @@ pub fn _3_account_sums_to_csv_with_orig_basis(
     for j in 1..=length {
 
         let acct = acct_map.get(&(j as u16)).unwrap();
-        let mut row: Vec<String> = [].to_vec();
+        let mut row: Vec<String> = Vec::with_capacity(6);
 
         let balance: String;
         let tentative_balance = acct.get_sum_of_amts_in_lots();
@@ -228,7 +228,7 @@ pub fn _4_transaction_mvmt_detail_to_csv(
 ) -> Result<(), Box<dyn Error>> {
 
     let mut rows: Vec<Vec<String>> = [].to_vec();
-    let mut header: Vec<String> = [].to_vec();
+    let mut header: Vec<String> = Vec::with_capacity(12);
     header.extend_from_slice(&[
         "Date".to_string(),
         "Txn#".to_string(),
@@ -285,7 +285,7 @@ pub fn _4_transaction_mvmt_detail_to_csv(
                 gain_loss = d128!(0);
             }
 
-            let mut row: Vec<String> = [].to_vec();
+            let mut row: Vec<String> = Vec::with_capacity(12);
 
             row.push(date);
             row.push("Txn ".to_string() + &tx_number);
@@ -327,7 +327,7 @@ pub fn _5_transaction_mvmt_summaries_to_csv(
 ) -> Result<(), Box<dyn Error>> {
 
     let mut rows: Vec<Vec<String>> = [].to_vec();
-    let mut header: Vec<String> = [].to_vec();
+    let mut header: Vec<String> = Vec::with_capacity(12);
 
     header.extend_from_slice(&[
         "Date".to_string(),
@@ -441,7 +441,7 @@ pub fn _5_transaction_mvmt_summaries_to_csv(
 
         if let Some(term) = term_st {
 
-            let mut row: Vec<String> = [].to_vec();
+            let mut row: Vec<String> = Vec::with_capacity(12);
 
             row.push(txn_date_string.clone());
             row.push(tx_num_string.clone());
@@ -460,7 +460,7 @@ pub fn _5_transaction_mvmt_summaries_to_csv(
         }
         if let Some(term) = term_lt {
 
-            let mut row: Vec<String> = [].to_vec();
+            let mut row: Vec<String> = Vec::with_capacity(12);
 
             row.push(txn_date_string);
             row.push(tx_num_string);
@@ -503,7 +503,7 @@ pub fn _6_transaction_mvmt_detail_to_csv_w_orig(
 ) -> Result<(), Box<dyn Error>> {
 
     let mut rows: Vec<Vec<String>> = [].to_vec();
-    let mut header: Vec<String> = [].to_vec();
+    let mut header: Vec<String> = Vec::with_capacity(16);
     header.extend_from_slice(&[
         "Date".to_string(),
         "Txn#".to_string(),
@@ -571,7 +571,7 @@ pub fn _6_transaction_mvmt_detail_to_csv_w_orig(
                 orig_gain_loss = d128!(0);
             }
 
-            let mut row: Vec<String> = [].to_vec();
+            let mut row: Vec<String> = Vec::with_capacity(16);
 
             row.push(date);
             row.push("Txn ".to_string() + &tx_number);

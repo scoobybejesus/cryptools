@@ -27,7 +27,7 @@ pub(crate) fn import_accounts(
     let header4: csv::StringRecord; //  is_margin
 
     // A StringRecord doesn't accept the same range indexing we need below, so we create our own
-    let mut headerstrings: Vec<String> = [].to_vec();
+    let mut headerstrings: Vec<String> = Vec::with_capacity(header1.len());
 
     for element in header1.into_iter() {
         headerstrings.push(element.to_string())
@@ -134,7 +134,7 @@ pub(crate) fn import_transactions(
         let mut proceeds_parsed = 0f32;
 
         //  Next, create action_records.
-        let mut action_records_map_keys_vec: Vec<u32> = [].to_vec();
+        let mut action_records_map_keys_vec: Vec<u32> = Vec::with_capacity(2);
         let mut outgoing_ar: Option<ActionRecord> = None;
         let mut incoming_ar: Option<ActionRecord> = None;
         let mut outgoing_ar_num: Option<u32> = None;
