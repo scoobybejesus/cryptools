@@ -130,11 +130,12 @@ pub(crate) fn import_and_process_final(
 
     transactions_map = create_lots_mvmts::create_lots_and_movements(
         transactions_map,
-        &settings,
-        &likekind_settings,
         &action_records_map,
         &mut raw_account_map,
         &mut account_map,
+        &settings.home_currency,
+        &settings.costing_method,
+        &likekind_settings,
         &mut lot_map,
     )?;
 

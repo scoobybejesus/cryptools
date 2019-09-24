@@ -11,16 +11,17 @@ use chrono::NaiveDate;
 
 use crate::transaction::{Transaction, ActionRecord, TxType, Polarity, TxHasMargin};
 use crate::account::{Account, RawAccount, Lot, Movement};
-use crate::core_functions::{InventoryCostingMethod, LikeKindSettings, ImportProcessParameters};
+use crate::core_functions::{InventoryCostingMethod, LikeKindSettings};
 use crate::decimal_utils::{round_d128_1e8};
 
 pub(crate) fn create_lots_and_movements(
     txns_map: HashMap<u32, Transaction>,
-    settings: &ImportProcessParameters,
-    likekind_settings: &Option<LikeKindSettings>,
     ar_map: &HashMap<u32, ActionRecord>,
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
+    chosen_home_currency: &String,
+    chosen_costing_method: &InventoryCostingMethod,
+    likekind_settings: &Option<LikeKindSettings>,
     lot_map: &HashMap<(RawAccount, u32), Lot>,
 ) -> Result<HashMap<u32,Transaction>, Box<dyn Error>> {
 
@@ -139,7 +140,7 @@ pub(crate) fn create_lots_and_movements(
                 proceeds_lk: Cell::new(d128!(0.0)),
                 cost_basis_lk: Cell::new(d128!(0.0)),
             };
-            wrap_mvmt_and_push(base_mvmt, &base_ar, &base_lot, &settings, &raw_acct_map, &acct_map);
+            wrap_mvmt_and_push(base_mvmt, &base_ar, &base_lot, &chosen_home_currency, &raw_acct_map, &acct_map);
 
             let quote_mvmt = Movement {
                 amount: quote_ar.amount,
@@ -155,7 +156,7 @@ pub(crate) fn create_lots_and_movements(
                 proceeds_lk: Cell::new(d128!(0.0)),
                 cost_basis_lk: Cell::new(d128!(0.0)),
             };
-            wrap_mvmt_and_push(quote_mvmt, &quote_ar, &quote_lot, &settings, &raw_acct_map, &acct_map);
+            wrap_mvmt_and_push(quote_mvmt, &quote_ar, &quote_lot, &chosen_home_currency, &raw_acct_map, &acct_map);
 
             if acct_balances_are_zero {
                 base_acct_lot_list.push(base_lot);
@@ -170,7 +171,7 @@ pub(crate) fn create_lots_and_movements(
                 let raw_acct = raw_acct_map.get(&acct.raw_key).unwrap();
                 let length_of_list_of_lots = acct.list_of_lots.borrow().len();
 
-                if raw_acct.is_home_currency(&settings.home_currency) {
+                if raw_acct.is_home_currency(&chosen_home_currency) {
                     if length_of_list_of_lots == 0 {
                         let lot =
                         Rc::new(
@@ -198,7 +199,7 @@ pub(crate) fn create_lots_and_movements(
                             proceeds_lk: Cell::new(d128!(0.0)),
                             cost_basis_lk: Cell::new(d128!(0.0)),
                         };
-                        wrap_mvmt_and_push(whole_mvmt, &ar, &lot, &settings, &raw_acct_map, &acct_map);
+                        wrap_mvmt_and_push(whole_mvmt, &ar, &lot, &chosen_home_currency, &raw_acct_map, &acct_map);
                         acct.list_of_lots.borrow_mut().push(lot);
                         continue
                     }
@@ -219,7 +220,7 @@ pub(crate) fn create_lots_and_movements(
                             proceeds_lk: Cell::new(d128!(0.0)),
                             cost_basis_lk: Cell::new(d128!(0.0)),
                         };
-                        wrap_mvmt_and_push(whole_mvmt, &ar, &lot, &settings, &raw_acct_map, &acct_map);
+                        wrap_mvmt_and_push(whole_mvmt, &ar, &lot, &chosen_home_currency, &raw_acct_map, &acct_map);
                         continue
                     }
                 }
@@ -250,13 +251,13 @@ pub(crate) fn create_lots_and_movements(
                                 proceeds_lk: Cell::new(d128!(0.0)),
                                 cost_basis_lk: Cell::new(d128!(0.0)),
                             };
-                            wrap_mvmt_and_push(whole_mvmt, &ar, &lot, &settings, &raw_acct_map, &acct_map);
+                            wrap_mvmt_and_push(whole_mvmt, &ar, &lot, &chosen_home_currency, &raw_acct_map, &acct_map);
                             continue
                         } else {
                             let list_of_lots_to_use = acct.list_of_lots.clone();
 
                             //  the following returns vec to be iterated from beginning to end, which provides the index for the correct lot
-                            let vec_of_ordered_index_values = match settings.costing_method {
+                            let vec_of_ordered_index_values = match chosen_costing_method {
                                 InventoryCostingMethod::LIFObyLotCreationDate => {
                                     get_lifo_by_creation_date(&list_of_lots_to_use.borrow())}
                                 InventoryCostingMethod::LIFObyLotBasisDate => {
@@ -347,7 +348,7 @@ pub(crate) fn create_lots_and_movements(
                                 list_of_lots_to_use,
                                 vec_of_ordered_index_values,
                                 index_position,
-                                &settings,
+                                &chosen_home_currency,
                                 &ar_map,
                                 &raw_acct_map,
                                 &acct_map,
@@ -380,7 +381,7 @@ pub(crate) fn create_lots_and_movements(
                                         proceeds_lk: Cell::new(d128!(0.0)),
                                         cost_basis_lk: Cell::new(d128!(0.0)),
                                     };
-                                    wrap_mvmt_and_push(mvmt, &ar, &lot, &settings, &raw_acct_map, &acct_map);
+                                    wrap_mvmt_and_push(mvmt, &ar, &lot, &chosen_home_currency, &raw_acct_map, &acct_map);
                                     continue
                                 } else {
                                     let mvmt: Movement;
@@ -470,7 +471,7 @@ pub(crate) fn create_lots_and_movements(
                                                 proceeds_lk: Cell::new(d128!(0.0)),
                                                 cost_basis_lk: Cell::new(d128!(0.0)),
                                             };
-                                            wrap_mvmt_and_push(inner_mvmt, &ar, &inner_lot, &settings, &raw_acct_map, &acct_map);
+                                            wrap_mvmt_and_push(inner_mvmt, &ar, &inner_lot, &chosen_home_currency, &raw_acct_map, &acct_map);
                                             acct.list_of_lots.borrow_mut().push(inner_lot);
                                             amounts_used += amount_used;
                                             percentages_used += percentage_used;
@@ -504,7 +505,7 @@ pub(crate) fn create_lots_and_movements(
                                             cost_basis_lk: Cell::new(d128!(0.0)),
                                         };
                                     }
-                                    wrap_mvmt_and_push(mvmt, &ar, &lot, &settings, &raw_acct_map, &acct_map);
+                                    wrap_mvmt_and_push(mvmt, &ar, &lot, &chosen_home_currency, &raw_acct_map, &acct_map);
                                     acct.list_of_lots.borrow_mut().push(lot);
                                     continue
                                 }
@@ -516,15 +517,15 @@ pub(crate) fn create_lots_and_movements(
                                 let og_raw_acct = raw_acct_map.get(&og_acct.raw_key).unwrap();
                                 let ic_ar = ar;
                                 let ic_raw_acct = raw_acct;
-                                both_are_non_home_curr = !og_raw_acct.is_home_currency(&settings.home_currency)
-                                                        && !ic_raw_acct.is_home_currency(&settings.home_currency);
+                                both_are_non_home_curr = !og_raw_acct.is_home_currency(&chosen_home_currency)
+                                                        && !ic_raw_acct.is_home_currency(&chosen_home_currency);
 
                                 if both_are_non_home_curr && multiple_incoming_mvmts_per_ar && (txn.date <= like_kind_cutoff_date) {
                                     process_multiple_incoming_lots_and_mvmts(
                                         txn_num,
                                         &og_ar,
                                         &ic_ar,
-                                        &settings,
+                                        &chosen_home_currency,
                                         *ar_num,
                                         &raw_acct_map,
                                         &acct_map,
@@ -561,7 +562,7 @@ pub(crate) fn create_lots_and_movements(
                                         proceeds_lk: Cell::new(d128!(0.0)),
                                         cost_basis_lk: Cell::new(d128!(0.0)),
                                     };
-                                    wrap_mvmt_and_push(whole_mvmt, &ar, &lot, &settings, &raw_acct_map, &acct_map);
+                                    wrap_mvmt_and_push(whole_mvmt, &ar, &lot, &chosen_home_currency, &raw_acct_map, &acct_map);
                                     acct.list_of_lots.borrow_mut().push(lot);
                                     continue
                                 }
@@ -574,7 +575,7 @@ pub(crate) fn create_lots_and_movements(
                                         txn_num,
                                         &ar_map.get(txn.action_record_idx_vec.first().unwrap()).unwrap(), // outgoing
                                         &ar, // incoming
-                                        &settings,
+                                        &chosen_home_currency,
                                         *ar_num,
                                         &raw_acct_map,
                                         &acct_map,
@@ -645,7 +646,7 @@ fn wrap_mvmt_and_push(
     this_mvmt: Movement,
     ar: &ActionRecord,
     lot: &Lot,
-    settings: &ImportProcessParameters,
+    chosen_home_currency: &String,
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
 ) {
@@ -653,7 +654,7 @@ fn wrap_mvmt_and_push(
     let acct = acct_map.get(&ar.account_key).unwrap();
     let raw_acct = raw_acct_map.get(&acct.raw_key).unwrap();
 
-    if ar.direction() == Polarity::Outgoing && !raw_acct.is_home_currency(&settings.home_currency) {
+    if ar.direction() == Polarity::Outgoing && !raw_acct.is_home_currency(&chosen_home_currency) {
         let ratio = this_mvmt.amount / ar.amount;
         this_mvmt.ratio_of_amt_to_outgoing_mvmts_in_a_r.set(round_d128_1e8(&ratio));
     }
@@ -674,7 +675,7 @@ fn fit_into_lots(
     list_of_lots_to_use: RefCell<Vec<Rc<Lot>>>,
     vec_of_ordered_index_values: Vec<usize>,
     index_position: usize,
-    settings: &ImportProcessParameters,
+    chosen_home_currency: &String,
     ar_map: &HashMap<u32, ActionRecord>,
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
@@ -683,7 +684,7 @@ fn fit_into_lots(
     let ar = ar_map.get(&spawning_ar_key).unwrap();
     let acct = acct_map.get(&ar.account_key).unwrap();
     let raw_acct = raw_acct_map.get(&acct.raw_key).unwrap();
-    assert_eq!(raw_acct.is_home_currency(&settings.home_currency), false);
+    assert_eq!(raw_acct.is_home_currency(&chosen_home_currency), false);
 
     let spawning_ar = ar_map.get(&spawning_ar_key).unwrap();
     let mut current_index_position = index_position;
@@ -723,7 +724,7 @@ fn fit_into_lots(
             list_of_lots_to_use,
             vec_of_ordered_index_values,
             current_index_position,
-            &settings,
+            &chosen_home_currency,
             &ar_map,
             &raw_acct_map,
             &acct_map
@@ -750,7 +751,7 @@ fn fit_into_lots(
             proceeds_lk: Cell::new(d128!(0.0)),
             cost_basis_lk: Cell::new(d128!(0.0)),
         };
-        wrap_mvmt_and_push(remainder_that_fits, &spawning_ar, &lot, &settings, &raw_acct_map, &acct_map);
+        wrap_mvmt_and_push(remainder_that_fits, &spawning_ar, &lot, &chosen_home_currency, &raw_acct_map, &acct_map);
         return  //  And we're done
     }
     //  Note: at this point, we know the movement doesn't fit in a single lot & sum_of_mvmts_in_lot > 0
@@ -771,7 +772,7 @@ fn fit_into_lots(
         proceeds_lk: Cell::new(d128!(0.0)),
         cost_basis_lk: Cell::new(d128!(0.0)),
     };
-    wrap_mvmt_and_push(mvmt_that_fits_in_lot, &spawning_ar, &lot, &settings, &raw_acct_map, &acct_map);
+    wrap_mvmt_and_push(mvmt_that_fits_in_lot, &spawning_ar, &lot, &chosen_home_currency, &raw_acct_map, &acct_map);
     let remainder_amt_to_recurse = remainder_amt + sum_of_mvmts_in_lot;
     // println!("Remainder amount to recurse: {}", remainder_amt_to_recurse);
     current_index_position += 1;
@@ -800,7 +801,7 @@ fn fit_into_lots(
         list_of_lots_to_use,
         vec_of_ordered_index_values,
         current_index_position,
-        &settings,
+        &chosen_home_currency,
         &ar_map,
         &raw_acct_map,
         &acct_map
@@ -811,7 +812,7 @@ fn process_multiple_incoming_lots_and_mvmts(
     txn_num: u32,
     outgoing_ar: &ActionRecord,
     incoming_ar: &ActionRecord,
-    settings: &ImportProcessParameters,
+    chosen_home_currency: &String,
     incoming_ar_key: u32,
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
@@ -874,7 +875,7 @@ fn process_multiple_incoming_lots_and_mvmts(
         //     incoming_mvmt.amount, acct_incoming_ar.ticker, acct_incoming_ar.account_num);
         all_but_last_incoming_mvmt_ratio += round_d128_1e8(&ratio_of_outgoing_mvmt_to_total_ar);
         all_but_last_incoming_mvmt_amt += incoming_mvmt.amount;
-        wrap_mvmt_and_push(incoming_mvmt, &incoming_ar, &lot, &settings, &raw_acct_map, &acct_map);
+        wrap_mvmt_and_push(incoming_mvmt, &incoming_ar, &lot, &chosen_home_currency, &raw_acct_map, &acct_map);
         this_acct.list_of_lots.borrow_mut().push(lot);
     }
     //  Second iteration, for final movement
@@ -911,6 +912,6 @@ fn process_multiple_incoming_lots_and_mvmts(
     };
     // println!("Final incoming mvmt for this actionrecord, amount: {} {} to account: {}",
     //     incoming_mvmt.amount, acct_incoming_ar.ticker, acct_incoming_ar.account_num);
-    wrap_mvmt_and_push(incoming_mvmt, &incoming_ar, &lot, &settings, &raw_acct_map, &acct_map);
+    wrap_mvmt_and_push(incoming_mvmt, &incoming_ar, &lot, &chosen_home_currency, &raw_acct_map, &acct_map);
     this_acct.list_of_lots.borrow_mut().push(lot);
 }
