@@ -32,7 +32,7 @@ pub(crate) fn add_cost_basis_to_movements(
             let ar = ars.get(ar_num).unwrap();
             let acct = acct_map.get(&ar.account_key).unwrap();
             let raw_acct = raw_acct_map.get(&acct.raw_key).unwrap();
-            let movements = ar.get_mvmts_in_ar(acct_map, txns_map);
+            let movements = ar.get_mvmts_in_ar_in_date_order(acct_map, txns_map);
 
             for mvmt in movements.iter() {
 
@@ -168,7 +168,7 @@ pub(crate) fn add_cost_basis_to_movements(
         assert_eq!(other_ar_borrowed.direction(), Polarity::Outgoing);
 
         let mut basis = d128!(0);
-        let movements = other_ar_borrowed.get_mvmts_in_ar(acct_map, txns_map);
+        let movements = other_ar_borrowed.get_mvmts_in_ar_in_date_order(acct_map, txns_map);
 
         for mvmt in movements.iter() {
             basis += mvmt.cost_basis.get();
@@ -197,7 +197,7 @@ pub(crate) fn add_proceeds_to_movements(
         for ar_num in txn.action_record_idx_vec.iter() {
 
             let ar = ars.get(ar_num).unwrap();
-            let movements = ar.get_mvmts_in_ar(acct_map, txns_map);
+            let movements = ar.get_mvmts_in_ar_in_date_order(acct_map, txns_map);
 
             for mvmt in movements.iter() {
 
@@ -289,7 +289,7 @@ fn update_current_txn_for_prior_likekind_treatment(
         let ar = ars.get(ar_num).unwrap();
         let acct = acct_map.get(&ar.account_key).unwrap();
         let raw_acct = raw_acct_map.get(&acct.raw_key).unwrap();
-        let movements = ar.get_mvmts_in_ar(acct_map, txns_map);
+        let movements = ar.get_mvmts_in_ar_in_date_order(acct_map, txns_map);
 
         for mvmt in movements.iter() {
 
@@ -386,7 +386,7 @@ fn perform_likekind_treatment_on_txn(
                 for ar_num in txn.action_record_idx_vec.iter() {
 
                     let ar = ars.get(ar_num).unwrap();
-                    let movements = ar.get_mvmts_in_ar(acct_map, txns_map);
+                    let movements = ar.get_mvmts_in_ar_in_date_order(acct_map, txns_map);
 
                     for mvmt in movements.iter() {
 
@@ -431,7 +431,7 @@ fn perform_likekind_treatment_on_txn(
                 for ar_num in txn.action_record_idx_vec.iter() {
 
                     let ar = ars.get(ar_num).unwrap();
-                    let movements = ar.get_mvmts_in_ar(acct_map, txns_map);
+                    let movements = ar.get_mvmts_in_ar_in_date_order(acct_map, txns_map);
 
                     let polarity = ar.direction();
 

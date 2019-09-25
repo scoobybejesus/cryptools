@@ -594,6 +594,20 @@ pub(crate) fn create_lots_and_movements(
     Ok(txns_map)
 }
 
+/// Chooses the outgoing `ActionRecord`. Gets a `Vec` of its `Movement`s. Chooses its
+/// first/earliest `Movement`. Gets that `Movement`'s `ActionRecord`. Gets that
+/// `ActionRecord`'s `Account`. Gets the first `Lot` from that `Account`'s
+/// `list_of_lots`. Get the `Movement`s from that `Lot`. Takes the first `Movement`
+/// and gets that `Movement`'s `Transaction`. Gets base and quote keys from that.println!
+///
+/// The rationale for this was to be able to determine whether this should be classifiable
+/// as a Long or a Short. As it turns out, the two are basically indistinguishable and/or
+/// interchangeable, so this `fn` should be simplified.
+///
+/// Just kidding.  You weren't paying attention, were you? This is a dual `ActionRecord`
+/// `Flow` `Transaction`, meaning this is most likely recording a margin profit or a
+/// margin loss. The `fn` was designed this was to definitely work for a margin profit,
+/// but it might could use reworking to be generalized for margin profit or loss.
 fn get_base_and_quote_acct_for_dual_actionrecord_flow_tx(
     txn_num: u32,
     ar_map: &HashMap<u32, ActionRecord>,
@@ -606,7 +620,7 @@ fn get_base_and_quote_acct_for_dual_actionrecord_flow_tx(
     let og_flow_ar = ar_map.get(txn.action_record_idx_vec.first().unwrap()).unwrap();
     // println!("Acct: {}, Amount: {}, Tx: {}, ar: {}",
     //     outgoing_flow_ar.account_key, outgoing_flow_ar.amount, outgoing_flow_ar.tx_key, outgoing_flow_ar.self_ar_key);
-    let og_ar_mvmts_list = &og_flow_ar.get_mvmts_in_ar(acct_map, txns_map); // TODO: ... in margin profit, this just takes a list of one mvmt
+    let og_ar_mvmts_list = &og_flow_ar.get_mvmts_in_ar_in_date_order(acct_map, txns_map); // TODO: ... in margin profit, this just takes a list of one mvmt
     let og_ar_list_first_mvmt = &og_ar_mvmts_list.first().unwrap(); // TODO: then this takes the one mvmt
     let og_ar_list_first_mvmt_ar = ar_map.get(&og_ar_list_first_mvmt.action_record_key).unwrap();
     let og_ar_list_first_mvmt_ar_acct = acct_map.get(&og_ar_list_first_mvmt_ar.account_key).unwrap();
@@ -828,12 +842,12 @@ fn process_multiple_incoming_lots_and_mvmts(
     let mut all_but_last_incoming_mvmt_amt = d128!(0.0);
     let mut all_but_last_incoming_mvmt_ratio = d128!(0.0);
     // println!("Txn date: {}. Outgoing mvmts: {}, Outgoing amount: {}", txn.date, outgoing_ar.movements.borrow().len(), outgoing_ar.amount);
-    let list_of_mvmts_of_outgoing_ar = outgoing_ar.get_mvmts_in_ar(acct_map, txns_map);
+    let list_of_mvmts_of_outgoing_ar = outgoing_ar.get_mvmts_in_ar_in_date_order(acct_map, txns_map);
     let final_mvmt = list_of_mvmts_of_outgoing_ar.last().unwrap();
     //  First iteration, for all but final movement
     for outgoing_mvmt in list_of_mvmts_of_outgoing_ar
                             .iter()
-                            .take(outgoing_ar.get_mvmts_in_ar(acct_map, txns_map).len() - 1) {
+                            .take(outgoing_ar.get_mvmts_in_ar_in_date_order(acct_map, txns_map).len() - 1) {
         let ratio_of_outgoing_mvmt_to_total_ar = outgoing_mvmt.amount / outgoing_ar.amount; //  Negative divided by negative is positive
         // println!("Ratio of outgoing amt to total actionrecord amt: {:.8}", ratio_of_outgoing_to_total_ar);
         let tentative_incoming_amt = ratio_of_outgoing_mvmt_to_total_ar * incoming_ar.amount;

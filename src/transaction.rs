@@ -164,7 +164,7 @@ impl Transaction {
 
             if !raw_acct.is_home_currency(user_home_currency) & !raw_acct.is_margin {
 
-                let movements = ar.get_mvmts_in_ar(acct_map, txns_map);
+                let movements = ar.get_mvmts_in_ar_in_date_order(acct_map, txns_map);
 
                 match self.transaction_type(ars, raw_acct_map, acct_map)? {
                     TxType::Exchange => {
@@ -292,31 +292,47 @@ impl ActionRecord {
 	// 	raw_acct.ticker.contains('_')
 	// }
 
-	pub fn get_mvmts_in_ar(
+    /// Iterates through every `Lot` in the `list_of_lots` of the `ActionRecord`'s `Account`
+    /// until it finds all the `Movements` - cloning each along the way - and then returns
+    /// a `Vec` of `Rc<Movements>`.
+    ///
+    /// Note that a `Lot`'s `date`, and generally its `basis_date` too, will increase
+    /// chronologically along with the `Lot`'s `lot_num` which is just it's `index` in the
+    /// `list_of_lots` plus `1`. Exceptions will occur, because `Lot`s are permanently
+    /// ordered by their creation date (`date`), so later `Lot`s may have earlier `basis_date`s
+    /// by virtue of them being the result of a `ToSelf` type `Transaction` that transferred
+    /// old "coins."
+    pub fn get_mvmts_in_ar_in_date_order(
         &self,
         acct_map: &HashMap<u16, Account>,
         txns_map: &HashMap<u32, Transaction>,
     ) -> Vec<Rc<Movement>> {
 
-        // let polarity = Self::direction(self);
         let txn = txns_map.get(&self.tx_key).unwrap();
         let mut movements_in_ar = [].to_vec();
         let acct = acct_map.get(&self.account_key).unwrap();
 
+        let target = self.amount;
+        let mut measure = d128!(0);
+
         for lot in acct.list_of_lots.borrow().iter() {
+
             for mvmt in lot.movements.borrow().iter() {
+
                 if (mvmt.date) <= txn.date {
+
                     if mvmt.action_record_key == self.self_ar_key {
-                        // if polarity == Polarity::Incoming{
-                            // movements_in_ar.push(mvmt.clone())
-                        // } else {
-                            movements_in_ar.insert(0, mvmt.clone())
-                        // }
-                        //  ^^ leaving that ugliness for this commit on purpose
+
+                        measure += mvmt.amount;
+
+                        movements_in_ar.push(mvmt.clone());
+
+                        if measure == target { return movements_in_ar }
                     }
                 }
             }
         }
+        println!("ERROR: This should never print.");
         movements_in_ar
 	}
 }
@@ -331,11 +347,11 @@ pub enum TxType {
 impl fmt::Display for TxType {
 
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-       match *self {
-           TxType::Exchange => write!(f, "Exchange"),
-           TxType::ToSelf => write!(f, "ToSelf"),
-           TxType::Flow => write!(f, "Flow"),
-       }
+        match *self {
+            TxType::Exchange => write!(f, "Exchange"),
+            TxType::ToSelf => write!(f, "ToSelf"),
+            TxType::Flow => write!(f, "Flow"),
+        }
     }
 }
 
