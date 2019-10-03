@@ -269,7 +269,7 @@ pub(crate) fn create_lots_and_movements(
                             };
 
                             fn get_lifo_by_creation_date(list_of_lots: &Ref<Vec<Rc<Lot>>>) -> Vec<usize> {
-                                let mut vec_of_indexes = [].to_vec();
+                                let mut vec_of_indexes = [].to_vec(); // TODO: Add with_capacity()
                                 for (idx, _lot) in list_of_lots.iter().enumerate() {
                                     vec_of_indexes.insert(0, idx)
                                 }
@@ -617,22 +617,22 @@ fn get_base_and_quote_acct_for_dual_actionrecord_flow_tx(
 ) -> Result<(u16, u16), Box<dyn Error>> {
 
     let txn = txns_map.get(&txn_num).expect("Couldn't get txn. Tx num invalid?");
+
     let og_flow_ar = ar_map.get(txn.action_record_idx_vec.first().unwrap()).unwrap();
-    // println!("Acct: {}, Amount: {}, Tx: {}, ar: {}",
-    //     outgoing_flow_ar.account_key, outgoing_flow_ar.amount, outgoing_flow_ar.tx_key, outgoing_flow_ar.self_ar_key);
-    let og_ar_mvmts_list = &og_flow_ar.get_mvmts_in_ar_in_date_order(acct_map, txns_map); // TODO: ... in margin profit, this just takes a list of one mvmt
+
+    let og_ar_mvmts_list = &og_flow_ar.get_mvmts_in_ar_in_date_order(acct_map, txns_map);
     let og_ar_list_first_mvmt = &og_ar_mvmts_list.first().unwrap(); // TODO: then this takes the one mvmt
     let og_ar_list_first_mvmt_ar = ar_map.get(&og_ar_list_first_mvmt.action_record_key).unwrap();
     let og_ar_list_first_mvmt_ar_acct = acct_map.get(&og_ar_list_first_mvmt_ar.account_key).unwrap();
     let og_mvmt_lot = &og_ar_list_first_mvmt_ar_acct.list_of_lots.borrow()[(og_ar_list_first_mvmt.lot_num - 1) as usize];
-    // let og_mvmt_lot_strong = &og_mvmt_lot;
+
     let og_mvmt_lot_mvmts = og_mvmt_lot.movements.borrow();
     let og_mvmt_lot_first_mvmt = &og_mvmt_lot_mvmts.first().unwrap();
     let txn_of_og_mvmt_lot_first_mvmt = txns_map.get(&og_mvmt_lot_first_mvmt.transaction_key).unwrap();
     let (base_key,quote_key) = txn_of_og_mvmt_lot_first_mvmt.get_base_and_quote_raw_acct_keys(
         ar_map,
         &raw_acct_map,
-        &acct_map)?; // TODO: should this panic on margin loss?
+        &acct_map)?; // TODO: should this panic on margin loss? As of 2019-10-02, no. Should test for margin shorting too, though.
 	Ok((base_key, quote_key))
 }
 

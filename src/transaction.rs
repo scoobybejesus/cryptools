@@ -91,7 +91,10 @@ impl Transaction {
 				TxHasMargin::NoARs
 			}
 		} else {
-			assert_eq!(self.action_record_idx_vec.len(),2);
+
+			assert_eq!(self.action_record_idx_vec.len(),2,
+                "Each txn can only have one or two ARs. Txn has {} ARs.", self.action_record_idx_vec.len());
+
 			let first_ar = ars.get(&self.action_record_idx_vec[0]).unwrap();
 			let second_ar = ars.get(&self.action_record_idx_vec[1]).unwrap();
 
