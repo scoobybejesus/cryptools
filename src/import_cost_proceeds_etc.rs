@@ -197,49 +197,64 @@ pub(crate) fn add_proceeds_to_movements(
         for ar_num in txn.action_record_idx_vec.iter() {
 
             let ar = ars.get(ar_num).unwrap();
+            let acct = acct_map.get(&ar.account_key).unwrap();
+            let raw_acct = raw_acct_map.get(&acct.raw_key).unwrap();
             let movements = ar.get_mvmts_in_ar_in_date_order(acct_map, txns_map);
 
-            for mvmt in movements.iter() {
+            if !raw_acct.is_margin {
 
-                let polarity = ar.direction();
-                let tx_type = txn.transaction_type(ars, raw_acct_map, acct_map)?;
-                let mvmt_copy = mvmt.clone();
-                let borrowed_mvmt = mvmt_copy.clone();
+                for mvmt in movements.iter() {
 
-                match tx_type {
+                    let polarity = ar.direction();
+                    let tx_type = txn.transaction_type(ars, raw_acct_map, acct_map)?;
+                    let mvmt_copy = mvmt.clone();
+                    let borrowed_mvmt = mvmt_copy.clone();
 
-                    TxType::Exchange | TxType::Flow => {
+                    match tx_type {
 
-                        match polarity {
+                        TxType::Exchange | TxType::Flow => {
 
-                            Polarity::Outgoing => {
+                            match polarity {
 
-                                let ratio = borrowed_mvmt.amount / ar.amount;
-                                let proceeds_unrounded = txn.proceeds.to_string().parse::<d128>().unwrap() * ratio;
-                                let proceeds_rounded = round_d128_1e2(&proceeds_unrounded);
+                                Polarity::Outgoing => {
 
-                                mvmt.proceeds.set(proceeds_rounded);
-                                mvmt.proceeds_lk.set(proceeds_rounded);
-                            }
+                                    if (tx_type == TxType::Flow) && (txn.action_record_idx_vec.len() == 2) {
 
-                            Polarity::Incoming => {
-                                // For a time, this was blank. As part of the commit(s) to add cost_basis_lk
-                                // and proceeds_lk, let's change this to reflect that incoming proceeds are now
-                                // negative, which net against the positive cost_basis to result in a gain of $0.
-                                // Additionally, we apply the same treatment to Flow txns.
-                                mvmt.proceeds.set(-mvmt.cost_basis.get());
-                                mvmt.proceeds_lk.set(-mvmt.cost_basis_lk.get());
+                                        // Keep at 0.00 proceeds for margin loss
+                                        continue
+                                    }
+
+                                    let ratio = borrowed_mvmt.amount / ar.amount;
+                                    let proceeds_unrounded = txn.proceeds.to_string().parse::<d128>().unwrap() * ratio;
+                                    let proceeds_rounded = round_d128_1e2(&proceeds_unrounded);
+
+                                    mvmt.proceeds.set(proceeds_rounded);
+                                    mvmt.proceeds_lk.set(proceeds_rounded);
+
+                                }
+
+                                Polarity::Incoming => {
+                                    // For a time, this was blank. As part of the commit(s) to add cost_basis_lk
+                                    // and proceeds_lk, let's change this to reflect that incoming proceeds are now
+                                    // negative, which net against the positive cost_basis to result in a gain of $0.
+                                    // Additionally, we apply the same treatment to Flow txns.
+                                    mvmt.proceeds.set(-mvmt.cost_basis.get());
+                                    mvmt.proceeds_lk.set(-mvmt.cost_basis_lk.get());
+                                }
                             }
                         }
-                    }
 
-                    TxType::ToSelf => {
-                        // Originally did nothing. Now explicity creating a condition where a report containing
-                        // ToSelf txns would reflect a $0 gain/loss.
-                        mvmt.proceeds.set(-mvmt.cost_basis.get());
-                        mvmt.proceeds_lk.set(-mvmt.cost_basis_lk.get());
+                        TxType::ToSelf => {
+                            // Originally did nothing. Now explicity creating a condition where a report containing
+                            // ToSelf txns would reflect a $0 gain/loss.
+                            mvmt.proceeds.set(-mvmt.cost_basis.get());
+                            mvmt.proceeds_lk.set(-mvmt.cost_basis_lk.get());
+                        }
                     }
                 }
+            } else {
+                // Do nothing. Future changes can add a code path where margin txns "settle"
+                // as they happen, though, if desired. Just need to write the code.
             }
         }
     }

@@ -291,8 +291,19 @@ impl Movement {
 				let ar = ar_map.get(&self.action_record_key).unwrap();
 
                 if ar.direction() == Polarity::Outgoing {
-                    let expense = -self.proceeds_lk.get();
-					Ok(expense)
+
+                    let acct = acct_map.get(&ar.account_key).unwrap();
+                    let raw_acct = raw_accts.get(&acct.raw_key).unwrap();
+
+                    if !raw_acct.is_margin {
+
+                       Ok(d128!(0))
+
+                    } else {
+
+                        let expense = -self.proceeds_lk.get();
+                        Ok(expense)
+                    }
 				}
 				else { Ok(d128!(0)) }
 			}
