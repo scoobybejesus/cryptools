@@ -504,6 +504,7 @@ pub fn _6_transaction_mvmt_detail_to_csv_w_orig(
 
     let mut rows: Vec<Vec<String>> = [].to_vec();
     let mut header: Vec<String> = Vec::with_capacity(16);
+
     header.extend_from_slice(&[
         "Date".to_string(),
         "Txn#".to_string(),
@@ -548,7 +549,7 @@ pub fn _6_transaction_mvmt_detail_to_csv_w_orig(
             let tx_number = txn.tx_number.to_string();
             let tx_type = txn.transaction_type(&ars, &raw_acct_map, &acct_map)?;
             let user_memo = txn.user_memo.to_string();
-            let auto_memo = txn.get_auto_memo(ars, raw_acct_map,acct_map)?;
+            let auto_memo = txn.get_auto_memo(ars, raw_acct_map,acct_map, &settings.home_currency)?;
             let mut amount = d128!(0);
             amount += mvmt.amount;   //  To prevent printing -5E+1 instead of 50, for example
             let ticker = raw_acct.ticker.to_string();

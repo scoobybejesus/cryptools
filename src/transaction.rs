@@ -217,7 +217,8 @@ impl Transaction {
 		&self,
 		ars: &HashMap<u32, ActionRecord>,
 		raw_accts: &HashMap<u16, RawAccount>,
-		acct_map: &HashMap<u16, Account>
+		acct_map: &HashMap<u16, Account>,
+        home_currency: &String,
 	) -> Result<String, Box<dyn Error>> {
 
         let auto_memo = if self.action_record_idx_vec.len() == 2 {
@@ -238,11 +239,12 @@ impl Transaction {
                 let ic_raw_acct = raw_accts.get(&ic_acct.raw_key).unwrap();
                 let ic_ticker = &ic_raw_acct.ticker;
 
-                format!("Paid {} {} for {} {}", og_amt, og_ticker, ic_amt, ic_ticker)
+                format!("Paid {} {} for {} {}, valued at {} {}.",
+                    og_amt, og_ticker, ic_amt, ic_ticker, self.proceeds, home_currency)
 
             } else {
 
-                format!("Margin profit or loss")
+                format!("Margin profit or loss valued at {} {}.", self.proceeds, home_currency)
             }
 
         } else {
@@ -255,11 +257,11 @@ impl Transaction {
 
             if amt > d128!(0.0) {
 
-                format!("Received {} {}", amt, ticker)
+                format!("Received {} {} valued at {} {}.", amt, ticker, self.proceeds, home_currency)
 
             } else {
 
-                format!("Spent {} {}", amt, ticker)
+                format!("Spent {} {} valued at {} {}.", amt, ticker, self.proceeds, home_currency)
 
             }
         };
