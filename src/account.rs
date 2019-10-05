@@ -88,10 +88,6 @@ impl Lot {
 		amts
 	}
 
-	// pub fn sum_of_amts_in_lot_is_zero(&self) -> bool {
-	// 	d128!(0) == Self::get_sum_of_amts_in_lot(&self)
-	// }
-
 	pub fn get_sum_of_lk_basis_in_lot(&self) -> d128 {
 		let mut amts = d128!(0);
 		self.movements.borrow().iter().for_each(|movement| amts += movement.cost_basis_lk.get());
@@ -139,10 +135,7 @@ impl Movement {
         acct_map: &HashMap<u16, Account>,
         ar_map: &HashMap<u32, ActionRecord>
     ) -> d128 {
-		// // println!("Lot #: {}", self.lot.lot_number);
-		// let ar = ar_map.get(&self.action_record_key).unwrap();
-		// let acct = acct_map.get(&ar.account_key).unwrap();
-		// let lot = &acct.list_of_lots.borrow()[self.lot_num as usize - 1];	//	lots start at 1 and indexes at 0
+
         let lot = self.get_lot(acct_map, ar_map);
 		let list_of_lot_mvmts = lot.movements.borrow();
 		let ratio = self.amount / list_of_lot_mvmts.first().unwrap().amount;
@@ -155,9 +148,7 @@ impl Movement {
         acct_map: &HashMap<u16, Account>,
         ar_map: &HashMap<u32, ActionRecord>
     ) -> d128 {
-		// let ar = ar_map.get(&self.action_record_key).unwrap();
-		// let acct = acct_map.get(&ar.account_key).unwrap();
-		// let lot = &acct.list_of_lots.borrow()[self.lot_num as usize - 1];	//	lots start at 1 and indexes at 0
+
         let lot = self.get_lot(acct_map, ar_map);
 		let list_of_lot_mvmts = lot.movements.borrow();
 		let cost_basis_lk = list_of_lot_mvmts.first().unwrap().cost_basis_lk.get();
@@ -170,30 +161,13 @@ impl Movement {
         acct_map: &HashMap<u16, Account>,
         ar_map: &HashMap<u32, ActionRecord>
     ) -> d128 {
-		// let ar = ar_map.get(&self.action_record_key).unwrap();
-		// let acct = acct_map.get(&ar.account_key).unwrap();
-		// let lot = &acct.list_of_lots.borrow()[self.lot_num as usize - 1];	//	lots start at 1 and indexes at 0
-		// let borrowed_mvmt_list = lot.movements.borrow();
+
         let lot = self.get_lot(acct_map, ar_map);
 		let list_of_lot_mvmts = lot.movements.borrow();
 		let cost_basis = list_of_lot_mvmts.first().unwrap().cost_basis.get();
 
 		cost_basis
 	}
-
-    // pub fn get_lk_proceeds_of_lots_first_mvmt(
-    //     &self,
-    //     acct_map: &HashMap<u16, Account>,
-    //     ar_map: &HashMap<u32, ActionRecord>
-    // ) -> d128 {
-	// 	let ar = ar_map.get(&self.action_record_key).unwrap();
-	// 	let acct = acct_map.get(&ar.account_key).unwrap();
-	// 	let lot = &acct.list_of_lots.borrow()[self.lot_num as usize - 1];	//	lots start at 1 and indexes at 0
-	// 	let borrowed_mvmt_list = lot.movements.borrow();
-	// 	let proceeds_lk = borrowed_mvmt_list.first().unwrap().proceeds_lk.get();
-
-	// 	proceeds_lk
-	// }
 
 	pub fn get_lk_gain_or_loss(&self) -> d128 {
 		self.proceeds_lk.get() + self.cost_basis_lk.get()
@@ -312,10 +286,6 @@ impl Movement {
 		}
 	}
 
-    // pub fn direction(&self) -> Polarity {
-	// 	if self.amount < d128!(0.0) { Polarity::Outgoing }
-	// 	else { Polarity::Incoming }
-	// }
 }
 
 #[derive(Clone, Debug, PartialEq)]
