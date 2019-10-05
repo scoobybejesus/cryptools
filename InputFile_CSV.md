@@ -6,11 +6,17 @@
 
 **`input_file.csv`**
 
-The key to understanding the value in this software is to understand the input file.
-All income, expenses, gains, and losses (and related like-kind treatment)
+The key to understanding how to use this software is to understand the input file.
+The input file encodes all accounts, including all transactions occurring in and between those accounts.
+All income, expenses, gains, and losses (and related like-kind treatment results)
 are deterministically calculated based on the input file (and the command-line parameters).
 This document aims to tell a user all they need to know about the CSV input file.
 
+Note: the input file is needed in the *current* version of the software.
+Future versions may store the transactional activity in a database or similar file.
+At that time, additional transactions perhaps may be entered directly into the software.
+For now, however, additional transactions are added to the input file,
+and then the input file is imported ***in full*** every time the software is run.
 
 ---
 
@@ -35,17 +41,15 @@ The activity that gets imported **must** be in a prescribed form (a CSV file) th
 |11/1/16|0       |ELEVENTH|      |-1.5    |1.5    |        |            |
 |12/1/16|2000    |TWELFTH*|      |        |-1.5   |        |400         |
 
-\* This last transaction is an example of how a user might reflect an exchange via Shapeshift or similar services, where one currency is spent from one wallet and a different currency is received in another wallet.
-
 ---
 
-#### CSV file components
+#### CSV file components - What they are
 
 ##### Columns
 
 The first three columns (ignoring the first four rows) are for transaction metadata.
 
-* **txDate** is currently set to parse dates of the format MM/dd/YY.
+* **txDate** With each row being a transaction, this is the date of the transaction in that row.
 
 * **proceeds** This is either (a) the value transferred from one party to another in a transaction,
 or (b) the value exchanged in a trade (an exchange transaction).
@@ -59,11 +63,16 @@ the proceeds of that transaction would also be $100.
 Note: when transfering to oneself (i.e.,  not changing currencies), the proceeds value is irrelevant and ignored.
 This value is also ignored when the user's home currency is spent.
 
-* **memo** is useful for evaluating the final output but isn't important.
-Currently, commas in the memo are **not** supported.
+* **memo** is a description of the transaction.
+This should be used to describe the nature of, or reason for, the transaction.
+This could be important for remembering, for example, a tax-deductible payment,
+or maybe for distinguishing between mining earnings and a customer deposit.
+A memo is also useful when evaluating the reports you print/export,
+because there may be several transactions on the same day and a good memo helps you identify them.
 
 * *Accounts* - After three columns of transaction metadata, the *Account* columns follow.
-The increases and decreases to each account are recorded directly below in that account's column.
+The increases and decreases to each account are recorded directly below in that account's column
+as part of the transaction activity.
 
 ##### Rows
 
@@ -71,19 +80,28 @@ The first four rows (ignoring the first three columns) are for account metadata.
 
 * *Account number* (**1**, **2**, **3**, **4**, **5**, ...): the top row reflects the account number (which currently must start at 1 and increase sequentially).
 
-* *Name* is the name of the wallet or exchange.
+* *Name*: This second row is the [friendly] name of the wallet or exchange.
 
-* *Ticker* should be self-explanatory (i.e., USD, EUR, BTC, XMR, ETH, LTC, etc.).
+* *Ticker*: This should be self-explanatory (i.e., USD, EUR, BTC, XMR, ETH, LTC, etc.).
 
-* *Margin_bool* is usually set as "no", "non" (i.e., non-margin), or "false".
-To indicate a margin account, set it as "yes", "margin" or "true".
+* *Margin_bool*: This describes, in 'yes' or 'no' fashion, whether the account is a margin account.
 
 * *Transactions*: After four header rows to describe the accounts, the transaction rows follow.
 Each row reflects the net effect on the accounts involved, net of any fees.
+There must be a value associated with *either* one *or* two accounts in each transaction row,
+depending on the type of transaction, i.e.:
+    * a deposit will reflect a postive value entering the account where money was deposit
+    * a payment will reflect a negative value exiting the account from where the money was spent
+    * an exchange would reflect a negative value in one account and a positive value in another
+    * a transfer (toSelf) would also reflect a negative value in one account and a positive value in another
 
-For example, in the first transaction above, 0.25 BTC was received,
-but the purchase would probably really have been for, say, 0.25002.
-That 0.00002 is a transaction fee kept by the exchange, so we ignore it.
+(An exchange transaction will trigger a gain or loss, whereas a toSelf transfer would not.)
+
+A note on transaction/network fees and exchange fees:
+
+In the first transaction above, 0.25 BTC was received,
+but the purchase would probably really have been buying, say, 0.25002.
+That extra 0.00002 is a transaction fee kept by the exchange, so we ignore it.
 The 0.25 represents the increase in the BTC balance, so 0.25 is used.
 
 The same logic applies to the next transaction.
@@ -110,3 +128,49 @@ For example, when using BTC to long XMR, the BTC account must be reflected with 
 * Margin gain or loss is accounted for when there is activity in the related "spot" account.
 For example, you won't reflect a loss until you actually spend your holdings to pay off your loans.
 Until you sell, it's simply an unrealized loss.
+
+#### CSV file components - Data types, restrictions, and important points
+
+##### Columns
+
+* **txDate**: This currently can parse dates of the formats `MM/dd/YY` and `MM/dd/YYYY`.
+The forward slash delineator must be used; not a hyphen.
+The ISO 8601 date format (`YYYY-MM-dd`) will be implemented eventually, including the hyphen delineator.
+
+* **proceeds**: This is can be any **positive** number that will parse into a floating point 32-bit number,
+as long as the **decimal separator** is a **period**.
+The software is designed to automatically *remove any commas* prior to parsing.
+The value in this field is denominated in the user's **home currency**,
+but be sure not to include the ticker or symbol of the currency
+(i.e., for `$14,567.27 USD`, enter `14567.27` or `14,567.27`).
+
+* **memo**: This can be a string of characters of any length, though fewer than 20-30 characters is advised.
+Currently, **commas** in the memo field are **not** supported.
+
+* *value*: This is similar to **proceeds**, in that the **decimal separator** must be a **period**,
+and you *cannot* include the ticker or symbol of the currency in that field.
+It is different from **proceeds** in that this will be parsed into a 128-bit precision decimal floating point number,
+and a negative value can be indicated via a preceding `-`.
+Negative values currently cannot be parsed if they are instead wrapped in parentheses (i.e., `(123.00)`).
+
+##### Rows
+
+* *Account number*: This will be parsed as a positive integer, the first account currently must
+be `1`, and each additional Account column must increase this value by `1`.
+
+* *Name*: This can be any string, though it should be very short, ideally.
+
+* *Ticker*: This can also be any string, but be mindful of the special formatting required for the margin quote account.
+Consider a scenario where XMR is being margin-traded in BTC terms.
+The price would be quoted in terms of the currency pair XMR/BTC, where XMR is the base account and BTC is the quote account.
+The software will behave fine with the XMR ticker as `XMR`, but the BTC ticker must be reflected as `BTC_xmr`.
+Note the underscore (`_`) that is used to signify that BTC was used to long or short XMR.
+
+* *Margin_bool*: This is usually set as "no", "non" (i.e., non-margin), or "false".
+To indicate a margin account, set it as "yes", "margin" or "true".
+Anything aside from those six choices will fail to parse.
+
+* *Transactions*: After the four header rows describing the accounts, the transaction rows follow.
+Each row is a separate transaction.
+For each transaction, input the **date**, **proceeds**, **memo**, and **values** by which the account balances change.
+As mentioned elsewhere, a minimum of one and a maximum of two Accounts can be associated with a single transaction.
