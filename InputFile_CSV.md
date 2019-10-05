@@ -18,9 +18,57 @@ At that time, additional transactions perhaps may be entered directly into the s
 For now, however, additional transactions are added to the input file,
 and then the input file is imported ***in full*** every time the software is run.
 
+## Overview
+
+`cryptools` is a command-line utility that does **not** store data.
+It is not a bookkeeping tool.
+It does **not** store your transactions in a persistent ledger.
+You cannot open the software later, load the ledger, and enter new transactions.
+If you have new transactions, you must append them to the input file.
+Once you have added new transactions to the input file and wish to view updated reports,
+you must run the software again and import the updated input file.
+New reports will be generated at that time.
+
+When the software runs, it imports the input file, it processes the transactions, and it prints reports.
+The transaction reports reflect income, expenses, realized gains, and realized losses.
+At a minimum, the account reports reflect account balances and cost basis of holdings.
+Some account reports reflect all movements in every lot in every account, including tracking of cost basis and more.
+After the reports have been printed/exported, the software stops running and the memory is abandoned/cleared.
+Once the software has run, you rely on the reports to tell you everything you need to know.
+
+Keep in mind that aggregating one's entire crypto history is very important!
+Cryptocurrency users **cannot** rely on exchanges to provide them with gain/loss information.
+At most, an exchange will be able to provide the gross value of their transactions (what `cryptools` calls `proceeds`).
+Exchanges have **no way** to track their users' cost basis, though,
+and exchanges have **no way** to verify the use of funds they disburse.
+Consequently, exchanges will treat all trades and all disbursements as pure gains.
+This means it is **up to users** to keep track of their cost basis!
+By aggregating all your cryptocurrency activity, this software enables you to track **and prove** your cost basis.
+(If you paid cash for any cryptos, proof becomes much more difficult, but at least you have an otherwise complete ledger.)
+
+The input file *can be* intimidating.
+Admittedly, some people will have a tough time preparing it correctly or at all.
+The trouble tends to come when aggregating a user's entire crypto history long after the fact.
+Even so, preparing and maintaining the input file is **not** very complicated.
+There are a small, limited number of rules to follow.
+The input file is simple to maintain once it is brought current and kept current.
+
+### The rules
+
+The rules for successfully preparing and maintaining the input file can generally be summarized as follows:
+
+1. The first account must be given number `1`, and each additional account must count up sequentially.
+2. Margin quote account tickers must be followed by an underscore and the base account ticker (i.e., `BTC_xmr`).
+3. Proceeds is the value of the transaction, whether spent, received, or exchanged.
+It is **required** in order to properly calculate income/expense/gain/loss.
+4. Proceeds must have a period as a decimal separator (1,000.00 not 1.000,00) and must not contain the ticker or symbol (USD or $).
+5. Only home currency accounts can have negative balances. Crypto accounts may not go negative at any time.
+
+Keep an eye out for a related project that creates input file pro formas from exchange reports, thus automating some of the process.
+
 ---
 
-The activity that gets imported **must** be in a prescribed form (a CSV file) that effectively looks like this:
+In order to be successfully imported, the CSV input file **must** be in a prescribed form that effectively looks like this:
 
 
 |txDate |proceeds|memo    |1     |2       |3      |4       |5           |
@@ -49,9 +97,9 @@ The activity that gets imported **must** be in a prescribed form (a CSV file) th
 
 The first three columns (ignoring the first four rows) are for transaction metadata.
 
-* **txDate** With each row being a transaction, this is the date of the transaction in that row.
+* **txDate**: With each row being a transaction, this is the date of the transaction in that row.
 
-* **proceeds** This is either (a) the value transferred from one party to another in a transaction,
+* **proceeds**: This is either (a) the value transferred from one party to another in a transaction,
 or (b) the value exchanged in a trade (an exchange transaction).
 In both cases, the value is measured in one's home currency!
 For example, if the user spends 0.01 BTC at a time when BTC/USD is $10,000/BTC,
@@ -63,14 +111,14 @@ the proceeds of that transaction would also be $100.
 Note: when transfering to oneself (i.e.,  not changing currencies), the proceeds value is irrelevant and ignored.
 This value is also ignored when the user's home currency is spent.
 
-* **memo** is a description of the transaction.
+* **memo**: is a description of the transaction.
 This should be used to describe the nature of, or reason for, the transaction.
 This could be important for remembering, for example, a tax-deductible payment,
 or maybe for distinguishing between mining earnings and a customer deposit.
 A memo is also useful when evaluating the reports you print/export,
 because there may be several transactions on the same day and a good memo helps you identify them.
 
-* *Accounts* - After three columns of transaction metadata, the *Account* columns follow.
+* *Accounts*: After three columns of transaction metadata, the *Account* columns follow.
 The increases and decreases to each account are recorded directly below in that account's column
 as part of the transaction activity.
 
@@ -78,7 +126,8 @@ as part of the transaction activity.
 
 The first four rows (ignoring the first three columns) are for account metadata.
 
-* *Account number* (**1**, **2**, **3**, **4**, **5**, ...): the top row reflects the account number (which currently must start at 1 and increase sequentially).
+* *Account number* (**1**, **2**, **3**, **4**, **5**, ...): the top row reflects the account number
+(which currently must start at 1 and increase sequentially).
 
 * *Name*: This second row is the [friendly] name of the wallet or exchange.
 
@@ -90,8 +139,8 @@ The first four rows (ignoring the first three columns) are for account metadata.
 Each row reflects the net effect on the accounts involved, net of any fees.
 There must be a value associated with *either* one *or* two accounts in each transaction row,
 depending on the type of transaction, i.e.:
-    * a deposit will reflect a postive value entering the account where money was deposit
-    * a payment will reflect a negative value exiting the account from where the money was spent
+    * a deposit will reflect a positive value posting to the account where money was deposited
+    * a payment will reflect a negative value posting to the account from where the money was spent
     * an exchange would reflect a negative value in one account and a positive value in another
     * a transfer (toSelf) would also reflect a negative value in one account and a positive value in another
 
@@ -119,15 +168,11 @@ These transactions are oversimplified on purpose.
 
 ###### Margin accounts
 
-* Margin accounts must come in pairs, the base account and the quote account.
-The base account is the coin being longed or shorted, and its ticker is reflected like normal.
-The quote account is the market.
-The quote account's ticker requires a different formatting.
-For example, when using BTC to long XMR, the BTC account must be reflected with the ticker BTC_xmr.
+* Margin accounts always come in pairs, the base account and the quote account.
 
 * Margin gain or loss is accounted for when there is activity in the related "spot" account.
-For example, you won't reflect a loss until you actually spend your holdings to pay off your loans.
-Until you sell, it's simply an unrealized loss.
+For example, a loss will not be recorded until "spot" holdings are used to pay off loans.
+Until "spot" funds are spent to pay off the margin loans, it's simply an [unrecorded] unrealized loss.
 
 #### CSV file components - Data types, restrictions, and important points
 
