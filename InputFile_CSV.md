@@ -34,18 +34,22 @@ Some account reports reflect *all* movements in *every* lot in *every* account, 
 After the reports have been printed/exported, the software stops running and the memory is abandoned/cleared.
 Once the software has run, you rely on the reports to tell you everything you need to know.
 
-Keep in mind that aggregating one's entire crypto history is very important!
-Cryptocurrency users **cannot** rely on exchanges to provide them with gain/loss information.
-At most, an exchange will be able to provide the gross value of their transactions (what `cryptools` calls `proceeds`).
+### Why should I go to the trouble?
 
 Think about this: exchanges have **no way** to track the cost basis of their users' holdings,
 nor can they verify how the funds they disburse are used.
-Consequently, exchanges will treat all trades and all disbursements as pure (taxable) gains.
+At most, an exchange will be able to provide the gross value of their transactions (what `cryptools` calls `proceeds`).
+If exchanges provide a user's trading activity to the IRS, for example, gross value is all they can provide.
+Consequently, unless you prove otherwise, the IRS will assume all trades and all disbursements are taxable income/gains.
 
-This means it is **up to users** to keep track of their cost basis!
+With that in mind, aggregating one's entire crypto history is very important!
+Cryptocurrency users **cannot** rely on exchanges to provide them (or the IRS) with gain/loss information.
+This means it is **up to users** to keep track of their cost basis.
+
 By aggregating all your cryptocurrency activity, this software enables you to track **and prove** your cost basis.
 Using these reports, you can walk back in time to track the cost basis used in every gain/loss calculation.
 (If you paid cash for any cryptos, proof becomes much more difficult, but at least you have an otherwise complete ledger.)
+The hurdle, of course, is preparing the input file.
 
 ### A final note before digging in
 
@@ -66,6 +70,9 @@ The rules for successfully preparing and maintaining the input file can generall
 It is **required** in order to properly calculate income/expense/gain/loss.
 4. Proceeds must have a period as a decimal separator (1,000.00 not 1.000,00) and must not contain the ticker or symbol (USD or $).
 5. Only home currency accounts can have negative balances. Crypto accounts may not go negative at any time.
+
+As you can see, most of the rules can generally be ignored.
+In fact, the only tricky field is the `proceeds` column, but even that becomes second nature soon enough.
 
 Keep an eye out for a related project that creates input file pro formas from exchange reports, thus automating some of the process.
 
@@ -94,7 +101,7 @@ In order to be successfully imported, the CSV input file **must** be in a prescr
 
 ---
 
-#### CSV file components - What they are
+### CSV file components - What they are
 
 ##### Columns
 
@@ -177,7 +184,7 @@ These transactions are oversimplified on purpose.
 For example, a loss will not be recorded until "spot" holdings are used to pay off loans.
 Until "spot" funds are spent to pay off the margin loans, it's simply an [unrecorded] unrealized loss.
 
-#### CSV file components - Data types, restrictions, and important points
+### CSV file components - Data types, restrictions, and important points
 
 ##### Columns
 
