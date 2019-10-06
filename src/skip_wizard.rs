@@ -23,7 +23,8 @@ pub(crate) fn skip_wizard(args: super::Cli) -> Result<(
     let date_separator = match args.opts.date_separator.into_string().unwrap().as_str() {
         "h" => {"-"}
         "s" => {"/"}
-        _ => { println!("\nFATAL: The date-separator arg requires either an 'h' or an 's'.\n"); process::exit(1) }
+        "p" => {"."}
+        _ => { println!("\nFATAL: The date-separator arg requires either an 'h', an 's', or a 'p'.\n"); process::exit(1) }
     };
 
     let input_file_path;

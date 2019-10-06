@@ -68,8 +68,8 @@ pub(crate) struct Flags {
 #[derive(StructOpt, Debug)]
 pub(crate) struct Options {
 
-    /// Choose "h" or "s" for hyphen or slash (i.e., "-" or "/") to indicate the separator character used
-    /// in the input file txDate column (i.e. 2017/12/31 or 2017-12-31).
+    /// Choose "h", "s", or "p" for hyphen, slash, or period (i.e., "-", "/", or ".") to indicate the separator
+    /// character used in the file_to_import txDate column (i.e. 2017/12/31, 2017-12-31, or 2017.12.31).
     #[structopt(name = "date separator character", short, long = "date-separator", default_value = "h", parse(from_os_str))]
     date_separator: OsString,
 
