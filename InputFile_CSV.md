@@ -2,58 +2,61 @@
 
 // Redistributions must include the license: https://github.com/scoobybejesus/cryptools/blob/master/LEGAL.txt
 
----
-
-**`input_file.csv`**
+## Overview
 
 The key to understanding how to use this software is to understand the input file.
-The input file encodes all accounts, including all transactions occurring in and between those accounts.
-All income, expenses, gains, and losses (and related like-kind treatment results)
-are deterministically calculated based on the input file (and the command-line parameters).
-This document aims to tell a user all they need to know about the CSV input file.
+This document aims to tell the user all they need to know.
 
 Note: the input file is needed in the *current* version of the software.
 Future versions may store the transactional activity in a database or similar file.
-At that time, additional transactions perhaps may be entered directly into the software.
-For now, however, additional transactions are added to the input file,
+At that time, it may be that additional transactions are entered directly into the software.
+For now, however, additional transactions must be added to the input file,
 and then the input file is imported ***in full*** every time the software is run.
 
-## Overview
+## Preface
 
-`cryptools` is a command-line utility that does **not** store data.
+`cryptools` is a command-line utility that does not store data.
 It is not a bookkeeping tool.
-It does **not** store your transactions in a persistent ledger.
+It does not store your transactions in a persistent ledger.
 You cannot open the software later, load the ledger, and enter new transactions.
+
+Rather, you must maintain the input file outside `cryptools`.
 If you have new transactions, you must append them to the input file.
 Once you have added new transactions to the input file and wish to view updated reports,
-you must run the software again and import the updated input file.
+you must run the software again and import the recently-updated input file.
 New reports will be generated at that time.
 
-When the software runs, it imports the input file, it processes the transactions, and it prints reports.
+When `cryptools` runs, it imports the input file, it processes the transactions, and it prints reports.
 The transaction reports reflect income, expenses, realized gains, and realized losses.
 At a minimum, the account reports reflect account balances and cost basis of holdings.
-Some account reports reflect all movements in every lot in every account, including tracking of cost basis and more.
+Some account reports reflect *all* movements in *every* lot in *every* account, including tracking of cost basis and more.
+
 After the reports have been printed/exported, the software stops running and the memory is abandoned/cleared.
 Once the software has run, you rely on the reports to tell you everything you need to know.
 
 Keep in mind that aggregating one's entire crypto history is very important!
 Cryptocurrency users **cannot** rely on exchanges to provide them with gain/loss information.
 At most, an exchange will be able to provide the gross value of their transactions (what `cryptools` calls `proceeds`).
-Exchanges have **no way** to track their users' cost basis, though,
-and exchanges have **no way** to verify the use of funds they disburse.
-Consequently, exchanges will treat all trades and all disbursements as pure gains.
+
+Think about this: exchanges have **no way** to track the cost basis of their users' holdings,
+nor can they verify how the funds they disburse are used.
+Consequently, exchanges will treat all trades and all disbursements as pure (taxable) gains.
+
 This means it is **up to users** to keep track of their cost basis!
 By aggregating all your cryptocurrency activity, this software enables you to track **and prove** your cost basis.
+Using these reports, you can walk back in time to track the cost basis used in every gain/loss calculation.
 (If you paid cash for any cryptos, proof becomes much more difficult, but at least you have an otherwise complete ledger.)
+
+### A final note before digging in
 
 The input file *can be* intimidating.
 Admittedly, some people will have a tough time preparing it correctly or at all.
 The trouble tends to come when aggregating a user's entire crypto history long after the fact.
 Even so, preparing and maintaining the input file is **not** very complicated.
-There are a small, limited number of rules to follow.
-The input file is simple to maintain once it is brought current and kept current.
+There are a small, limited number of rules to follow, and that's it.
+The truth is that the input file is simple to maintain once it is brought current and kept current.
 
-### The rules
+#### Rules of the input file
 
 The rules for successfully preparing and maintaining the input file can generally be summarized as follows:
 
@@ -66,7 +69,7 @@ It is **required** in order to properly calculate income/expense/gain/loss.
 
 Keep an eye out for a related project that creates input file pro formas from exchange reports, thus automating some of the process.
 
----
+## Visual representation
 
 In order to be successfully imported, the CSV input file **must** be in a prescribed form that effectively looks like this:
 

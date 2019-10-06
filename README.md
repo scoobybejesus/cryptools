@@ -4,21 +4,22 @@
 
 ###### (Currently runs as a binary)
 
-The software measures one's cryptocurrency activity (i.e., denominates one's income/expenses/gains/losses) in their home currency.
-The default home currency is USD, but anything can be substituted.
-This tool is probably most useful when filing one's taxes.
+This software calculates income, expenses, realized gains, and realized losses from cryptocurrency activity
+and denominates the results in the user's home currency.
+The default home currency is USD, but any currency can be substituted.
+This tool is probably most useful for filling out a tax return or making tax planning decisions.
 
 ---
 
 Given a [CSV input file](https://github.com/scoobybejesus/cryptools/blob/master/InputFile_CSV.md)
 containing the user's entire cryptocurrency transaction history, the software will:
 
-* assign cost basis as of the date of purchase/exchange/receipt
-* track the original acquisition date and cost basis until the time of disposal
+* record every cryptocurrency acquisition and track it until it is disposed
+* assign cost basis to every acquisition as of the date of purchase/exchange/receipt
+* track the original acquisition date and cost basis (making adjustements for like-kind exchange treatment, if elected)
 * compute gain or loss from the sale/exchange/disposal (including whether short-term or long-term)
 * record income for incoming transactions and expenses for outgoing transactions
-
-Reports reflecting income/expenses/gains/losses or amount and cost basis of existing holdings may be exported as CSV/TXT files.
+* print/export the results as CSV and TXT files
 
 ---
 
@@ -40,20 +41,22 @@ Reports reflecting income/expenses/gains/losses or amount and cost basis of exis
 the XCP or ETH transaction fee must be reflected in a separate transaction row).
 
 * Manual adjustments may need to be made to the output files in cases, for example,
-when the user used appreciated cryptocurrency to make a tax-deductible charitable contribution.
+when the uses used appreciated cryptocurrency to make a tax-deductible charitable contribution.
 
 ## Installation
 
-1. `cargo build` (include `--release` for a non-debug build)
+1. `git clone https://github.com/scoobybejesus/cryptools.git`
+2. `cd cryptools`
+3. `cargo build` (include `--release` for a non-debug build)
 
 This will build `./target/debug/cryptools` (or `./target/rls/cryptools` for a non-debug build).
 
 ## Usage
 
-Run `./target/debug/cryptools` with no arguments (or `--help`, or `-h`) to see usage.
+Run `./target/debug/cryptools` with no arguments (or with `--help`, or `-h`) to see usage.
 Alternatively, run `cargo run`, in which case command-line arguments for `cryptools` may be entered following `--`, e.g., `cargo run -- -h`.
 
-Running with no arguments will lead the user through a wizard, or all required arguments can be passed as command-line flags/options/args.
+Running with no arguments will lead the user through a wizard; or all required arguments can be passed as command-line flags/options/args.
 See `/examples/` directory for further guidance,
 or jump directly to the [examples.md](https://github.com/scoobybejesus/cryptools/blob/master/examples/examples.md) file.
 
@@ -75,16 +78,15 @@ Additional testers/users are encouraged and welcome.
 
 ## A few words from the founder
 
-I have an accounting background, and I live in the US.
-I took an interest in cryptocurrency in 2016.
+I have an accounting background, I live in the US, and I am interested in cryptocurrencies.
 When it came time to file my tax return, I had to come to grips with recording my cryptocurrency activity.
-I initially used a spreadsheet to manually process the activity into lots, and it quickly became clear that I needed a software solution.
+I initially used a spreadsheet that manually processed the activity into lots, and it quickly became clear that I needed a software solution.
 Given my background, I had certain expectations about what this type of software would do, and I tried several online options.
 I eventually created this project as a reaction to the inadequate tooling I found online.
 Sure, other products have more bells and whistles, but at least I know this produces correct results
 (i.e., this software specifically identifies and track all acquired assets, whereas online solutions seems to pool them together).
 
-I am not a formally trained programmer, however I enjoy it very much and learn more whenever I can.
+I am not a formally trained programmer, however I have come to enjoy it very much and learn more whenever I can.
 I originally tried to learn C++ by myself, and that was frustrating.
 My first real progress was with Python, but I still didn't manage to fully develop a working program.
 Luckily, I managed to stumble across a mentor who helped me write 80% of an MVP in strongly-typed Swift.
