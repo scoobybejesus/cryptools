@@ -24,7 +24,7 @@ pub(crate) fn wizard(args: super::Cli) -> Result<(
 
     shall_we_proceed()?;
 
-    let date_separator = match args.date_separator.into_string().unwrap().as_str() {
+    let date_separator = match args.opts.date_separator.into_string().unwrap().as_str() {
         "h" => {"-"}
         "s" => {"/"}
         _ => { println!("\nFATAL: The date-separator arg requires either an 'h' or an 's'.\n"); process::exit(1) }
@@ -38,15 +38,15 @@ pub(crate) fn wizard(args: super::Cli) -> Result<(
         input_file_path = cli_user_choices::choose_file_for_import()?;
     }
 
-    let output_dir_path = args.output_dir_path;
+    let output_dir_path = args.opts.output_dir_path;
 
-    let costing_method_choice = cli_user_choices::choose_inventory_costing_method(args.inv_costing_method)?;
+    let costing_method_choice = cli_user_choices::choose_inventory_costing_method(args.opts.inv_costing_method)?;
 
-    let home_currency_choice = args.home_currency.into_string().unwrap().to_uppercase();
+    let home_currency_choice = args.opts.home_currency.into_string().unwrap().to_uppercase();
 
     let lk_cutoff_date_opt_string;
 
-    if let Some(lk_cutoff) = args.lk_cutoff_date {
+    if let Some(lk_cutoff) = args.opts.lk_cutoff_date {
         lk_cutoff_date_opt_string = Some(lk_cutoff.into_string().unwrap())
     } else {
         lk_cutoff_date_opt_string = None
@@ -61,6 +61,7 @@ pub(crate) fn wizard(args: super::Cli) -> Result<(
         enable_like_kind_treatment: like_kind_election,
         lk_cutoff_date_string: like_kind_cutoff_date,
         date_separator: date_separator.to_string(),
+        iso_date_style: args.flags.iso_date
     };
 
     let (

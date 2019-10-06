@@ -112,6 +112,7 @@ pub(crate) fn import_transactions(
     txns_map: &mut HashMap<u32, Transaction>,
     action_records: &mut HashMap<u32, ActionRecord>,
     sep: &str,
+    iso: bool,
 ) -> Result<(), Box<dyn Error>> {
 
     let mut this_tx_number = 0;
@@ -200,11 +201,19 @@ pub(crate) fn import_transactions(
             None => {}
         }
 
-        let format_yy: &str = &("%m".to_owned() + sep + &"%d" + sep + "%y");
-        let format_yyyy: &str = &("%m".to_owned() + sep + &"%d" + sep + "%Y");
+        let format_yy: String;
+        let format_yyyy: String;
 
-        let tx_date = NaiveDate::parse_from_str(this_tx_date, format_yy)
-            .unwrap_or(NaiveDate::parse_from_str(this_tx_date, format_yyyy)
+        if iso {
+            format_yyyy = "%Y".to_owned() + sep + &"%d" + sep + "%m";
+            format_yy = "%y".to_owned() + sep + &"%d" + sep + "%m";
+        } else {
+            format_yyyy = "%m".to_owned() + sep + &"%d" + sep + "%Y";
+            format_yy = "%m".to_owned() + sep + &"%d" + sep + "%y";
+        }
+
+        let tx_date = NaiveDate::parse_from_str(this_tx_date, &format_yy)
+            .unwrap_or(NaiveDate::parse_from_str(this_tx_date, &format_yyyy)
             .expect("\nFailed to parse date in input file. Check date separator character. Also %m/%d/%y (or %Y) format is required.\n")
         );
 

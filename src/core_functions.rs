@@ -53,6 +53,7 @@ pub struct ImportProcessParameters {
     pub costing_method: InventoryCostingMethod,
     pub lk_cutoff_date_string: String,
     pub date_separator: String,
+    pub iso_date_style: bool,
 }
 
 pub(crate) fn import_and_process_final(
@@ -79,6 +80,7 @@ pub(crate) fn import_and_process_final(
         &mut raw_account_map,
         &mut account_map,
         &settings.date_separator,
+        settings.iso_date_style,
     ) {
         Ok(()) => { println!("Successfully imported csv file."); }
         Err(err) => {
@@ -96,6 +98,7 @@ pub(crate) fn import_and_process_final(
         raw_acct_map: &mut HashMap<u16, RawAccount>,
         acct_map: &mut HashMap<u16, Account>,
         date_separator: &str,
+        iso_date_style: bool,
     ) -> Result<(), Box<dyn Error>> {
 
         let file = File::open(import_file_path)?; println!("CSV ledger file opened successfully.\n");
@@ -111,6 +114,7 @@ pub(crate) fn import_and_process_final(
             transactions_map,
             action_records,
             date_separator,
+            iso_date_style,
         )?;
 
         Ok(())

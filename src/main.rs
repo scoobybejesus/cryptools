@@ -36,18 +36,47 @@ pub(crate) struct Cli {
     #[structopt(flatten)]
     flags: Flags,
 
+    #[structopt(flatten)]
+    opts: Options,
+
     /// File to be imported.  (Currently, the only supported date format is %m/%d/%y.)
     #[structopt(name = "file", parse(from_os_str))]
     file_to_import: Option<PathBuf>,
+}
 
-    /// Output directory for exported reports.
-    #[structopt(name = "output directory", short, long = "output", default_value = ".", parse(from_os_str))]
-    output_dir_path: PathBuf,
+#[derive(StructOpt, Debug)]
+pub(crate) struct Flags {
+
+    /// User is instructing the program to skip the data entry wizard.
+    /// When set, program will error without required command-line args.
+    #[structopt(name = "accept args", short = "a", long = "accept")]
+    accept_args: bool,
+
+    /// This will cause the program to expect the txDate field in the file_to_import to use the format
+    /// YYYY-MM-dd or YY-MM-dd (or YYYY/MM/dd or YY/MM/dd, depending on the date-separator option)
+    /// instead of the default US-style MM-dd-YYYY or MM-dd-YY (or MM/dd/YYYY or MM/dd/YY, depending on the
+    /// date separator option).
+    #[structopt(name = "date conforms to ISO 8601", short = "i", long = "iso")]
+    iso_date: bool,
+
+    /// This will prevent the program from writing reports to files.
+    /// This will be ignored if -a is not set (the wizard will always ask to output).
+    #[structopt(name = "suppress reports", short, long = "suppress")]
+    suppress_reports: bool,
+}
+
+#[derive(StructOpt, Debug)]
+pub(crate) struct Options {
 
     /// Choose "h" or "s" for hyphen or slash (i.e., "-" or "/") to indicate the separator character used
     /// in the input file txDate column (i.e. 2017/12/31 or 2017-12-31).
     #[structopt(name = "date separator character", short, long = "date-separator", default_value = "h", parse(from_os_str))]
     date_separator: OsString,
+
+    /// Home currency (currency in which all resulting reports are denominated).
+    /// (Only available as a command line setting.)
+    #[structopt(name = "home currency", short = "c", long = "currency", default_value = "USD", parse(from_os_str))]
+    home_currency: OsString,
 
     /// Cutoff date through which like-kind exchange treatment should be applied.
     /// Please use %y-%m-%d (or %Y-%m-%d) format for like-kind cutoff date entry.
@@ -64,24 +93,9 @@ pub(crate) struct Cli {
     ")]
     inv_costing_method: OsString,
 
-    /// Home currency (currency in which all resulting reports are denominated).
-    /// (Only available as a command line setting.)
-    #[structopt(name = "home currency", short = "c", long = "currency", default_value = "USD", parse(from_os_str))]
-    home_currency: OsString,
-}
-
-#[derive(StructOpt, Debug)]
-pub(crate) struct Flags {
-
-    /// User is instructing the program to skip the data entry wizard.
-    /// When set, program will error without required command-line args.
-    #[structopt(name = "accept args", short, long = "accept")]
-    accept_args: bool,
-
-    /// This will prevent the program from writing reports to files.
-    /// This will be ignored if -a is not set (the wizard will always ask to output).
-    #[structopt(name = "suppress reports", short, long = "suppress")]
-    suppress_reports: bool,
+    /// Output directory for exported reports.
+    #[structopt(name = "output directory", short, long = "output", default_value = ".", parse(from_os_str))]
+    output_dir_path: PathBuf,
 }
 
 
