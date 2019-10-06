@@ -23,7 +23,7 @@ containing the user's entire cryptocurrency transaction history, the software wi
 
 ---
 
-#### Features
+### Features
 
 * Two methods each of LIFO or FIFO (with intentions to add more)
 
@@ -31,7 +31,7 @@ containing the user's entire cryptocurrency transaction history, the software wi
 
 * Compatible with any home currency
 
-#### Constraints
+### Constraints
 
 * *All* cryptocurrency-related activity for the user generally must be included in the
 [CSV input file](https://github.com/scoobybejesus/cryptools/blob/master/InputFile_CSV.md).
@@ -41,7 +41,7 @@ containing the user's entire cryptocurrency transaction history, the software wi
 the XCP or ETH transaction fee must be reflected in a separate transaction row).
 
 * Manual adjustments may need to be made to the output files in cases, for example,
-when the uses used appreciated cryptocurrency to make a tax-deductible charitable contribution.
+when appreciated cryptocurrency was used to make a tax-deductible charitable contribution.
 
 ## Installation
 

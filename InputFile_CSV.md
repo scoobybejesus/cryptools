@@ -1,7 +1,3 @@
-// Copyright (c) 2017-2019, scoobybejesus
-
-// Redistributions must include the license: https://github.com/scoobybejesus/cryptools/blob/master/LEGAL.txt
-
 ## Overview
 
 The key to understanding how to use this software is to understand the input file.
@@ -47,7 +43,7 @@ Cryptocurrency users **cannot** rely on exchanges to provide them (or the IRS) w
 This means it is **up to users** to keep track of their cost basis.
 
 By aggregating all your cryptocurrency activity, this software enables you to track **and prove** your cost basis.
-Using these reports, you can walk back in time to track the cost basis used in every gain/loss calculation.
+Using these reports, you can walk back in time, tracing the history of the cost basis from every gain/loss calculation.
 (If you paid cash for any cryptos, proof becomes much more difficult, but at least you have an otherwise complete ledger.)
 The hurdle, of course, is preparing the input file.
 
