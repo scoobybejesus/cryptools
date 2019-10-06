@@ -3,6 +3,7 @@
 
 use std::error::Error;
 use std::collections::{HashMap};
+use std::process;
 
 use crate::cli_user_choices;
 use crate::core_functions::{self, LikeKindSettings, ImportProcessParameters};
@@ -18,6 +19,12 @@ pub(crate) fn skip_wizard(args: super::Cli) -> Result<(
     ImportProcessParameters,
     bool
 ), Box<dyn Error>> {
+
+    let date_separator = match args.date_separator.into_string().unwrap().as_str() {
+        "h" => {"-"}
+        "s" => {"/"}
+        _ => { println!("\nFATAL: The date-separator arg requires either an 'h' or an 's'.\n"); process::exit(1) }
+    };
 
     let input_file_path;
 
@@ -37,7 +44,7 @@ pub(crate) fn skip_wizard(args: super::Cli) -> Result<(
     let like_kind_election;
     let like_kind_cutoff_date_string: String;
 
-    if let Some(date) = args.cutoff_date {
+    if let Some(date) = args.lk_cutoff_date {
         like_kind_election = true;
         like_kind_cutoff_date_string = date.into_string().unwrap();
     } else {
@@ -51,6 +58,7 @@ pub(crate) fn skip_wizard(args: super::Cli) -> Result<(
         costing_method: costing_method_choice,
         enable_like_kind_treatment: like_kind_election,
         lk_cutoff_date_string: like_kind_cutoff_date_string,
+        date_separator: date_separator.to_string(),
     };
 
     let (
@@ -61,7 +69,7 @@ pub(crate) fn skip_wizard(args: super::Cli) -> Result<(
         like_kind_settings1
     ) = core_functions::import_and_process_final(input_file_path, &settings)?;
 
-    let should_export = !args.suppress_reports;
+    let should_export = !args.flags.suppress_reports;
 
     Ok((account_map1, raw_acct_map1, action_records_map1, transactions_map1, like_kind_settings1, settings, should_export))
 }

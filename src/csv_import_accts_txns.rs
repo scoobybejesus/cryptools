@@ -111,6 +111,7 @@ pub(crate) fn import_transactions(
     rdr: &mut csv::Reader<File>,
     txns_map: &mut HashMap<u32, Transaction>,
     action_records: &mut HashMap<u32, ActionRecord>,
+    sep: &str,
 ) -> Result<(), Box<dyn Error>> {
 
     let mut this_tx_number = 0;
@@ -199,9 +200,12 @@ pub(crate) fn import_transactions(
             None => {}
         }
 
-        let tx_date = NaiveDate::parse_from_str(this_tx_date, "%m/%d/%y")
-            .unwrap_or(NaiveDate::parse_from_str(this_tx_date, "%m/%d/%Y")
-            .expect("%m/%d/%y (or %Y) format required for ledger import")
+        let format_yy: &str = &("%m".to_owned() + sep + &"%d" + sep + "%y");
+        let format_yyyy: &str = &("%m".to_owned() + sep + &"%d" + sep + "%Y");
+
+        let tx_date = NaiveDate::parse_from_str(this_tx_date, format_yy)
+            .unwrap_or(NaiveDate::parse_from_str(this_tx_date, format_yyyy)
+            .expect("\nFailed to parse date in input file. Check date separator character. Also %m/%d/%y (or %Y) format is required.\n")
         );
 
         let transaction = Transaction {

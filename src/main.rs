@@ -33,6 +33,9 @@ mod skip_wizard;
 #[structopt(name = "cryptools")]
 pub(crate) struct Cli {
 
+    #[structopt(flatten)]
+    flags: Flags,
+
     /// File to be imported.  (Currently, the only supported date format is %m/%d/%y.)
     #[structopt(name = "file", parse(from_os_str))]
     file_to_import: Option<PathBuf>,
@@ -41,16 +44,18 @@ pub(crate) struct Cli {
     #[structopt(name = "output directory", short, long = "output", default_value = ".", parse(from_os_str))]
     output_dir_path: PathBuf,
 
-    /// This will prevent the program from writing the CSV to file. This will be ignored if -a is not set (the wizard will always ask to output).
-    #[structopt(name = "suppress reports", short, long = "suppress")]
-    suppress_reports: bool,
+    /// Choose "h" or "s" for hyphen or slash (i.e., "-" or "/") to indicate the separator character used
+    /// in the input file txDate column (i.e. 2017/12/31 or 2017-12-31).
+    #[structopt(name = "date separator character", short, long = "date-separator", default_value = "h", parse(from_os_str))]
+    date_separator: OsString,
 
     /// Cutoff date through which like-kind exchange treatment should be applied.
     /// Please use %y-%m-%d (or %Y-%m-%d) format for like-kind cutoff date entry.
-    #[structopt(name = "like-kind cutoff date", short, long = "cutoff", parse(from_os_str))]
-    cutoff_date: Option<OsString>,
+    #[structopt(name = "like-kind cutoff date", short, long = "lk-cutoff", parse(from_os_str))]
+    lk_cutoff_date: Option<OsString>,
 
-    /// Inventory costing method (in terms of lot selection, i.e., LIFO, FIFO, etc.). There are currently four options (1 through 4).
+    /// Inventory costing method (in terms of lot selection, i.e., LIFO, FIFO, etc.).
+    /// There are currently four options (1 through 4).
     #[structopt(name = "method", short, long, default_value = "1", parse(from_os_str), long_help =
     r"    1. LIFO according to the order the lot was created.
     2. LIFO according to the basis date of the lot.
@@ -59,13 +64,24 @@ pub(crate) struct Cli {
     ")]
     inv_costing_method: OsString,
 
-    /// Home currency (currency in which all resulting reports are denominated). (Only available as a command line setting.)
+    /// Home currency (currency in which all resulting reports are denominated).
+    /// (Only available as a command line setting.)
     #[structopt(name = "home currency", short = "c", long = "currency", default_value = "USD", parse(from_os_str))]
     home_currency: OsString,
+}
 
-    /// User is instructing the program to skip the data entry wizard. When set, program will error without required command-line args.
+#[derive(StructOpt, Debug)]
+pub(crate) struct Flags {
+
+    /// User is instructing the program to skip the data entry wizard.
+    /// When set, program will error without required command-line args.
     #[structopt(name = "accept args", short, long = "accept")]
     accept_args: bool,
+
+    /// This will prevent the program from writing reports to files.
+    /// This will be ignored if -a is not set (the wizard will always ask to output).
+    #[structopt(name = "suppress reports", short, long = "suppress")]
+    suppress_reports: bool,
 }
 
 
@@ -92,7 +108,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let like_kind_settings;
     let should_export;
 
-    if !args.accept_args {
+    if !args.flags.accept_args {
 
         let (
             account_map1,

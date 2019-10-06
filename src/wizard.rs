@@ -24,6 +24,12 @@ pub(crate) fn wizard(args: super::Cli) -> Result<(
 
     shall_we_proceed()?;
 
+    let date_separator = match args.date_separator.into_string().unwrap().as_str() {
+        "h" => {"-"}
+        "s" => {"/"}
+        _ => { println!("\nFATAL: The date-separator arg requires either an 'h' or an 's'.\n"); process::exit(1) }
+    };
+
     let input_file_path;
 
     if let Some(file) = args.file_to_import {
@@ -40,7 +46,7 @@ pub(crate) fn wizard(args: super::Cli) -> Result<(
 
     let lk_cutoff_date_opt_string;
 
-    if let Some(lk_cutoff) = args.cutoff_date {
+    if let Some(lk_cutoff) = args.lk_cutoff_date {
         lk_cutoff_date_opt_string = Some(lk_cutoff.into_string().unwrap())
     } else {
         lk_cutoff_date_opt_string = None
@@ -54,6 +60,7 @@ pub(crate) fn wizard(args: super::Cli) -> Result<(
         costing_method: costing_method_choice,
         enable_like_kind_treatment: like_kind_election,
         lk_cutoff_date_string: like_kind_cutoff_date,
+        date_separator: date_separator.to_string(),
     };
 
     let (

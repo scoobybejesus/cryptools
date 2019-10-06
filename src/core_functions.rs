@@ -52,6 +52,7 @@ pub struct ImportProcessParameters {
     pub enable_like_kind_treatment: bool,
     pub costing_method: InventoryCostingMethod,
     pub lk_cutoff_date_string: String,
+    pub date_separator: String,
 }
 
 pub(crate) fn import_and_process_final(
@@ -62,7 +63,7 @@ pub(crate) fn import_and_process_final(
     HashMap<u16, RawAccount>,
     HashMap<u32, ActionRecord>,
     HashMap<u32, Transaction>,
-    Option<LikeKindSettings>
+    Option<LikeKindSettings>,
 ), Box<dyn Error>> {
 
     let mut transactions_map: HashMap<u32, Transaction> = HashMap::new();
@@ -76,7 +77,8 @@ pub(crate) fn import_and_process_final(
         &mut transactions_map,
         &mut action_records_map,
         &mut raw_account_map,
-        &mut account_map
+        &mut account_map,
+        &settings.date_separator,
     ) {
         Ok(()) => { println!("Successfully imported csv file."); }
         Err(err) => {
@@ -93,6 +95,7 @@ pub(crate) fn import_and_process_final(
         action_records: &mut HashMap<u32, ActionRecord>,
         raw_acct_map: &mut HashMap<u16, RawAccount>,
         acct_map: &mut HashMap<u16, Account>,
+        date_separator: &str,
     ) -> Result<(), Box<dyn Error>> {
 
         let file = File::open(import_file_path)?; println!("CSV ledger file opened successfully.\n");
@@ -107,6 +110,7 @@ pub(crate) fn import_and_process_final(
             &mut rdr,
             transactions_map,
             action_records,
+            date_separator,
         )?;
 
         Ok(())
