@@ -12,6 +12,7 @@ use std::ffi::OsString;
 use structopt::StructOpt;
 use std::path::PathBuf;
 use std::error::Error;
+use std::process;
 
 mod account;
 mod transaction;
@@ -98,6 +99,20 @@ pub(crate) struct Options {
     output_dir_path: PathBuf,
 }
 
+pub struct NonExclusiveToImportWizardArgs {
+    file_to_import: PathBuf,
+    accept_args: bool,
+    iso_date: bool,
+    date_separator: String,
+    home_currency: String,
+}
+
+pub struct ExclusiveToImportWizardArgs {
+    pub inv_costing_method_arg: OsString,
+    pub lk_cutoff_date_arg: Option<OsString>,
+    pub output_dir_path: PathBuf,
+    pub suppress_reports: bool,
+}
 
 fn main() -> Result<(), Box<dyn Error>> {
 
@@ -122,6 +137,37 @@ fn main() -> Result<(), Box<dyn Error>> {
     let like_kind_settings;
     let should_export;
 
+    let input_file_path;
+
+    if let Some(file) = args.file_to_import {
+        input_file_path = file
+    } else {
+        // println!("WARN: Flag to 'accept args' was set, but 'file' is missing. It is a required field.\n");
+        input_file_path = cli_user_choices::choose_file_for_import()?;
+    }
+
+    let date_separator = match args.opts.date_separator.into_string().unwrap().as_str() {
+        "h" => {"-"}
+        "s" => {"/"}
+        "p" => {"."}
+        _ => { println!("\nFATAL: The date-separator arg requires either an 'h', an 's', or a 'p'.\n"); process::exit(1) }
+    };
+
+    let non_excl_args = NonExclusiveToImportWizardArgs {
+        file_to_import: input_file_path,
+        accept_args: args.flags.accept_args,
+        iso_date: args.flags.iso_date,
+        date_separator: date_separator.to_string(),
+        home_currency: args.opts.home_currency.into_string().unwrap().to_uppercase(),
+    };
+
+    let excl_args = ExclusiveToImportWizardArgs {
+        inv_costing_method_arg: args.opts.inv_costing_method,
+        lk_cutoff_date_arg: args.opts.lk_cutoff_date,
+        output_dir_path: args.opts.output_dir_path,
+        suppress_reports: args.flags.suppress_reports,
+    };
+
     if !args.flags.accept_args {
 
         let (
@@ -132,7 +178,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             like_kind_settings1,
             settings1,
             should_export1
-        ) = wizard::wizard(args)?;
+        ) = wizard::wizard(non_excl_args, excl_args)?;
 
         account_map = account_map1;
         raw_acct_map = raw_acct_map1;
@@ -152,7 +198,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             like_kind_settings1,
             settings1,
             should_export1
-        ) = skip_wizard::skip_wizard(args)?;
+        ) = skip_wizard::skip_wizard(non_excl_args, excl_args)?;
 
         account_map = account_map1;
         raw_acct_map = raw_acct_map1;
