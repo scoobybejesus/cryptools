@@ -14,8 +14,8 @@ use rustyline::config::OutputStreamType;
 use rustyline::hint::{Hinter};
 use rustyline::error::ReadlineError;
 use rustyline::highlight::{Highlighter};
-use crate::core_functions::InventoryCostingMethod;
 
+use crate::core_functions::InventoryCostingMethod;
 use crate::string_utils;
 
 
@@ -174,7 +174,6 @@ pub(crate) fn elect_like_kind_treatment(cutoff_date_arg: &Option<String>) -> Res
                 let mut input = String::new();
                 let stdin = io::stdin();
                 stdin.lock().read_line(&mut input)?;
-
 
                 match input.trim().to_ascii_lowercase().as_str() {
                     "y" | "ye" | "yes" | "" => {
