@@ -50,10 +50,10 @@ pub struct ImportProcessParameters {
     pub export_path: PathBuf,
     pub home_currency: String,
     pub enable_like_kind_treatment: bool,
-    pub costing_method: InventoryCostingMethod,
     pub lk_cutoff_date_string: String,
-    pub date_separator: String,
-    pub iso_date_style: bool,
+    pub costing_method: InventoryCostingMethod,
+    pub input_file_date_separator: String,
+    pub input_file_has_iso_date_style: bool,
     pub should_export: bool,
 }
 
@@ -80,8 +80,8 @@ pub(crate) fn import_and_process_final(
         &mut action_records_map,
         &mut raw_account_map,
         &mut account_map,
-        &settings.date_separator,
-        settings.iso_date_style,
+        &settings.input_file_date_separator,
+        settings.input_file_has_iso_date_style,
     ) {
         Ok(()) => { println!("Successfully imported csv file."); }
         Err(err) => {

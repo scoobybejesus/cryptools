@@ -130,7 +130,7 @@ pub(crate) fn import_transactions(
 
         //  First, initialize metadata fields.
         let mut this_tx_date: &str = "";
-        let mut this_proceeds: &str = "";
+        let mut this_proceeds: &str;
         let mut this_memo: &str = "";
         let mut this: String;
         let mut proceeds_parsed = 0f32;

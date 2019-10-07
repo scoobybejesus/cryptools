@@ -12,7 +12,7 @@ use crate::skip_wizard;
 use crate::wizard;
 
 
-pub struct WizardMaybeArgs {
+pub struct ArgsForImportVarsTBD {
     pub inv_costing_method_arg: OsString,
     pub lk_cutoff_date_arg: Option<OsString>,
     pub output_dir_path: PathBuf,
@@ -33,7 +33,7 @@ pub (crate) fn run_setup(args: super::Cli) -> Result<(PathBuf, ImportProcessPara
         None => cli_user_choices::choose_file_for_import()?
     };
 
-    let wizard_or_not_args = WizardMaybeArgs {
+    let wizard_or_not_args = ArgsForImportVarsTBD {
         inv_costing_method_arg: args.opts.inv_costing_method,
         lk_cutoff_date_arg: args.opts.lk_cutoff_date,
         output_dir_path: args.opts.output_dir_path,
@@ -49,20 +49,20 @@ pub (crate) fn run_setup(args: super::Cli) -> Result<(PathBuf, ImportProcessPara
      ) = wizard_or_not(args.flags.accept_args, wizard_or_not_args)?;
 
     let settings = ImportProcessParameters {
-        export_path: output_dir_path,
         home_currency: args.opts.home_currency.into_string().unwrap().to_uppercase(),
+        input_file_has_iso_date_style: args.flags.iso_date,
+        input_file_date_separator: date_separator.to_string(),
         costing_method: costing_method_choice,
         enable_like_kind_treatment: like_kind_election,
         lk_cutoff_date_string: like_kind_cutoff_date_string,
-        date_separator: date_separator.to_string(),
-        iso_date_style: args.flags.iso_date,
         should_export: should_export,
+        export_path: output_dir_path,
     };
 
     Ok((input_file_path, settings))
 }
 
-fn wizard_or_not(accept_args: bool, excl_args: WizardMaybeArgs) -> Result<(
+fn wizard_or_not(accept_args: bool, args: ArgsForImportVarsTBD) -> Result<(
         InventoryCostingMethod,
         bool,
         String,
@@ -84,7 +84,7 @@ fn wizard_or_not(accept_args: bool, excl_args: WizardMaybeArgs) -> Result<(
                 like_kind_cutoff_date_string1,
                 should_export1,
                 output_dir_path1,
-            ) = wizard::wizard(excl_args)?;
+            ) = wizard::wizard(args)?;
 
             costing_method_choice = costing_method_choice1;
             like_kind_election = like_kind_election1;
@@ -100,7 +100,7 @@ fn wizard_or_not(accept_args: bool, excl_args: WizardMaybeArgs) -> Result<(
                 like_kind_cutoff_date_string1,
                 should_export1,
                 output_dir_path1,
-            ) = skip_wizard::skip_wizard(excl_args)?;
+            ) = skip_wizard::skip_wizard(args)?;
 
             costing_method_choice = costing_method_choice1;
             like_kind_election = like_kind_election1;

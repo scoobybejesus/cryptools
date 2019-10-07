@@ -8,9 +8,9 @@ use std::path::PathBuf;
 
 use crate::cli_user_choices;
 use crate::core_functions::{InventoryCostingMethod};
-use crate::setup::{WizardMaybeArgs};
+use crate::setup::{ArgsForImportVarsTBD};
 
-pub(crate) fn wizard(excl_args: WizardMaybeArgs) -> Result<(
+pub(crate) fn wizard(args: ArgsForImportVarsTBD) -> Result<(
     InventoryCostingMethod,
     bool,
     String,
@@ -20,11 +20,11 @@ pub(crate) fn wizard(excl_args: WizardMaybeArgs) -> Result<(
 
     shall_we_proceed()?;
 
-    let costing_method_choice = cli_user_choices::choose_inventory_costing_method(excl_args.inv_costing_method_arg)?;
+    let costing_method_choice = cli_user_choices::choose_inventory_costing_method(args.inv_costing_method_arg)?;
 
     let lk_cutoff_date_opt_string;
 
-    if let Some(lk_cutoff) = excl_args.lk_cutoff_date_arg {
+    if let Some(lk_cutoff) = args.lk_cutoff_date_arg {
         lk_cutoff_date_opt_string = Some(lk_cutoff.into_string().unwrap())
     } else {
         lk_cutoff_date_opt_string = None
@@ -32,7 +32,7 @@ pub(crate) fn wizard(excl_args: WizardMaybeArgs) -> Result<(
 
     let (like_kind_election, like_kind_cutoff_date_string) = cli_user_choices::elect_like_kind_treatment(&lk_cutoff_date_opt_string)?;
 
-    let (should_export, output_dir_path) = export_reports_to_output_dir(excl_args.output_dir_path)?;
+    let (should_export, output_dir_path) = export_reports_to_output_dir(args.output_dir_path)?;
 
     Ok((costing_method_choice, like_kind_election, like_kind_cutoff_date_string, should_export, output_dir_path.to_path_buf()))
 }
