@@ -54,6 +54,7 @@ pub struct ImportProcessParameters {
     pub lk_cutoff_date_string: String,
     pub date_separator: String,
     pub iso_date_style: bool,
+    pub should_export: bool,
 }
 
 pub(crate) fn import_and_process_final(

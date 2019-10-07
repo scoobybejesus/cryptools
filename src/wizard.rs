@@ -5,24 +5,17 @@ use std::error::Error;
 use std::process;
 use std::io::{self, BufRead};
 use std::path::PathBuf;
-use std::collections::{HashMap};
 
 use crate::cli_user_choices;
-use crate::core_functions::{self, LikeKindSettings, ImportProcessParameters};
-use crate::account::{Account, RawAccount};
-use crate::transaction::{Transaction, ActionRecord};
+use crate::core_functions::{InventoryCostingMethod};
+use crate::setup::{WizardMaybeArgs};
 
-pub(crate) fn wizard(
-    non_excl_args: super::NonExclusiveToImportWizardArgs,
-    excl_args: super::ExclusiveToImportWizardArgs
-) -> Result<(
-    HashMap<u16, Account>,
-    HashMap<u16, RawAccount>,
-    HashMap<u32, ActionRecord>,
-    HashMap<u32, Transaction>,
-    Option<LikeKindSettings>,
-    ImportProcessParameters,
-    bool
+pub(crate) fn wizard(excl_args: WizardMaybeArgs) -> Result<(
+    InventoryCostingMethod,
+    bool,
+    String,
+    bool,
+    PathBuf,
 ), Box<dyn Error>> {
 
     shall_we_proceed()?;
@@ -39,27 +32,9 @@ pub(crate) fn wizard(
 
     let (like_kind_election, like_kind_cutoff_date_string) = cli_user_choices::elect_like_kind_treatment(&lk_cutoff_date_opt_string)?;
 
-    let mut settings = ImportProcessParameters {
-        export_path: excl_args.output_dir_path,
-        home_currency: non_excl_args.home_currency,
-        costing_method: costing_method_choice,
-        enable_like_kind_treatment: like_kind_election,
-        lk_cutoff_date_string: like_kind_cutoff_date_string,
-        date_separator: non_excl_args.date_separator,
-        iso_date_style: non_excl_args.iso_date
-    };
+    let (should_export, output_dir_path) = export_reports_to_output_dir(excl_args.output_dir_path)?;
 
-    let (
-        account_map1,
-        raw_acct_map1,
-        action_records_map1,
-        transactions_map1,
-        like_kind_settings1
-    ) = core_functions::import_and_process_final(non_excl_args.file_to_import, &settings)?;
-
-    let should_export = export_reports_to_output_dir(&mut settings)?;
-
-    Ok((account_map1, raw_acct_map1, action_records_map1, transactions_map1, like_kind_settings1, settings, should_export))
+    Ok((costing_method_choice, like_kind_election, like_kind_cutoff_date_string, should_export, output_dir_path.to_path_buf()))
 }
 
 fn shall_we_proceed() -> Result<(), Box<dyn Error>> {
@@ -85,19 +60,19 @@ fn shall_we_proceed() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn export_reports_to_output_dir(settings: &mut ImportProcessParameters) -> Result<(bool), Box<dyn Error>> {
+fn export_reports_to_output_dir(output_dir_path: PathBuf) -> Result<(bool, PathBuf), Box<dyn Error>> {
 
-    println!("\nThe directory currently selected for exporting reports is: {}", settings.export_path.to_str().unwrap());
+    println!("\nThe directory currently selected for exporting reports is: {}", output_dir_path.to_str().unwrap());
 
-    if settings.export_path.to_str().unwrap() == "." {
+    if output_dir_path.to_str().unwrap() == "." {
         println!("  (A 'dot' denotes the default value: current working directory.)");
     }
 
     println!("\nExport reports to selected directory? [Y/n/c] ('c' to 'change') ");
 
-    let choice = _export(settings)?;
+    let (choice, path) = _export(output_dir_path)?;
 
-    fn _export(settings: &mut ImportProcessParameters) -> Result<(bool), Box<dyn Error>> {
+    fn _export(output_dir_path: PathBuf) -> Result<(bool, PathBuf), Box<dyn Error>> {
 
         let mut input = String::new();
         let stdin = io::stdin();
@@ -105,18 +80,17 @@ fn export_reports_to_output_dir(settings: &mut ImportProcessParameters) -> Resul
 
         match input.trim().to_ascii_lowercase().as_str() {
 
-            "y" | "ye" | "yes" | "" => { Ok(true) },
-            "n" | "no" => { println!("Okay, no reports will be created."); Ok(false) },
+            "y" | "ye" | "yes" | "" => { Ok((true, output_dir_path)) },
+            "n" | "no" => { println!("Okay, no reports will be created."); Ok((false, output_dir_path)) },
             "c" | "change" => {
                 let new_dir = cli_user_choices::choose_export_dir()?;
-                settings.export_path = PathBuf::from(new_dir);
-                Ok(true)
+                Ok((true, new_dir))
             },
             _   => { println!("Please respond with 'y', 'n', or 'c' (or 'yes' or 'no' or 'change').");
-                _export(settings)
+                _export(output_dir_path)
             }
         }
     }
 
-    Ok(choice)
+    Ok((choice, path))
 }
