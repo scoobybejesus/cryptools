@@ -16,7 +16,7 @@ It is not a bookkeeping tool.
 It does not store your transactions in a persistent ledger.
 You cannot open the software later, load the ledger, and enter new transactions.
 
-Rather, you must maintain the input file outside `cryptools`.
+Rather, you must maintain the input file outside of `cryptools`.
 If you have new transactions, you must append them to the input file.
 Once you have added new transactions to the input file and wish to view updated reports,
 you must run the software again and import the recently-updated input file.
@@ -61,11 +61,12 @@ The truth is that the input file is simple to maintain once it is brought curren
 The rules for successfully preparing and maintaining the input file can generally be summarized as follows:
 
 1. The first account must be given number `1`, and each additional account must count up sequentially.
-2. Margin quote account tickers must be followed by an underscore and the base account ticker (i.e., `BTC_xmr`).
-3. Proceeds is the value of the transaction, whether spent, received, or exchanged.
+2. Margin quote account `ticker`s must be followed by an underscore and the base account ticker (i.e., `BTC_xmr`).
+3. `Proceeds` is the value of the transaction, whether spent, received, or exchanged.
 It is **required** in order to properly calculate income/expense/gain/loss.
-4. Proceeds must have a period as a decimal separator (1,000.00 not 1.000,00) and must not contain the ticker or symbol (USD or $).
+4. `Proceeds` must have a period as a decimal separator (`1,000.00` not `1.000,00`) and must not contain the ticker or symbol (USD or $).
 5. Only home currency accounts can have negative balances. Crypto accounts may not go negative at any time.
+(Exception: crypto margin accounts may go negative, of course.)
 
 As you can see, most of the rules can generally be ignored.
 In fact, the only tricky field is the `proceeds` column, but even that becomes second nature soon enough.
@@ -184,9 +185,10 @@ Until "spot" funds are spent to pay off the margin loans, it's simply an [unreco
 
 ##### Columns
 
-* **txDate**: This currently can parse dates of the formats `MM/dd/YY` and `MM/dd/YYYY`.
-The forward slash delineator must be used; not a hyphen.
-The ISO 8601 date format (`YYYY-MM-dd`) will be implemented eventually, including the hyphen delineator.
+* **txDate**: As a default, this parser expects a format of `MM-dd-YY` or `MM-dd-YYYY`.
+The ISO 8601 date format (`YYYY-MM-dd` or `YY-MM-dd` both work) may be indicated by passing the `-i` flag.
+The hyphen, slash, or period delimiters (`-`, `/`, or `.`) may be indicated
+by passing the `-d` option followed by `h`, `s`, or `p`, respectively (hyphen, `-`, is default).
 
 * **proceeds**: This is can be any **positive** number that will parse into a floating point 32-bit number,
 as long as the **decimal separator** is a **period**.
