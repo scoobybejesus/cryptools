@@ -86,7 +86,7 @@ pub(crate) struct Options {
 
     /// Inventory costing method (in terms of lot selection, i.e., LIFO, FIFO, etc.).
     /// There are currently four options (1 through 4).
-    #[structopt(name = "method", short, long, default_value = "1", parse(from_os_str), long_help =
+    #[structopt(name = "method number for lot selection", short, long, default_value = "1", parse(from_os_str), long_help =
     r"    1. LIFO according to the order the lot was created.
     2. LIFO according to the basis date of the lot.
     3. FIFO according to the order the lot was created.

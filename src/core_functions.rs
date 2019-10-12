@@ -16,6 +16,8 @@ use crate::csv_import_accts_txns;
 use crate::import_cost_proceeds_etc;
 use crate::create_lots_mvmts;
 
+/// An `InventoryMethod` determines the order in which a `Lot` is chosen when posting
+/// `ActionRecord` amounts as individual `Movement`s.
 #[derive(Clone, Debug, PartialEq, StructOpt)]
 pub enum InventoryCostingMethod {
     /// 1. LIFO according to the order the lot was created.
@@ -40,7 +42,10 @@ impl fmt::Display for InventoryCostingMethod {
     }
 }
 
-
+/// `ImportProcessParameters` are determined from command-line args and/or wizard input from the user.
+/// They are the settings that allow the software to carry out the importing-from-csv of
+/// `Account`s and `Transaction`s, creation of `Lot`s and `Movement`s, addition of cost basis and proceeds
+/// to `Movement`s, and application of like-kind treatment, in a specific and automated fashion.
 pub struct ImportProcessParameters {
     pub export_path: PathBuf,
     pub home_currency: String,
