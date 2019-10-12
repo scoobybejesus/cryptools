@@ -32,7 +32,7 @@ pub (crate) fn run_setup(args: super::Cli) -> Result<(PathBuf, ImportProcessPara
 
     let input_file_path = match args.file_to_import {
         Some(file) => file,
-        None => cli_user_choices::choose_file_for_import()?
+        None => cli_user_choices::choose_file_for_import(args.flags.accept_args)?
     };
 
     let wizard_or_not_args = ArgsForImportVarsTBD {

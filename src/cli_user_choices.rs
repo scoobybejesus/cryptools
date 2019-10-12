@@ -19,14 +19,18 @@ use crate::core_functions::InventoryCostingMethod;
 use crate::string_utils;
 
 
-pub fn choose_file_for_import() -> Result<PathBuf, Box<dyn Error>> {
+pub fn choose_file_for_import(flag_to_accept_cli_args: bool) -> Result<PathBuf, Box<dyn Error>> {
+
+    if flag_to_accept_cli_args {
+        println!("\nWARN: Flag to 'accept args' was set, but 'file' is missing.\n");
+    }
 
     println!("Please input a file (absolute or relative path) to import: ");
 
     let (file_string, has_tilde) = _get_path()?;
 
     if has_tilde {
-        choose_file_for_import()
+        choose_file_for_import(flag_to_accept_cli_args)
     } else {
         Ok( PathBuf::from(file_string) )
     }
