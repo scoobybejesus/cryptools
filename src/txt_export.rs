@@ -78,12 +78,12 @@ Home currency: {}
 Enable like-kind treatment: {}",
         settings.costing_method,
         settings.home_currency,
-        settings.enable_like_kind_treatment
+        settings.lk_treatment_enabled
     )?;
 
-    if settings.enable_like_kind_treatment {
+    if settings.lk_treatment_enabled {
         writeln!(file, "Like-kind cut-off date: {}.",
-            settings.lk_cutoff_date_string
+            settings.lk_cutoff_date
         )?;
     }
 
@@ -226,12 +226,12 @@ Home currency: {}
 Enable like-kind treatment: {}",
         settings.costing_method,
         settings.home_currency,
-        settings.enable_like_kind_treatment
+        settings.lk_treatment_enabled
     )?;
 
-    if settings.enable_like_kind_treatment {
+    if settings.lk_treatment_enabled {
         writeln!(file, "Like-kind cut-off date: {}.",
-            settings.lk_cutoff_date_string
+            settings.lk_cutoff_date
         )?;
     }
 
@@ -308,12 +308,12 @@ Home currency: {}
 Enable like-kind treatment: {}",
         settings.costing_method,
         settings.home_currency,
-        settings.enable_like_kind_treatment
+        settings.lk_treatment_enabled
     )?;
 
-    if settings.enable_like_kind_treatment {
+    if settings.lk_treatment_enabled {
         writeln!(file, "Like-kind cut-off date: {}.",
-            settings.lk_cutoff_date_string
+            settings.lk_cutoff_date
         )?;
     }
 

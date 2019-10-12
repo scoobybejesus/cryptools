@@ -40,17 +40,14 @@ impl fmt::Display for InventoryCostingMethod {
     }
 }
 
-#[derive(Clone)]
-pub struct LikeKindSettings {
-    pub like_kind_cutoff_date: NaiveDate,
-    pub like_kind_basis_date_preserved: bool,
-}
 
 pub struct ImportProcessParameters {
     pub export_path: PathBuf,
     pub home_currency: String,
-    pub enable_like_kind_treatment: bool,
-    pub lk_cutoff_date_string: String,
+    pub lk_treatment_enabled: bool,
+    /// NaiveDate either from "1-1-1" (default and not to be used) or the actual date chosen (or passed in via Cli option)
+    pub lk_cutoff_date: NaiveDate,
+    pub lk_basis_date_preserved: bool,
     pub costing_method: InventoryCostingMethod,
     pub input_file_date_separator: String,
     pub input_file_has_iso_date_style: bool,
@@ -65,7 +62,6 @@ pub(crate) fn import_and_process_final(
     HashMap<u16, RawAccount>,
     HashMap<u32, ActionRecord>,
     HashMap<u32, Transaction>,
-    Option<LikeKindSettings>,
 ), Box<dyn Error>> {
 
     let mut transactions_map: HashMap<u32, Transaction> = HashMap::new();
@@ -121,22 +117,6 @@ pub(crate) fn import_and_process_final(
         Ok(())
     }
 
-    let likekind_settings: Option<LikeKindSettings> = if settings.enable_like_kind_treatment {
-
-        let like_kind_cutoff_date = &settings.lk_cutoff_date_string;
-
-        Some(
-            LikeKindSettings {
-                like_kind_cutoff_date: NaiveDate::parse_from_str(&like_kind_cutoff_date, "%y-%m-%d")
-                    .unwrap_or(NaiveDate::parse_from_str(&like_kind_cutoff_date, "%Y-%m-%d")
-                    .expect("Found date string with improper format")),
-                like_kind_basis_date_preserved: true,
-            }
-        )
-    } else {
-        None
-    };
-
     transactions_map = create_lots_mvmts::create_lots_and_movements(
         transactions_map,
         &action_records_map,
@@ -144,7 +124,9 @@ pub(crate) fn import_and_process_final(
         &mut account_map,
         &settings.home_currency,
         &settings.costing_method,
-        &likekind_settings,
+        settings.lk_treatment_enabled,
+        settings.lk_cutoff_date,
+        settings.lk_basis_date_preserved,
         &mut lot_map,
     )?;
 
@@ -170,13 +152,11 @@ pub(crate) fn import_and_process_final(
     println!("  Successfully added proceeds to movements.");
 
 
-    if let Some(lk_settings) = &likekind_settings {
+    if settings.lk_treatment_enabled {
 
-        let cutoff_date = lk_settings.like_kind_cutoff_date;
-        println!(" Applying like-kind treatment for cut-off date: {}.", cutoff_date);
+        println!(" Applying like-kind treatment for cut-off date: {}.", settings.lk_cutoff_date);
 
         import_cost_proceeds_etc::apply_like_kind_treatment(
-            cutoff_date,
             &settings,
             &action_records_map,
             &raw_account_map,
@@ -185,7 +165,7 @@ pub(crate) fn import_and_process_final(
         )?;
 
         println!("  Successfully applied like-kind treatment.");
-    };
+    }
 
-    Ok((account_map, raw_account_map, action_records_map, transactions_map, likekind_settings))
+    Ok((account_map, raw_account_map, action_records_map, transactions_map))
 }

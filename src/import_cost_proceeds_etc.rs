@@ -4,7 +4,6 @@
 use std::collections::{HashMap};
 use std::error::Error;
 
-use chrono::NaiveDate;
 use decimal::d128;
 
 use crate::transaction::{Transaction, TxType, ActionRecord, Polarity};
@@ -263,7 +262,6 @@ pub(crate) fn add_proceeds_to_movements(
 }
 
 pub(crate) fn apply_like_kind_treatment(
-    cutoff_date: NaiveDate,
     settings: &ImportProcessParameters,
     ars: &HashMap<u32, ActionRecord>,
     raw_acct_map: &HashMap<u16, RawAccount>,
@@ -272,6 +270,7 @@ pub(crate) fn apply_like_kind_treatment(
 ) -> Result<(), Box<dyn Error>> {
 
     let length = txns_map.len();
+    let cutoff_date = settings.lk_cutoff_date;
     for txn_num in 1..=length {
 
         let txn_num = txn_num as u32;

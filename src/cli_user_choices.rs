@@ -163,7 +163,7 @@ pub(crate) fn elect_like_kind_treatment(cutoff_date_arg: &Option<String>) -> Res
         Some(cutoff_date_arg) => {
             let provided_date = NaiveDate::parse_from_str(&cutoff_date_arg, "%y-%m-%d")
                 .unwrap_or(NaiveDate::parse_from_str(&cutoff_date_arg, "%Y-%m-%d")
-                .expect("Date entered as -c command line arg has an incorrect format."));
+                .expect("Date entered as -l (like-kind cutoff date) command line arg has an incorrect format."));
 
             println!("\nUse like-kind exchange treatment through {}? [Y/n/c] ('c' to 'change') ", provided_date);
 

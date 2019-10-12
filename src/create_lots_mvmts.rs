@@ -11,7 +11,7 @@ use chrono::NaiveDate;
 
 use crate::transaction::{Transaction, ActionRecord, TxType, Polarity, TxHasMargin};
 use crate::account::{Account, RawAccount, Lot, Movement};
-use crate::core_functions::{InventoryCostingMethod, LikeKindSettings};
+use crate::core_functions::{InventoryCostingMethod};
 use crate::decimal_utils::{round_d128_1e8};
 
 pub(crate) fn create_lots_and_movements(
@@ -21,27 +21,13 @@ pub(crate) fn create_lots_and_movements(
     acct_map: &HashMap<u16, Account>,
     chosen_home_currency: &String,
     chosen_costing_method: &InventoryCostingMethod,
-    likekind_settings: &Option<LikeKindSettings>,
+    enable_lk_treatment: bool,
+    like_kind_cutoff_date: NaiveDate,
+    lk_basis_date_preserved: bool,
     lot_map: &HashMap<(RawAccount, u32), Lot>,
 ) -> Result<HashMap<u32,Transaction>, Box<dyn Error>> {
 
-    //  Set values to be referred to repeatedly, potentially, in Incoming Exchange transactions
-    let multiple_incoming_mvmts_per_ar = match &likekind_settings {
-        Some(likekind_settings) => {
-            likekind_settings.like_kind_basis_date_preserved
-        }
-        None => {
-            false
-        }
-    };
-
-    let mut like_kind_cutoff_date: NaiveDate = NaiveDate::parse_from_str("1/1/1", "%m/%d/%y")
-        .expect("NaiveDate string parsing failed. It shouldn't have. Try again.");
-    // Above sets date never to be used.  Below modifies date in case it will be used.
-    if likekind_settings.is_some() {
-        let likekind_settings_clone = likekind_settings.clone().unwrap();
-        like_kind_cutoff_date = likekind_settings_clone.like_kind_cutoff_date;
-    }
+    let multiple_incoming_mvmts_per_ar = lk_basis_date_preserved;
 
     //  On with the creating of lots and movements.
     let length = txns_map.len();

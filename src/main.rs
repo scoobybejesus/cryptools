@@ -123,7 +123,6 @@ fn main() -> Result<(), Box<dyn Error>> {
         raw_acct_map,
         action_records_map,
         transactions_map,
-        like_kind_settings
     ) = core_functions::import_and_process_final(input_file_path, &settings)?;
 
     let should_export = settings.should_export;

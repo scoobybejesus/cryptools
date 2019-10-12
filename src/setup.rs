@@ -6,6 +6,8 @@ use std::path::PathBuf;
 use std::error::Error;
 use std::process;
 
+use chrono::NaiveDate;
+
 use crate::cli_user_choices;
 use crate::core_functions::{ImportProcessParameters, InventoryCostingMethod};
 use crate::skip_wizard;
@@ -48,13 +50,24 @@ pub (crate) fn run_setup(args: super::Cli) -> Result<(PathBuf, ImportProcessPara
         output_dir_path,
      ) = wizard_or_not(args.flags.accept_args, wizard_or_not_args)?;
 
+    let like_kind_cutoff_date;
+
+    if like_kind_election {
+        like_kind_cutoff_date = NaiveDate::parse_from_str(&like_kind_cutoff_date_string, "%y-%m-%d")
+            .unwrap_or(NaiveDate::parse_from_str(&like_kind_cutoff_date_string, "%Y-%m-%d")
+            .expect("Command line date (like-kind cutoff option) has an incorrect format. Program must abort."));
+    } else {
+        like_kind_cutoff_date = NaiveDate::parse_from_str(&"1-1-1", "%y-%m-%d").unwrap();
+    }
+
     let settings = ImportProcessParameters {
         home_currency: args.opts.home_currency.into_string().unwrap().to_uppercase(),
         input_file_has_iso_date_style: args.flags.iso_date,
         input_file_date_separator: date_separator.to_string(),
         costing_method: costing_method_choice,
-        enable_like_kind_treatment: like_kind_election,
-        lk_cutoff_date_string: like_kind_cutoff_date_string,
+        lk_treatment_enabled: like_kind_election,
+        lk_cutoff_date: like_kind_cutoff_date,
+        lk_basis_date_preserved: true,  //  TODO
         should_export: should_export,
         export_path: output_dir_path,
     };
