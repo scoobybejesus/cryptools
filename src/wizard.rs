@@ -22,7 +22,7 @@ pub(crate) fn wizard(args: ArgsForImportVarsTBD) -> Result<(
 
     let costing_method_choice = cli_user_choices::choose_inventory_costing_method(args.inv_costing_method_arg)?;
 
-    let lk_cutoff_date_opt_string;
+    let mut lk_cutoff_date_opt_string;
 
     if let Some(lk_cutoff) = args.lk_cutoff_date_arg {
         lk_cutoff_date_opt_string = Some(lk_cutoff.into_string().unwrap())
@@ -30,7 +30,7 @@ pub(crate) fn wizard(args: ArgsForImportVarsTBD) -> Result<(
         lk_cutoff_date_opt_string = None
     };
 
-    let (like_kind_election, like_kind_cutoff_date_string) = cli_user_choices::elect_like_kind_treatment(&lk_cutoff_date_opt_string)?;
+    let (like_kind_election, like_kind_cutoff_date_string) = cli_user_choices::elect_like_kind_treatment(&mut lk_cutoff_date_opt_string)?;
 
     let (should_export, output_dir_path) = export_reports_to_output_dir(args.output_dir_path)?;
 

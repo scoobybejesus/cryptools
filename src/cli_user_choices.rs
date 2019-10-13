@@ -22,7 +22,7 @@ use crate::string_utils;
 pub fn choose_file_for_import(flag_to_accept_cli_args: bool) -> Result<PathBuf, Box<dyn Error>> {
 
     if flag_to_accept_cli_args {
-        println!("\nWARN: Flag to 'accept args' was set, but 'file' is missing.\n");
+        println!("WARN: Flag to 'accept args' was set, but 'file' is missing.\n");
     }
 
     println!("Please input a file (absolute or relative path) to import: ");
@@ -160,18 +160,22 @@ pub fn inv_costing_from_cmd_arg(arg: OsString) -> Result<InventoryCostingMethod,
     }
 }
 
-pub(crate) fn elect_like_kind_treatment(cutoff_date_arg: &Option<String>) -> Result<(bool, String), Box<dyn Error>> {
+pub(crate) fn elect_like_kind_treatment(cutoff_date_arg: &mut Option<String>) -> Result<(bool, String), Box<dyn Error>> {
 
-    match cutoff_date_arg {
+    match cutoff_date_arg.clone() {
 
-        Some(cutoff_date_arg) => {
+        Some(mut cutoff_date_arg) => {
+
             let provided_date = NaiveDate::parse_from_str(&cutoff_date_arg, "%y-%m-%d")
                 .unwrap_or(NaiveDate::parse_from_str(&cutoff_date_arg, "%Y-%m-%d")
-                .expect("Date entered as -l (like-kind cutoff date) command line arg has an incorrect format."));
+                .unwrap_or_else(|e| {
+                    println!("\nWARN: Date entered after -l command line arg (like-kind cutoff date) has an invalid format.");
+                    second_date_try_from_user(&mut cutoff_date_arg).unwrap()
+                } ) );
 
             println!("\nUse like-kind exchange treatment through {}? [Y/n/c] ('c' to 'change') ", provided_date);
 
-            let (election, date) = _elect_like_kind_arg(&cutoff_date_arg, provided_date)?;
+            let (election, date_string) = _elect_like_kind_arg(&cutoff_date_arg, provided_date)?;
 
             fn _elect_like_kind_arg(cutoff_date_arg: &String, provided_date: NaiveDate) -> Result<(bool, String), Box<dyn Error>> {
 
@@ -180,44 +184,40 @@ pub(crate) fn elect_like_kind_treatment(cutoff_date_arg: &Option<String>) -> Res
                 stdin.lock().read_line(&mut input)?;
 
                 match input.trim().to_ascii_lowercase().as_str() {
+
                     "y" | "ye" | "yes" | "" => {
+
                         println!("   Using like-kind treatment through {}.\n", provided_date);
                         Ok( (true, cutoff_date_arg.to_string()) )
                     },
+
                     "n" | "no" => {
+
                         println!("   Proceeding without like-kind treatment.\n");
                         Ok( (false, "1-1-1".to_string()) )
                     },
+
                     "c" | "change" => {
-                        println!("Please enter your desired like-kind exchange treatment cutoff date.");
-                        println!("  You must use the format %y-%m-%d (e.g., 2017-12-31, 17-12-31, and 9-6-1 are all acceptable).\n");
 
-                        let mut input = String::new();
-                        let stdin = io::stdin();
-                        stdin.lock().read_line(&mut input)?;
-                        string_utils::trim_newline(&mut input);
-
-                        let newly_chosen_date = NaiveDate::parse_from_str(&input, "%y-%m-%d")
-                            .unwrap_or(NaiveDate::parse_from_str(&input, "%Y-%m-%d")
-                            .expect("Date entered has an incorrect format. Program must abort."));
-                        //  TODO: figure out how to make this fail gracefully and let the user input the date again
-                        println!("   Using like-kind treatment through {}.\n", newly_chosen_date);
+                        let input = change_or_choose_lk_date_by_user()?;
                         Ok( (true, input) )
                     },
+
                     _   => {
+
                         println!("Please respond with 'y', 'n', or 'c' (or 'yes' or 'no' or 'change').");
                         _elect_like_kind_arg(&cutoff_date_arg, provided_date)
                     }
                 }
             }
 
-            return Ok((election, date))
+            return Ok((election, date_string))
         }
 
         None => {
             println!("\nContinue without like-kind exchange treatment? [Y/n] ");
 
-            let (election, date) = _no_elect_like_kind_arg()?;
+            let (election, date_string) = _no_elect_like_kind_arg()?;
 
             fn _no_elect_like_kind_arg() -> Result<(bool, String), Box<dyn Error>> {
 
@@ -226,31 +226,67 @@ pub(crate) fn elect_like_kind_treatment(cutoff_date_arg: &Option<String>) -> Res
                 stdin.lock().read_line(&mut input)?;
 
                 match input.trim().to_ascii_lowercase().as_str() {
+
                     "y" | "ye" | "yes" | "" => {
+
                         println!("   Proceeding without like-kind treatment.\n");
                         Ok( (false, "1-1-1".to_string()) )
                     },
+
                     "n" | "no" => {
-                        println!("Please enter your desired like-kind exchange treatment cutoff date.");
-                        println!("  You must use the format %y-%m-%d (e.g., 2017-12-31, 17-12-31, and 9-6-1 are all acceptable).\n");
-                        let mut input = String::new();
-                        let stdin = io::stdin();
-                        stdin.lock().read_line(&mut input)?;
-                        string_utils::trim_newline(&mut input);
 
-                        let newly_chosen_date = NaiveDate::parse_from_str(&input, "%y-%m-%d")
-                            .unwrap_or(NaiveDate::parse_from_str(&input, "%Y-%m-%d")
-                            .expect("Date entered has an incorrect format. Program must abort."));
-                        //  TODO: figure out how to make this fail gracefully and let the user input the date again
-                        println!("   Using like-kind treatment through {}.\n", newly_chosen_date);
-
+                        let input = change_or_choose_lk_date_by_user()?;
                         Ok( (true, input) )
                     },
+
                     _   => { println!("Please respond with 'y' or 'n' (or 'yes' or 'no')."); _no_elect_like_kind_arg() }
                 }
             }
 
-            return Ok((election, date))
+            return Ok((election, date_string))
         }
+    }
+
+
+    fn change_or_choose_lk_date_by_user() -> Result<String, Box<dyn Error>> {
+
+        println!("Please enter your desired like-kind exchange treatment cutoff date using ISO 8601 style date format.");
+
+        let mut input = String::new();
+        let stdin = io::stdin();
+        stdin.lock().read_line(&mut input)?;
+        string_utils::trim_newline(&mut input);
+
+        let successfully_parsed_naive_date = test_naive_date_from_user_string(&mut input)?;
+
+        println!("   Using like-kind treatment through {}.\n", successfully_parsed_naive_date);
+
+        Ok(input)
+    }
+
+    fn test_naive_date_from_user_string(input: &mut String) -> Result<NaiveDate, Box<dyn Error>> {
+
+        let successfully_parsed_naive_date = NaiveDate::parse_from_str(&input, "%y-%m-%d")
+            .unwrap_or(NaiveDate::parse_from_str(&input, "%Y-%m-%d")
+            .unwrap_or_else(|e| { second_date_try_from_user(input).unwrap() } ));
+
+        Ok(successfully_parsed_naive_date)
+    }
+
+    fn second_date_try_from_user(input: &mut String) -> Result<NaiveDate, Box<dyn Error>> {
+
+        println!("  You must use the format %y-%m-%d (e.g., 2009-06-01, 09-06-01, and 9-6-1 are all acceptably formatted).");
+
+        let mut input2 = String::new();
+        let stdin = io::stdin();
+        stdin.lock().read_line(&mut input2)?;
+        string_utils::trim_newline(&mut input2);
+        *input = input2;
+
+        let successfully_parsed_naive_date = NaiveDate::parse_from_str(&input, "%y-%m-%d")
+            .unwrap_or(NaiveDate::parse_from_str(&input, "%Y-%m-%d")
+            .unwrap_or_else(|e| { second_date_try_from_user(input).unwrap() } ));
+
+        Ok(successfully_parsed_naive_date)
     }
 }
