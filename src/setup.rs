@@ -70,6 +70,7 @@ pub (crate) fn run_setup(args: super::Cli) -> Result<(PathBuf, ImportProcessPara
         lk_basis_date_preserved: true,  //  TODO
         should_export: should_export,
         export_path: output_dir_path,
+        print_menu: args.flags.print_menu,
     };
 
     Ok((input_file_path, settings))
