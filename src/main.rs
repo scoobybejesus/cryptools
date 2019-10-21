@@ -12,20 +12,14 @@ use std::ffi::OsString;
 use std::path::PathBuf;
 use std::error::Error;
 use std::io;
-use std::sync::mpsc;
-use std::thread;
 use std::time::Duration;
 
-use tui::Terminal;
-use tui::backend::{TermionBackend, Backend};
-use tui::style::{Color, Modifier, Style};
-use tui::widgets::{Widget, Block, Borders, SelectableList, Text, Paragraph};
-use tui::layout::{Layout, Constraint, Direction};
+use ::tui::Terminal;
+use ::tui::backend::TermionBackend;
 use termion::raw::IntoRawMode;
 use termion::screen::AlternateScreen;
 use termion::input::MouseTerminal;
 use termion::event::Key;
-use termion::input::TermRead;
 use structopt::StructOpt;
 
 mod account;
@@ -43,6 +37,10 @@ mod tests;
 mod wizard;
 mod skip_wizard;
 mod setup;
+mod tui;
+
+use crate::tui::app::PrintWindow;
+use crate::tui::event::{Events, Event, Config};
 
 
 #[derive(StructOpt, Debug)]
@@ -220,93 +218,12 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     if present_print_menu_tui {
 
-        const TASKS: [&'static str; 9] = [
-            "1. CSV: Account Sums",
-            "2. CSV: Account Sums (Non-zero only)",
-            "3. CSV: Account Sums (Orig. basis vs like-kind basis)",
-            "4. CSV: Transactions by movement (every movement)",
-            "5. CSV: Transactions by movement (summarized by long-term/short-term)",
-            "6. CSV: Transactions by movement (every movement, w/ orig. and like-kind basis",
-            "7. TXT: Accounts by lot (every movement)",
-            "8. TXT: Accounts by lot (every lot balance)",
-            "9. TXT: Accounts by lot (every non-zero lot balance)",
-        ];
+        let reports = tui::app::REPORTS;
 
-        pub struct ListState<I> {
-            pub items: Vec<I>,
-            pub selected: usize,
-        }
-
-        impl<I> ListState<I> {
-            fn new(items: Vec<I>) -> ListState<I> {
-                ListState { items, selected: 0 }
-            }
-            fn select_previous(&mut self) {
-                if self.selected > 0 {
-                    self.selected -= 1;
-                }
-            }
-            fn select_next(&mut self) {
-                if self.selected < self.items.len() - 1 {
-                    self.selected += 1
-                }
-            }
-        }
-
-        pub struct PrintWindow<'a> {
-            pub title: &'a str,
-            pub should_quit: bool,
-            pub tasks: ListState<(&'a str)>,
-            pub to_print: Vec<usize>,
-        }
-
-        impl<'a> PrintWindow<'a> {
-            pub fn new(title: &'a str) -> PrintWindow<'a> {
-                PrintWindow {
-                    title,
-                    should_quit: false,
-                    tasks: ListState::new(TASKS.to_vec()),
-                    to_print: Vec::with_capacity(TASKS.len() + 3),
-                }
-            }
-
-            pub fn on_up(&mut self) {
-                self.tasks.select_previous();
-            }
-
-            pub fn on_down(&mut self) {
-                self.tasks.select_next();
-            }
-
-            pub fn on_key(&mut self, c: char) {
-                match c {
-                    'q' => {
-                        self.should_quit = true;
-                        self.to_print = Vec::with_capacity(0)
-                    }
-                    'p' => {
-                        Self::change_vec_to_chrono_order_and_dedup(&mut self.to_print);
-                        self.should_quit = true;
-                    }
-                    'x' => {
-                        self.to_print.push(self.tasks.selected)
-                    }
-                    _ => {}
-                }
-            }
-            fn change_vec_to_chrono_order_and_dedup(vec: &mut Vec<usize>) {
-                let length = vec.len();
-                for _ in 0..length {
-                    for j in 0..length-1 {
-                        if vec[j] > vec[j+1] {
-                            vec.swap(j, j+1)
-                        }
-
-                    }
-                }
-                vec.dedup();
-            }
-        }
+        let events = Events::with_config(Config {
+            tick_rate: Duration::from_millis(250u64),
+            ..Config::default()
+        });
 
         let stdout = io::stdout().into_raw_mode()?;
         let stdout = MouseTerminal::from(stdout);
@@ -315,136 +232,16 @@ fn main() -> Result<(), Box<dyn Error>> {
         let mut terminal = Terminal::new(backend)?;
         terminal.hide_cursor()?;
 
-        pub fn draw<B: Backend>(terminal: &mut Terminal<B>, app: &PrintWindow) -> Result<(), io::Error> {
-            terminal.draw(|mut f| {
-                let chunks = Layout::default()
-                    .constraints([
-                        Constraint::Length(1),
-                        Constraint::Length(8),
-                        Constraint::Length(TASKS.len() as u16 + 2),
-                        Constraint::Percentage(35)
-                    ].as_ref())
-                    .split(f.size());
-
-                let text = [
-                    Text::raw("\nPress '"),
-                    Text::styled("x", Style::default().fg(Color::LightGreen)),
-                    Text::raw("' to add the selected report to the list of reports to print/export.\n"),
-                    Text::raw("\nPress '"),
-                    Text::styled("p", Style::default().fg(Color::Green)),
-                    Text::raw("' to print/export the selected reports.\n"),
-                    Text::raw("\nPress '"),
-                    Text::styled("q", Style::default().fg(Color::Red)),
-                    Text::raw("' to quit without printing.\n\n"),
-                ];
-                Paragraph::new(text.iter())
-                    .block(
-                        Block::default()
-                            .borders(Borders::NONE)
-                            .title("Instructions")
-                            .title_style(Style::default().fg(Color::Blue).modifier(Modifier::BOLD)),
-                    )
-                    .wrap(true)
-                    .render(&mut f, chunks[1]);
-
-                let draw_chunk = Layout::default()
-                    .constraints([Constraint::Percentage(10), Constraint::Percentage(80),Constraint::Percentage(10),].as_ref())
-                    .direction(Direction::Horizontal)
-                    .split(chunks[2]);
-
-                SelectableList::default()
-                    .block(Block::default().borders(Borders::ALL).title("Report List"))
-                    .items(&app.tasks.items)
-                    .select(Some(app.tasks.selected))
-                    .highlight_style(Style::default().fg(Color::Yellow).modifier(Modifier::BOLD))
-                    .highlight_symbol(">")
-                    .render(&mut f, draw_chunk[1]);
-
-            })
-        }
-
-
-        pub enum Event<I> {
-            Input(I),
-            Tick,
-        }
-        pub struct Events {
-            rx: mpsc::Receiver<Event<Key>>,
-            input_handle: thread::JoinHandle<()>,
-            tick_handle: thread::JoinHandle<()>,
-        }
-        let events = Events::with_config(Config {
-            tick_rate: Duration::from_millis(250u64),
-            ..Config::default()
-        });
-        #[derive(Debug, Clone, Copy)]
-        pub struct Config {
-            pub exit_key: Key,
-            pub tick_rate: Duration,
-        }
-
-        impl Default for Config {
-            fn default() -> Config {
-                Config {
-                    exit_key: Key::Char('q'),
-                    tick_rate: Duration::from_millis(250),
-                }
-            }
-        }
-
-        impl Events {
-            pub fn new() -> Events {
-                Events::with_config(Config::default())
-            }
-
-            pub fn with_config(config: Config) -> Events {
-                let (tx, rx) = mpsc::channel();
-                let input_handle = {
-                    let tx = tx.clone();
-                    thread::spawn(move || {
-                        let stdin = io::stdin();
-                        for evt in stdin.keys() {
-                            match evt {
-                                Ok(key) => {
-                                    if let Err(_) = tx.send(Event::Input(key)) {
-                                        return;
-                                    }
-                                    if key == config.exit_key {
-                                        return;
-                                    }
-                                }
-                                Err(_) => {}
-                            }
-                        }
-                    })
-                };
-                let tick_handle = {
-                    let tx = tx.clone();
-                    thread::spawn(move || {
-                        let tx = tx.clone();
-                        loop {
-                            tx.send(Event::Tick).unwrap();
-                            thread::sleep(config.tick_rate);
-                        }
-                    })
-                };
-                Events {
-                    rx,
-                    input_handle,
-                    tick_handle,
-                }
-            }
-
-            pub fn next(&self) -> Result<Event<Key>, mpsc::RecvError> {
-                self.rx.recv()
-            }
-        }
-
         let mut app = PrintWindow::new("Reports");
+
         loop {
-            draw(&mut terminal, &app)?;
+
+            tui::ui::draw(&mut terminal, &app, reports.len() as u16)?;
+
             match events.next()? {
+
                 Event::Input(key) => match key {
+
                     Key::Char(c) => {
                         app.on_key(c);
                     }
@@ -464,6 +261,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 },
                 _ => {}
             }
+
             if app.should_quit {
                 break;
             }
@@ -474,7 +272,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         std::thread::sleep(Duration::from_millis(10));
 
         for report in app.to_print {
-            println!("Exporting: {}", TASKS[report]);
+            println!("Exporting: {}", reports[report]);
             match report + 1 {
                 1 => {
                     csv_export::_1_account_sums_to_csv(
