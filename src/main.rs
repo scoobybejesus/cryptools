@@ -39,8 +39,6 @@ mod skip_wizard;
 mod setup;
 mod tui;
 
-use crate::tui::app::PrintWindow;
-use crate::tui::event::{Events, Event, Config};
 
 
 #[derive(StructOpt, Debug)]
@@ -218,12 +216,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     if present_print_menu_tui {
 
-        let reports = tui::app::REPORTS;
-
-        let events = Events::with_config(Config {
-            tick_rate: Duration::from_millis(250u64),
-            ..Config::default()
-        });
+        use crate::tui::event::{Events, Event, Config};
 
         let stdout = io::stdout().into_raw_mode()?;
         let stdout = MouseTerminal::from(stdout);
@@ -232,11 +225,16 @@ fn main() -> Result<(), Box<dyn Error>> {
         let mut terminal = Terminal::new(backend)?;
         terminal.hide_cursor()?;
 
-        let mut app = PrintWindow::new("Reports");
+        let mut app = tui::app::PrintWindow::new("Reports");
+
+        let events = Events::with_config(Config {
+            tick_rate: Duration::from_millis(250u64),
+            ..Config::default()
+        });
 
         loop {
 
-            tui::ui::draw(&mut terminal, &app, reports.len() as u16)?;
+            tui::ui::draw(&mut terminal, &app)?;
 
             match events.next()? {
 
@@ -250,12 +248,6 @@ fn main() -> Result<(), Box<dyn Error>> {
                     }
                     Key::Down => {
                         app.on_down();
-                    }
-                    Key::Left => {
-                        // app.on_left();
-                    }
-                    Key::Right => {
-                        // app.on_right();
                     }
                     _ => {}
                 },
@@ -271,83 +263,15 @@ fn main() -> Result<(), Box<dyn Error>> {
         std::mem::drop(terminal);
         std::thread::sleep(Duration::from_millis(10));
 
-        for report in app.to_print {
-            println!("Exporting: {}", reports[report]);
-            match report + 1 {
-                1 => {
-                    csv_export::_1_account_sums_to_csv(
-                        &settings,
-                        &raw_acct_map,
-                        &account_map
-                    );
-                }
-                2 => {
-                    csv_export::_2_account_sums_nonzero_to_csv(
-                        &account_map,
-                        &settings,
-                        &raw_acct_map
-                    );
-                }
-                3 => {
-                    csv_export::_3_account_sums_to_csv_with_orig_basis(
-                        &settings,
-                        &raw_acct_map,
-                        &account_map
-                    );
-                }
-                4 => {
-                    csv_export::_4_transaction_mvmt_detail_to_csv(
-                        &settings,
-                        &action_records_map,
-                        &raw_acct_map,
-                        &account_map,
-                        &transactions_map
-                    )?;
-                }
-                5 => {
-                    csv_export::_5_transaction_mvmt_summaries_to_csv(
-                        &settings,
-                        &action_records_map,
-                        &raw_acct_map,
-                        &account_map,
-                        &transactions_map
-                    )?;
-                }
-                6 => {
-                    csv_export::_6_transaction_mvmt_detail_to_csv_w_orig(
-                        &settings,
-                        &action_records_map,
-                        &raw_acct_map,
-                        &account_map,
-                        &transactions_map
-                    )?;
-                }
-                7 => {
-                    txt_export::_1_account_lot_detail_to_txt(
-                        &settings,
-                        &raw_acct_map,
-                        &account_map,
-                        &transactions_map,
-                        &action_records_map
-                    )?;
-                }
-                8 => {
-                    txt_export::_2_account_lot_summary_to_txt(
-                        &settings,
-                        &raw_acct_map,
-                        &account_map,
-                    )?;
-                }
-                9 => {
-                    txt_export::_3_account_lot_summary_non_zero_to_txt(
-                        &settings,
-                        &raw_acct_map,
-                        &account_map,
-                    )?;
-                }
-                _ => {}
-            }
-        }
+        tui::app::export(
+            &app,
+            &settings,
+            &action_records_map,
+            &raw_acct_map,
+            &account_map,
+            &transactions_map
+        )?;
+
     }
 
     // use tests::test;
