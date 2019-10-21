@@ -38,6 +38,7 @@ mod wizard;
 mod skip_wizard;
 mod setup;
 mod tui;
+mod export_all;
 
 
 
@@ -148,70 +149,13 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     if should_export_all {
 
-        println!("Creating reports now.");
-
-        csv_export::_1_account_sums_to_csv(
-            &settings,
-            &raw_acct_map,
-            &account_map
-        );
-
-        csv_export::_2_account_sums_nonzero_to_csv(
-            &account_map,
-            &settings,
-            &raw_acct_map
-        );
-
-        csv_export::_3_account_sums_to_csv_with_orig_basis(
-            &settings,
-            &raw_acct_map,
-            &account_map
-        );
-
-        csv_export::_4_transaction_mvmt_detail_to_csv(
+        export_all::export(
             &settings,
             &action_records_map,
             &raw_acct_map,
             &account_map,
             &transactions_map
         )?;
-
-        csv_export::_5_transaction_mvmt_summaries_to_csv(
-            &settings,
-            &action_records_map,
-            &raw_acct_map,
-            &account_map,
-            &transactions_map
-        )?;
-
-        csv_export::_6_transaction_mvmt_detail_to_csv_w_orig(
-            &settings,
-            &action_records_map,
-            &raw_acct_map,
-            &account_map,
-            &transactions_map
-        )?;
-
-        txt_export::_1_account_lot_detail_to_txt(
-            &settings,
-            &raw_acct_map,
-            &account_map,
-            &transactions_map,
-            &action_records_map
-        )?;
-
-        txt_export::_2_account_lot_summary_to_txt(
-            &settings,
-            &raw_acct_map,
-            &account_map,
-        )?;
-
-        txt_export::_3_account_lot_summary_non_zero_to_txt(
-            &settings,
-            &raw_acct_map,
-            &account_map,
-        )?;
-
     }
 
     if present_print_menu_tui {
