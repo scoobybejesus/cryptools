@@ -214,7 +214,8 @@ pub(crate) fn import_transactions(
 
         let tx_date = NaiveDate::parse_from_str(this_tx_date, &format_yy)
             .unwrap_or(NaiveDate::parse_from_str(this_tx_date, &format_yyyy)
-            .expect("\nFailed to parse date in input file. Check date separator character. Also %m/%d/%y (or %Y) format is required.\n")
+            .expect("
+Failed to parse date in input file. Check date separator character (which is a hyphen unless modified via Cli option -d).\n")
         );
 
         let transaction = Transaction {
