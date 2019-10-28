@@ -6,9 +6,11 @@ use std::process;
 use std::io::{self, BufRead};
 use std::path::PathBuf;
 
+use crptls::costing_method::InventoryCostingMethod;
+
 use crate::cli_user_choices;
-use crate::core_functions::{InventoryCostingMethod};
 use crate::setup::{ArgsForImportVarsTBD};
+
 
 pub(crate) fn wizard(args: ArgsForImportVarsTBD) -> Result<(
     InventoryCostingMethod,

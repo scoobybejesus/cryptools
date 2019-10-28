@@ -5,42 +5,16 @@ use std::path::PathBuf;
 use std::error::Error;
 use std::fs::File;
 use std::collections::{HashMap};
-use std::fmt;
 
 use chrono::NaiveDate;
-use structopt::StructOpt;
 
-use crate::account::{Account, RawAccount, Lot};
-use crate::transaction::{Transaction, ActionRecord};
-use crate::csv_import_accts_txns;
-use crate::import_cost_proceeds_etc;
-use crate::create_lots_mvmts;
+use crate::crptls_lib::account::{Account, RawAccount, Lot};
+use crate::crptls_lib::transaction::{Transaction, ActionRecord};
+use crate::crptls_lib::csv_import_accts_txns;
+use crate::crptls_lib::import_cost_proceeds_etc;
+use crate::crptls_lib::create_lots_mvmts;
+use crate::crptls_lib::costing_method::InventoryCostingMethod;
 
-/// An `InventoryMethod` determines the order in which a `Lot` is chosen when posting
-/// `ActionRecord` amounts as individual `Movement`s.
-#[derive(Clone, Debug, PartialEq, StructOpt)]
-pub enum InventoryCostingMethod {
-    /// 1. LIFO according to the order the lot was created.
-    LIFObyLotCreationDate,
-    /// 2. LIFO according to the basis date of the lot.
-    LIFObyLotBasisDate,
-    /// 3. FIFO according to the order the lot was created.
-    FIFObyLotCreationDate,
-    /// 4. FIFO according to the basis date of the lot.
-    FIFObyLotBasisDate,
-}
-
-impl fmt::Display for InventoryCostingMethod {
-
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-           InventoryCostingMethod::LIFObyLotCreationDate => write!(f, "LIFO by lot creation date"),
-           InventoryCostingMethod::LIFObyLotBasisDate => write!(f, "LIFO by lot basis date"),
-           InventoryCostingMethod::FIFObyLotCreationDate => write!(f, "FIFO by lot creation date"),
-           InventoryCostingMethod::FIFObyLotBasisDate => write!(f, "FIFO by lot basis date"),
-       }
-    }
-}
 
 /// `ImportProcessParameters` are determined from command-line args and/or wizard input from the user.
 /// They are the settings that allow the software to carry out the importing-from-csv of
@@ -60,7 +34,7 @@ pub struct ImportProcessParameters {
     pub print_menu: bool,
 }
 
-pub(crate) fn import_and_process_final(
+pub fn import_and_process_final(
     input_file_path: PathBuf,
     settings: &ImportProcessParameters,
 ) -> Result<(

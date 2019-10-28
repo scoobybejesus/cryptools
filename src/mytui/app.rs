@@ -4,12 +4,13 @@
 use std::error::Error;
 use std::collections::{HashMap};
 
+use crptls::transaction::{Transaction, ActionRecord};
+use crptls::account::{Account, RawAccount};
+use crptls::core_functions::{ImportProcessParameters};
 
-use crate::transaction::{Transaction, ActionRecord};
-use crate::account::{Account, RawAccount};
-use crate::core_functions::{ImportProcessParameters};
-use crate::csv_export;
-use crate::txt_export;
+use crate::export_csv;
+use crate::export_txt;
+
 
 pub (crate) const REPORTS: [&'static str; 9] = [
     "1. CSV: Account Sums",
@@ -128,28 +129,28 @@ pub fn export(
         match report + 1 {
 
             1 => {
-                csv_export::_1_account_sums_to_csv(
+                export_csv::_1_account_sums_to_csv(
                     &settings,
                     &raw_acct_map,
                     &account_map
                 );
             }
             2 => {
-                csv_export::_2_account_sums_nonzero_to_csv(
+                export_csv::_2_account_sums_nonzero_to_csv(
                     &account_map,
                     &settings,
                     &raw_acct_map
                 );
             }
             3 => {
-                csv_export::_3_account_sums_to_csv_with_orig_basis(
+                export_csv::_3_account_sums_to_csv_with_orig_basis(
                     &settings,
                     &raw_acct_map,
                     &account_map
                 );
             }
             4 => {
-                csv_export::_4_transaction_mvmt_detail_to_csv(
+                export_csv::_4_transaction_mvmt_detail_to_csv(
                     &settings,
                     &action_records_map,
                     &raw_acct_map,
@@ -158,7 +159,7 @@ pub fn export(
                 )?;
             }
             5 => {
-                csv_export::_5_transaction_mvmt_summaries_to_csv(
+                export_csv::_5_transaction_mvmt_summaries_to_csv(
                     &settings,
                     &action_records_map,
                     &raw_acct_map,
@@ -167,7 +168,7 @@ pub fn export(
                 )?;
             }
             6 => {
-                csv_export::_6_transaction_mvmt_detail_to_csv_w_orig(
+                export_csv::_6_transaction_mvmt_detail_to_csv_w_orig(
                     &settings,
                     &action_records_map,
                     &raw_acct_map,
@@ -176,7 +177,7 @@ pub fn export(
                 )?;
             }
             7 => {
-                txt_export::_1_account_lot_detail_to_txt(
+                export_txt::_1_account_lot_detail_to_txt(
                     &settings,
                     &raw_acct_map,
                     &account_map,
@@ -185,14 +186,14 @@ pub fn export(
                 )?;
             }
             8 => {
-                txt_export::_2_account_lot_summary_to_txt(
+                export_txt::_2_account_lot_summary_to_txt(
                     &settings,
                     &raw_acct_map,
                     &account_map,
                 )?;
             }
             9 => {
-                txt_export::_3_account_lot_summary_non_zero_to_txt(
+                export_txt::_3_account_lot_summary_non_zero_to_txt(
                     &settings,
                     &raw_acct_map,
                     &account_map,

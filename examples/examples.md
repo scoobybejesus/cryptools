@@ -3,7 +3,9 @@
 The sample input files and the resulting reports are in the `/examples/resources/` directory.
 
 (Note: new reports have been added since the write-up below was written.
-Nevertheless, evaluating the reports should mostly be self-explanatory.)
+Nevertheless, evaluating the reports should mostly be self-explanatory.
+Pass a -p flag from the command line to see the full list of available
+reports - and select from them - once the import has taken place.)
 
 ## 1. Using the wizard
 
@@ -39,7 +41,7 @@ Then tab-complete your way through `/Users/<your-username>/Documents`*, for exam
 
 ##### Now the program has ended, and you should have reports in the directory you provided.
 
-The reports should match those in the `examples/resources` directory.
+The reports should generally match those in the `examples/resources` directory.
 (Additional reports are created too, but you can generally match the existing reports by title.)
 
 
@@ -76,6 +78,8 @@ or you may set your home currency to EUR instead of USD.
 Or maybe you may want to apply like-kind exchange treatment through a particular date.
 These parameters can all be set via command line options.
 See the `--help` screen for all the options.
+
+As mentioned above, pass the -p flag to be presented with a list of available reports.
 
 ## Notes on the reports
 

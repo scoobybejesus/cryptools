@@ -11,40 +11,23 @@
 use std::ffi::OsString;
 use std::path::PathBuf;
 use std::error::Error;
-use std::io;
-use std::time::Duration;
 
-use ::tui::Terminal;
-use ::tui::backend::TermionBackend;
-use termion::raw::IntoRawMode;
-use termion::screen::AlternateScreen;
-use termion::input::MouseTerminal;
-use termion::event::Key;
 use structopt::StructOpt;
 
-mod account;
-mod transaction;
-mod core_functions;
-mod csv_import_accts_txns;
-mod create_lots_mvmts;
-mod import_cost_proceeds_etc;
+mod setup;
 mod cli_user_choices;
-mod csv_export;
-mod txt_export;
-mod string_utils;
-mod decimal_utils;
-mod tests;
 mod wizard;
 mod skip_wizard;
-mod setup;
-mod tui;
+mod mytui;
+mod export_csv;
+mod export_txt;
 mod export_all;
-
+mod tests;
 
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "cryptools")]
-pub(crate) struct Cli {
+pub struct Cli {
 
     #[structopt(flatten)]
     flags: Flags,
@@ -58,7 +41,7 @@ pub(crate) struct Cli {
 }
 
 #[derive(StructOpt, Debug)]
-pub(crate) struct Flags {
+pub struct Flags {
 
     /// User is instructing the program to skip the data entry wizard.
     /// When set, program will error without required command-line args.
@@ -84,7 +67,7 @@ pub(crate) struct Flags {
 }
 
 #[derive(StructOpt, Debug)]
-pub(crate) struct Options {
+pub struct Options {
 
     /// Choose "h", "s", or "p" for hyphen, slash, or period (i.e., "-", "/", or ".") to indicate the separator
     /// character used in the file_to_import txDate column (i.e. 2017/12/31, 2017-12-31, or 2017.12.31).
@@ -117,7 +100,6 @@ pub(crate) struct Options {
 }
 
 
-
 fn main() -> Result<(), Box<dyn Error>> {
 
     let args = Cli::from_args();
@@ -140,7 +122,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         raw_acct_map,
         action_records_map,
         transactions_map,
-    ) = core_functions::import_and_process_final(input_file_path, &settings)?;
+    ) = crptls::core_functions::import_and_process_final(input_file_path, &settings)?;
 
     let mut should_export_all = settings.should_export;
     let present_print_menu_tui = settings.print_menu;
@@ -160,62 +142,13 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     if present_print_menu_tui {
 
-        use crate::tui::event::{Events, Event, Config};
-
-        let stdout = io::stdout().into_raw_mode()?;
-        let stdout = MouseTerminal::from(stdout);
-        let stdout = AlternateScreen::from(stdout);
-        let backend = TermionBackend::new(stdout);
-        let mut terminal = Terminal::new(backend)?;
-        terminal.hide_cursor()?;
-
-        let mut app = tui::app::PrintWindow::new("Reports");
-
-        let events = Events::with_config(Config {
-            tick_rate: Duration::from_millis(250u64),
-            ..Config::default()
-        });
-
-        loop {
-
-            tui::ui::draw(&mut terminal, &app)?;
-
-            match events.next()? {
-
-                Event::Input(key) => match key {
-
-                    Key::Char(c) => {
-                        app.on_key(c);
-                    }
-                    Key::Up => {
-                        app.on_up();
-                    }
-                    Key::Down => {
-                        app.on_down();
-                    }
-                    _ => {}
-                },
-                _ => {}
-            }
-
-            if app.should_quit {
-                break;
-            }
-        }
-
-        // Seem to need both of these for the native terminal to be available for println!()'s below
-        std::mem::drop(terminal);
-        std::thread::sleep(Duration::from_millis(10));
-
-        tui::app::export(
-            &app,
+        mytui::print_menu_tui::print_menu_tui(
             &settings,
             &action_records_map,
             &raw_acct_map,
             &account_map,
             &transactions_map
         )?;
-
     }
 
     // use tests::test;

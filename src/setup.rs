@@ -8,8 +8,10 @@ use std::process;
 
 use chrono::NaiveDate;
 
+use crptls::core_functions::ImportProcessParameters;
+use crptls::costing_method::InventoryCostingMethod;
+
 use crate::cli_user_choices;
-use crate::core_functions::{ImportProcessParameters, InventoryCostingMethod};
 use crate::skip_wizard;
 use crate::wizard;
 
@@ -77,52 +79,52 @@ pub (crate) fn run_setup(args: super::Cli) -> Result<(PathBuf, ImportProcessPara
 }
 
 fn wizard_or_not(accept_args: bool, args: ArgsForImportVarsTBD) -> Result<(
-        InventoryCostingMethod,
-        bool,
-        String,
-        bool,
-        PathBuf,
-    ), Box<dyn Error>> {
+    InventoryCostingMethod,
+    bool,
+    String,
+    bool,
+    PathBuf,
+), Box<dyn Error>> {
 
-        let costing_method_choice;
-        let like_kind_election;
-        let like_kind_cutoff_date_string;
-        let should_export;
-        let output_dir_path;
+    let costing_method_choice;
+    let like_kind_election;
+    let like_kind_cutoff_date_string;
+    let should_export;
+    let output_dir_path;
 
-        if !accept_args {
+    if !accept_args {
 
-            let (
-                costing_method_choice1,
-                like_kind_election1,
-                like_kind_cutoff_date_string1,
-                should_export1,
-                output_dir_path1,
-            ) = wizard::wizard(args)?;
+        let (
+            costing_method_choice1,
+            like_kind_election1,
+            like_kind_cutoff_date_string1,
+            should_export1,
+            output_dir_path1,
+        ) = wizard::wizard(args)?;
 
-            costing_method_choice = costing_method_choice1;
-            like_kind_election = like_kind_election1;
-            like_kind_cutoff_date_string = like_kind_cutoff_date_string1;
-            should_export = should_export1;
-            output_dir_path = output_dir_path1;
+        costing_method_choice = costing_method_choice1;
+        like_kind_election = like_kind_election1;
+        like_kind_cutoff_date_string = like_kind_cutoff_date_string1;
+        should_export = should_export1;
+        output_dir_path = output_dir_path1;
 
-        } else {
+    } else {
 
-            let (
-                costing_method_choice1,
-                like_kind_election1,
-                like_kind_cutoff_date_string1,
-                should_export1,
-                output_dir_path1,
-            ) = skip_wizard::skip_wizard(args)?;
+        let (
+            costing_method_choice1,
+            like_kind_election1,
+            like_kind_cutoff_date_string1,
+            should_export1,
+            output_dir_path1,
+        ) = skip_wizard::skip_wizard(args)?;
 
-            costing_method_choice = costing_method_choice1;
-            like_kind_election = like_kind_election1;
-            like_kind_cutoff_date_string = like_kind_cutoff_date_string1;
-            should_export = should_export1;
-            output_dir_path = output_dir_path1;
+        costing_method_choice = costing_method_choice1;
+        like_kind_election = like_kind_election1;
+        like_kind_cutoff_date_string = like_kind_cutoff_date_string1;
+        should_export = should_export1;
+        output_dir_path = output_dir_path1;
 
-        }
-
-        Ok((costing_method_choice, like_kind_election, like_kind_cutoff_date_string, should_export, output_dir_path))
     }
+
+    Ok((costing_method_choice, like_kind_election, like_kind_cutoff_date_string, should_export, output_dir_path))
+}

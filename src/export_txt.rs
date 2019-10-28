@@ -9,9 +9,9 @@ use std::io::prelude::Write;
 
 use decimal::d128;
 
-use crate::transaction::{Transaction, ActionRecord};
-use crate::account::{Account, RawAccount};
-use crate::core_functions::{ImportProcessParameters};
+use crptls::transaction::{Transaction, ActionRecord};
+use crptls::account::{Account, RawAccount};
+use crptls::core_functions::{ImportProcessParameters};
 
 
 pub fn _1_account_lot_detail_to_txt(

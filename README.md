@@ -2,7 +2,7 @@
 
 ### Accounting library for cryptocurrency transaction activity.
 
-###### (Currently runs as a binary)
+###### (The package produces a binary that makes use of the library)
 
 This software calculates income, expenses, realized gains, and realized losses from cryptocurrency activity
 and denominates the results in the user's home currency.
@@ -49,7 +49,7 @@ when appreciated cryptocurrency was used to make a tax-deductible charitable con
 2. `cd cryptools`
 3. `cargo build` (include `--release` for a non-debug build)
 
-This will build `./target/debug/cryptools` (or `./target/rls/cryptools` for a non-debug build).
+This will build `./target/debug/cryptools` (or `./target/release/cryptools` for a non-debug build).
 
 ## Usage
 

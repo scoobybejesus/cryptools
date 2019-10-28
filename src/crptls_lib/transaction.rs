@@ -12,7 +12,7 @@ use decimal::d128;
 use chrono::NaiveDate;
 use serde_derive::{Serialize, Deserialize};
 
-use crate::account::{Account, Movement, RawAccount};
+use crate::crptls_lib::account::{Account, Movement, RawAccount};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Transaction {

@@ -12,7 +12,7 @@ use chrono_tz::US::Eastern;
 use decimal::d128;
 use serde_derive::{Serialize, Deserialize};
 
-use crate::transaction::{Transaction, ActionRecord, Polarity, TxType};
+use crate::crptls_lib::transaction::{Transaction, ActionRecord, Polarity, TxType};
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
 pub struct RawAccount {

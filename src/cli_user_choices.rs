@@ -15,8 +15,8 @@ use rustyline::hint::{Hinter};
 use rustyline::error::ReadlineError;
 use rustyline::highlight::{Highlighter};
 
-use crate::core_functions::InventoryCostingMethod;
-use crate::string_utils;
+use crptls::costing_method::InventoryCostingMethod;
+use crptls::string_utils;
 
 
 pub fn choose_file_for_import(flag_to_accept_cli_args: bool) -> Result<PathBuf, Box<dyn Error>> {

@@ -4,9 +4,11 @@
 use std::path::PathBuf;
 use std::error::Error;
 
+use crptls::costing_method::InventoryCostingMethod;
+
 use crate::cli_user_choices;
-use crate::core_functions::{InventoryCostingMethod};
 use crate::setup::{ArgsForImportVarsTBD};
+
 
 pub(crate) fn skip_wizard(args: ArgsForImportVarsTBD) -> Result<(
     InventoryCostingMethod,

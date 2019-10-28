@@ -9,10 +9,10 @@ use std::error::Error;
 use decimal::d128;
 use chrono::NaiveDate;
 
-use crate::transaction::{Transaction, ActionRecord, TxType, Polarity, TxHasMargin};
-use crate::account::{Account, RawAccount, Lot, Movement};
-use crate::core_functions::{InventoryCostingMethod};
-use crate::decimal_utils::{round_d128_1e8};
+use crate::crptls_lib::transaction::{Transaction, ActionRecord, TxType, Polarity, TxHasMargin};
+use crate::crptls_lib::account::{Account, RawAccount, Lot, Movement};
+use crate::crptls_lib::costing_method::{InventoryCostingMethod};
+use crate::crptls_lib::decimal_utils::{round_d128_1e8};
 
 pub(crate) fn create_lots_and_movements(
     txns_map: HashMap<u32, Transaction>,

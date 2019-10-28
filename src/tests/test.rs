@@ -6,9 +6,9 @@ use std::collections::{HashMap};
 
 use decimal::d128;
 
-use crate::account::{Account};
-use crate::transaction::{Transaction, ActionRecord};
-use crate::decimal_utils::*;
+use crptls::account::{Account};
+use crptls::transaction::{Transaction, ActionRecord};
+use crptls::decimal_utils::*;
 
 pub fn run_tests(
     transactions_map: &HashMap<u32, Transaction>,

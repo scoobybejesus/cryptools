@@ -6,10 +6,10 @@ use std::error::Error;
 
 use decimal::d128;
 
-use crate::transaction::{Transaction, TxType, ActionRecord, Polarity};
-use crate::account::{Account, RawAccount};
-use crate::decimal_utils::{round_d128_1e2};
-use crate::core_functions::{ImportProcessParameters};
+use crate::crptls_lib::transaction::{Transaction, TxType, ActionRecord, Polarity};
+use crate::crptls_lib::account::{Account, RawAccount};
+use crate::crptls_lib::decimal_utils::{round_d128_1e2};
+use crate::crptls_lib::core_functions::{ImportProcessParameters};
 
 pub(crate) fn add_cost_basis_to_movements(
     settings: &ImportProcessParameters,

@@ -9,8 +9,7 @@ use ::tui::widgets::{Widget, Block, Borders, SelectableList, Text, Paragraph};
 use ::tui::layout::{Layout, Constraint, Direction};
 use ::tui::backend::Backend;
 
-use crate::tui::app::PrintWindow;
-use crate::tui;
+use crate::mytui::app::{PrintWindow, REPORTS};
 
 
 pub fn draw<B: Backend>(terminal: &mut Terminal<B>, app: &PrintWindow) -> Result<(), io::Error> {
@@ -21,7 +20,7 @@ pub fn draw<B: Backend>(terminal: &mut Terminal<B>, app: &PrintWindow) -> Result
             .constraints([
                 Constraint::Length(1),
                 Constraint::Length(8),
-                Constraint::Length(tui::app::REPORTS.len() as u16 + 2),
+                Constraint::Length(REPORTS.len() as u16 + 2),
                 Constraint::Percentage(35)
             ].as_ref())
             .split(f.size());
