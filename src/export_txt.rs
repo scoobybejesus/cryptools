@@ -259,11 +259,12 @@ Enable like-kind treatment: {}",
 
             if acct.list_of_lots.borrow().len() > 0 {
 
-                writeln!(file, "  Lot {} • Σ: {}, with remaining cost basis of {} and basis date of {}",
+                writeln!(file, "  Lot {} created {} w/ basis date {} • Σ: {}, and cost basis of {}",
                     (lot_idx+1),
+                    lot.date_of_first_mvmt_in_lot,
+                    lot.date_for_basis_purposes,
                     movements_sum,
                     lk_lot_basis,
-                    lot.date_for_basis_purposes
                 )?;
             }
         }
@@ -347,11 +348,12 @@ Enable like-kind treatment: {}",
             if acct.list_of_lots.borrow().len() > 0 {
                 if movements_sum > d128!(0) {
 
-                    writeln!(file, "  Lot {} • Σ: {}, with remaining cost basis of {} and basis date of {}",
+                    writeln!(file, "  Lot {} created {} w/ basis date {} • Σ: {}, and cost basis of {}",
                         (lot_idx+1),
+                        lot.date_of_first_mvmt_in_lot,
+                        lot.date_for_basis_purposes,
                         movements_sum,
                         lk_lot_basis,
-                        lot.date_for_basis_purposes
                     )?;
                 }
             }

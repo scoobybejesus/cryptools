@@ -10,7 +10,7 @@ name = "crptls"
 path = "src/lib.rs"
 
 [[bin]]
-name = "main"
+name = "cryptools"
 path = "src/main.rs"
 
 [dependencies]
