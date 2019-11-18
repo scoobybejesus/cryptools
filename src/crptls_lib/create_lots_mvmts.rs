@@ -606,7 +606,7 @@ fn get_base_and_quote_acct_for_dual_actionrecord_flow_tx(
 
     let og_flow_ar = ar_map.get(txn.action_record_idx_vec.first().unwrap()).unwrap();
 
-    let og_ar_mvmts_list = &og_flow_ar.get_mvmts_in_ar_in_date_order(acct_map, txns_map);
+    let og_ar_mvmts_list = &og_flow_ar.get_mvmts_in_ar_in_lot_date_order(acct_map, txns_map);
     let og_ar_list_first_mvmt = &og_ar_mvmts_list.first().unwrap(); // TODO: then this takes the one mvmt
     let og_ar_list_first_mvmt_ar = ar_map.get(&og_ar_list_first_mvmt.action_record_key).unwrap();
     let og_ar_list_first_mvmt_ar_acct = acct_map.get(&og_ar_list_first_mvmt_ar.account_key).unwrap();
@@ -828,12 +828,12 @@ fn process_multiple_incoming_lots_and_mvmts(
     let mut all_but_last_incoming_mvmt_amt = d128!(0.0);
     let mut all_but_last_incoming_mvmt_ratio = d128!(0.0);
     // println!("Txn date: {}. Outgoing mvmts: {}, Outgoing amount: {}", txn.date, outgoing_ar.movements.borrow().len(), outgoing_ar.amount);
-    let list_of_mvmts_of_outgoing_ar = outgoing_ar.get_mvmts_in_ar_in_date_order(acct_map, txns_map);
+    let list_of_mvmts_of_outgoing_ar = outgoing_ar.get_mvmts_in_ar_in_lot_date_order(acct_map, txns_map);
     let final_mvmt = list_of_mvmts_of_outgoing_ar.last().unwrap();
     //  First iteration, for all but final movement
     for outgoing_mvmt in list_of_mvmts_of_outgoing_ar
                             .iter()
-                            .take(outgoing_ar.get_mvmts_in_ar_in_date_order(acct_map, txns_map).len() - 1) {
+                            .take(outgoing_ar.get_mvmts_in_ar_in_lot_date_order(acct_map, txns_map).len() - 1) {
         let ratio_of_outgoing_mvmt_to_total_ar = outgoing_mvmt.amount / outgoing_ar.amount; //  Negative divided by negative is positive
         // println!("Ratio of outgoing amt to total actionrecord amt: {:.8}", ratio_of_outgoing_to_total_ar);
         let tentative_incoming_amt = ratio_of_outgoing_mvmt_to_total_ar * incoming_ar.amount;

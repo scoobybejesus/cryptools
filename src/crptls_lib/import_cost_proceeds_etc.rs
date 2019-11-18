@@ -31,16 +31,17 @@ pub(crate) fn add_cost_basis_to_movements(
             let ar = ars.get(ar_num).unwrap();
             let acct = acct_map.get(&ar.account_key).unwrap();
             let raw_acct = raw_acct_map.get(&acct.raw_key).unwrap();
-            let movements = ar.get_mvmts_in_ar_in_date_order(acct_map, txns_map);
+            let movements = ar.get_mvmts_in_ar_in_lot_date_order(acct_map, txns_map);
 
-            for mvmt in movements.iter() {
+            for (idx, mvmt) in movements.iter().enumerate() {
 
                 let polarity = ar.direction();
                 let tx_type = txn.transaction_type(ars, raw_acct_map, acct_map)?;
                 let is_home_curr = raw_acct.is_home_currency(&settings.home_currency);
                 let mvmt_copy = mvmt.clone();
                 let borrowed_mvmt = mvmt_copy.clone();
-                // println!("Txn: {} on {} of type: {:?}",txn.tx_number,txn.date, txn.transaction_type());
+                // println!("Txn: {} on {} of type: {:?}",
+                //     txn.tx_number,txn.date, txn.transaction_type(ars, raw_acct_map, acct_map));
 
                 if !raw_acct.is_margin {
 
@@ -113,16 +114,17 @@ pub(crate) fn add_cost_basis_to_movements(
 
                                     TxType::ToSelf => {
 
-                                        let ratio_of_amt_to_incoming_mvmts_in_a_r =
-                                            borrowed_mvmt.ratio_of_amt_to_incoming_mvmts_in_a_r;
-                                        let cb_outgoing_ar = retrieve_cost_basis_from_corresponding_outgoing_toself(
+                                        let cb_vec_outgoing_ar = retrieve_cb_vec_from_corresponding_outgoing_toself(
                                             txn_num,
                                             &ars,
                                             txns_map,
                                             acct_map
                                         );
 
-                                        let unrounded_basis = cb_outgoing_ar * ratio_of_amt_to_incoming_mvmts_in_a_r;
+                                        assert!(idx <= cb_vec_outgoing_ar.len(),
+                                            "ToSelf txn had different # of in- and out- mvmts (more outs than ins).");
+
+                                        let unrounded_basis = cb_vec_outgoing_ar[idx];
                                         let rounded_basis = round_d128_1e2(&unrounded_basis);
 
                                         mvmt.cost_basis.set(-rounded_basis);
@@ -154,26 +156,27 @@ pub(crate) fn add_cost_basis_to_movements(
             }
         }
     }
-    fn retrieve_cost_basis_from_corresponding_outgoing_toself(
+
+    fn retrieve_cb_vec_from_corresponding_outgoing_toself(
         txn_num: u32,
         ars: &HashMap<u32, ActionRecord>,
         txns_map: &HashMap<u32, Transaction>,
         acct_map: &HashMap<u16, Account>,
-    ) -> d128 {
+    ) -> Vec<d128> {
 
         let txn = txns_map.get(&txn_num).unwrap();
         let other_ar_borrowed = &ars.get(&txn.action_record_idx_vec[0]).unwrap();
 
         assert_eq!(other_ar_borrowed.direction(), Polarity::Outgoing);
 
-        let mut basis = d128!(0);
-        let movements = other_ar_borrowed.get_mvmts_in_ar_in_date_order(acct_map, txns_map);
+        let movements = other_ar_borrowed.get_mvmts_in_ar_in_lot_date_order(acct_map, txns_map);
+        let mut vec = Vec::new();
 
         for mvmt in movements.iter() {
-            basis += mvmt.cost_basis.get();
+            vec.push(mvmt.cost_basis.get());
         }
 
-        basis
+        vec
     };
 
     Ok(())
@@ -198,7 +201,7 @@ pub(crate) fn add_proceeds_to_movements(
             let ar = ars.get(ar_num).unwrap();
             let acct = acct_map.get(&ar.account_key).unwrap();
             let raw_acct = raw_acct_map.get(&acct.raw_key).unwrap();
-            let movements = ar.get_mvmts_in_ar_in_date_order(acct_map, txns_map);
+            let movements = ar.get_mvmts_in_ar_in_lot_date_order(acct_map, txns_map);
 
             if !raw_acct.is_margin {
 
@@ -303,7 +306,7 @@ fn update_current_txn_for_prior_likekind_treatment(
         let ar = ars.get(ar_num).unwrap();
         let acct = acct_map.get(&ar.account_key).unwrap();
         let raw_acct = raw_acct_map.get(&acct.raw_key).unwrap();
-        let movements = ar.get_mvmts_in_ar_in_date_order(acct_map, txns_map);
+        let movements = ar.get_mvmts_in_ar_in_lot_date_order(acct_map, txns_map);
 
         for mvmt in movements.iter() {
 
@@ -400,7 +403,7 @@ fn perform_likekind_treatment_on_txn(
                 for ar_num in txn.action_record_idx_vec.iter() {
 
                     let ar = ars.get(ar_num).unwrap();
-                    let movements = ar.get_mvmts_in_ar_in_date_order(acct_map, txns_map);
+                    let movements = ar.get_mvmts_in_ar_in_lot_date_order(acct_map, txns_map);
 
                     for mvmt in movements.iter() {
 
@@ -445,7 +448,7 @@ fn perform_likekind_treatment_on_txn(
                 for ar_num in txn.action_record_idx_vec.iter() {
 
                     let ar = ars.get(ar_num).unwrap();
-                    let movements = ar.get_mvmts_in_ar_in_date_order(acct_map, txns_map);
+                    let movements = ar.get_mvmts_in_ar_in_lot_date_order(acct_map, txns_map);
 
                     let polarity = ar.direction();
 

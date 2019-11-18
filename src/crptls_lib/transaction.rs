@@ -167,7 +167,7 @@ impl Transaction {
 
             if !raw_acct.is_home_currency(user_home_currency) & !raw_acct.is_margin {
 
-                let movements = ar.get_mvmts_in_ar_in_date_order(acct_map, txns_map);
+                let movements = ar.get_mvmts_in_ar_in_lot_date_order(acct_map, txns_map);
 
                 match self.transaction_type(ars, raw_acct_map, acct_map)? {
                     TxType::Exchange => {
@@ -307,7 +307,7 @@ impl ActionRecord {
     /// ordered by their creation date (`date`), so later `Lot`s may have earlier `basis_date`s
     /// by virtue of them being the result of a `ToSelf` type `Transaction` that transferred
     /// old "coins."
-    pub fn get_mvmts_in_ar_in_date_order(
+    pub fn get_mvmts_in_ar_in_lot_date_order(
         &self,
         acct_map: &HashMap<u16, Account>,
         txns_map: &HashMap<u32, Transaction>,

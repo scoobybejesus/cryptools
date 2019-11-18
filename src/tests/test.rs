@@ -67,7 +67,7 @@ fn compare_movements_across_implementations(
                 + " with amount: "
                 + &ar.amount.to_string() + &"\n".to_string()
             );
-            let mvmts = ar.get_mvmts_in_ar_in_date_order(&account_map, &transactions_map);
+            let mvmts = ar.get_mvmts_in_ar_in_lot_date_order(&account_map, &transactions_map);
             let mut amts = d128!(0);
             for mvmt in mvmts {
                 amts += mvmt.amount;
@@ -156,7 +156,7 @@ pub fn test_action_records_amts_vs_mvmt_amts(
         for ar_num in &txn.action_record_idx_vec {
 
             let ar = action_records_map.get(&(ar_num)).unwrap();
-            let mvmts = ar.get_mvmts_in_ar_in_date_order(&account_map, &transactions_map);
+            let mvmts = ar.get_mvmts_in_ar_in_lot_date_order(&account_map, &transactions_map);
                 for mvmt in mvmts {
                     mvmt_amt_ar += mvmt.amount
                 }
