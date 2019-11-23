@@ -33,11 +33,13 @@ pub fn export(
         &raw_acct_map
     );
 
-    export_csv::_3_account_sums_to_csv_with_orig_basis(
-        &settings,
-        &raw_acct_map,
-        &account_map
-    );
+    if settings.lk_treatment_enabled {
+        export_csv::_3_account_sums_to_csv_with_orig_basis(
+            &settings,
+            &raw_acct_map,
+            &account_map
+        );
+    }
 
     export_csv::_4_transaction_mvmt_detail_to_csv(
         &settings,
@@ -55,13 +57,15 @@ pub fn export(
         &transactions_map
     )?;
 
-    export_csv::_6_transaction_mvmt_detail_to_csv_w_orig(
-        &settings,
-        &action_records_map,
-        &raw_acct_map,
-        &account_map,
-        &transactions_map
-    )?;
+    if settings.lk_treatment_enabled {
+        export_csv::_6_transaction_mvmt_detail_to_csv_w_orig(
+            &settings,
+            &action_records_map,
+            &raw_acct_map,
+            &account_map,
+            &transactions_map
+        )?;
+    }
 
     export_txt::_1_account_lot_detail_to_txt(
         &settings,
