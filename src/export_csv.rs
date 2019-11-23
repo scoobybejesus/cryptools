@@ -28,6 +28,7 @@ pub fn _1_account_sums_to_csv(
         "Ticker".to_string(),
         "Cost Basis".to_string(),
         "Total lots".to_string(),
+        "Nonzero lots".to_string(),
     ]);
     rows.push(header);
 
@@ -36,7 +37,7 @@ pub fn _1_account_sums_to_csv(
     for j in 1..=length {
 
         let acct = acct_map.get(&(j as u16)).unwrap();
-        let mut row: Vec<String> = Vec::with_capacity(5);
+        let mut row: Vec<String> = Vec::with_capacity(6);
 
         let balance: String;
         let tentative_balance = acct.get_sum_of_amts_in_lots();
@@ -55,11 +56,14 @@ pub fn _1_account_sums_to_csv(
             } else { lk_cost_basis = tentative_lk_cost_basis.to_string() }
         }
 
+        let nonzero_lots = acct.get_num_of_nonzero_lots();
+
         row.push(raw_acct.name.to_string());
         row.push(balance);
         row.push(raw_acct.ticker.to_string());
         row.push(lk_cost_basis);
         row.push(acct.list_of_lots.borrow().len().to_string());
+        row.push(nonzero_lots.to_string());
         rows.push(row);
     }
     let file_name = PathBuf::from("C1_Acct_Sum_with_cost_basis.csv");
@@ -90,6 +94,7 @@ pub fn _2_account_sums_nonzero_to_csv(
         "Ticker".to_string(),
         "Cost basis".to_string(),
         "Total lots".to_string(),
+        "Nonzero lots".to_string(),
     ]);
     rows.push(header);
 
@@ -98,7 +103,7 @@ pub fn _2_account_sums_nonzero_to_csv(
     for j in 1..=length {
 
         let acct = acct_map.get(&(j as u16)).unwrap();
-        let mut row: Vec<String> = Vec::with_capacity(5);
+        let mut row: Vec<String> = Vec::with_capacity(6);
 
         let raw_acct = raw_acct_map.get(&acct.raw_key).unwrap();
         let name = raw_acct.name.to_string();
@@ -120,12 +125,15 @@ pub fn _2_account_sums_nonzero_to_csv(
             } else { lk_cost_basis = tentative_lk_cost_basis.to_string() }
         }
 
+        let nonzero_lots = acct.get_num_of_nonzero_lots();
+
         if balance_d128 != d128!(0) {
             row.push(name);
             row.push(balance);
             row.push(raw_acct.ticker.to_string());
             row.push(lk_cost_basis);
             row.push(acct.list_of_lots.borrow().len().to_string());
+            row.push(nonzero_lots.to_string());
             rows.push(row);
         }
     }

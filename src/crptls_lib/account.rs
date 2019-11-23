@@ -65,7 +65,20 @@ impl Account {
 				total_amount += sum;
 			}
 		total_amount
-	}
+    }
+
+    pub fn get_num_of_nonzero_lots(&self) -> u32 {
+
+        let mut count = 0;
+
+        for lot in self.list_of_lots.borrow().iter() {
+            if lot.get_sum_of_amts_in_lot() > d128!(0) {
+                count += 1
+            }
+        }
+
+        count
+    }
 }
 
 #[derive(Clone, Debug)]
