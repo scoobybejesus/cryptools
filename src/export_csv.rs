@@ -20,16 +20,20 @@ pub fn _1_account_sums_to_csv(
 ) {
 
     let mut rows: Vec<Vec<String>> = Vec::with_capacity(acct_map.len());
-    let mut header: Vec<String> = Vec::with_capacity(5);
 
-    header.extend_from_slice(&[
+    let columns = [
         "Account".to_string(),
         "Balance".to_string(),
         "Ticker".to_string(),
         "Cost Basis".to_string(),
         "Total lots".to_string(),
         "Nonzero lots".to_string(),
-    ]);
+    ];
+
+    let total_columns = columns.len();
+    let mut header: Vec<String> = Vec::with_capacity(total_columns);
+
+    header.extend_from_slice(&columns);
     rows.push(header);
 
     let length = acct_map.len();
@@ -37,7 +41,7 @@ pub fn _1_account_sums_to_csv(
     for j in 1..=length {
 
         let acct = acct_map.get(&(j as u16)).unwrap();
-        let mut row: Vec<String> = Vec::with_capacity(6);
+        let mut row: Vec<String> = Vec::with_capacity(total_columns);
 
         let balance: String;
         let tentative_balance = acct.get_sum_of_amts_in_lots();
@@ -86,16 +90,20 @@ pub fn _2_account_sums_nonzero_to_csv(
 ) {
 
     let mut rows: Vec<Vec<String>> = Vec::with_capacity(acct_map.len());    //  more than needed...
-    let mut header: Vec<String> = Vec::with_capacity(5);
 
-    header.extend_from_slice(&[
+    let columns = [
         "Account".to_string(),
         "Balance".to_string(),
         "Ticker".to_string(),
         "Cost basis".to_string(),
         "Total lots".to_string(),
         "Nonzero lots".to_string(),
-    ]);
+    ];
+
+    let total_columns = columns.len();
+    let mut header: Vec<String> = Vec::with_capacity(total_columns);
+
+    header.extend_from_slice(&columns);
     rows.push(header);
 
     let length = acct_map.len();
@@ -103,7 +111,7 @@ pub fn _2_account_sums_nonzero_to_csv(
     for j in 1..=length {
 
         let acct = acct_map.get(&(j as u16)).unwrap();
-        let mut row: Vec<String> = Vec::with_capacity(6);
+        let mut row: Vec<String> = Vec::with_capacity(total_columns);
 
         let raw_acct = raw_acct_map.get(&acct.raw_key).unwrap();
         let name = raw_acct.name.to_string();
@@ -158,16 +166,21 @@ pub fn _3_account_sums_to_csv_with_orig_basis(
 ) {
 
     let mut rows: Vec<Vec<String>> = Vec::with_capacity(acct_map.len());
-    let mut header: Vec<String> = Vec::with_capacity(6);
 
-    header.extend_from_slice(&[
+    let columns = [
         "Account".to_string(),
         "Balance".to_string(),
         "Ticker".to_string(),
         "Orig. Cost Basis".to_string(),
         "LK Cost Basis".to_string(),
         "Total lots".to_string(),
-    ]);
+        "Nonzero lots".to_string(),
+    ];
+
+    let total_columns = columns.len();
+    let mut header: Vec<String> = Vec::with_capacity(total_columns);
+
+    header.extend_from_slice(&columns);
     rows.push(header);
 
     let length = acct_map.len();
@@ -206,12 +219,15 @@ pub fn _3_account_sums_to_csv_with_orig_basis(
             } else { orig_cost_basis = tentative_orig_cost_basis.to_string() }
         }
 
+        let nonzero_lots = acct.get_num_of_nonzero_lots();
+
         row.push(raw_acct.name.to_string());
         row.push(balance);
         row.push(raw_acct.ticker.to_string());
         row.push(orig_cost_basis);
         row.push(lk_cost_basis);
         row.push(acct.list_of_lots.borrow().len().to_string());
+        row.push(nonzero_lots.to_string());
         rows.push(row);
     }
     let file_name = PathBuf::from("C3_Acct_Sum_with_orig_and_lk_cost_basis.csv");
@@ -236,8 +252,8 @@ pub fn _4_transaction_mvmt_detail_to_csv(
 ) -> Result<(), Box<dyn Error>> {
 
     let mut rows: Vec<Vec<String>> = [].to_vec();
-    let mut header: Vec<String> = Vec::with_capacity(12);
-    header.extend_from_slice(&[
+
+    let columns = [
         "Date".to_string(),
         "Txn#".to_string(),
         "Type".to_string(),
@@ -250,7 +266,12 @@ pub fn _4_transaction_mvmt_detail_to_csv(
         "Gain/loss".to_string(),
         "Income".to_string(),
         "Expense".to_string(),
-    ]);
+    ];
+
+    let total_columns = columns.len();
+
+    let mut header: Vec<String> = Vec::with_capacity(total_columns);
+    header.extend_from_slice(&columns);
     rows.push(header);
 
     let length = txns_map.len();
@@ -273,9 +294,10 @@ pub fn _4_transaction_mvmt_detail_to_csv(
             let acct = acct_map.get(&lot.account_key).unwrap();
             let raw_acct = raw_acct_map.get(&acct.raw_key).unwrap();
 
-            let date = txn.date.format("%Y/%m/%d").to_string();
+            let date = txn.date.to_string();
             let tx_number = txn.tx_number.to_string();
             let tx_type = txn.transaction_type(&ars, &raw_acct_map, &acct_map)?;
+            let tx_type_string = mvmt.friendly_tx_type(&tx_type);
             let memo = txn.user_memo.to_string();
             let mut amount = d128!(0);
             amount += mvmt.amount;   //  To prevent printing -5E+1 instead of 50, for example
@@ -287,17 +309,18 @@ pub fn _4_transaction_mvmt_detail_to_csv(
             let income = mvmt.get_income(ars, &raw_acct_map, &acct_map, &txns_map)?;
             let expense = mvmt.get_expense(ars, &raw_acct_map, &acct_map, &txns_map)?;
 
+
             if tx_type == TxType::Flow && amount > d128!(0) {
                 proceeds_lk = d128!(0);
                 cost_basis_lk = d128!(0);
                 gain_loss = d128!(0);
             }
 
-            let mut row: Vec<String> = Vec::with_capacity(12);
+            let mut row: Vec<String> = Vec::with_capacity(total_columns);
 
             row.push(date);
-            row.push("Txn ".to_string() + &tx_number);
-            row.push(tx_type.to_string());
+            row.push(tx_number.to_string());
+            row.push(tx_type_string);
             row.push(memo);
             row.push(amount.to_string());
             row.push(ticker);
@@ -335,9 +358,8 @@ pub fn _5_transaction_mvmt_summaries_to_csv(
 ) -> Result<(), Box<dyn Error>> {
 
     let mut rows: Vec<Vec<String>> = [].to_vec();
-    let mut header: Vec<String> = Vec::with_capacity(12);
 
-    header.extend_from_slice(&[
+    let columns = [
         "Date".to_string(),
         "Txn#".to_string(),
         "Type".to_string(),
@@ -350,18 +372,25 @@ pub fn _5_transaction_mvmt_summaries_to_csv(
         "Gain/loss".to_string(),
         "Income".to_string(),
         "Expense".to_string(),
-    ]);
+    ];
+
+    let total_columns = columns.len();
+    let mut header: Vec<String> = Vec::with_capacity(total_columns);
+
+    header.extend_from_slice(&columns);
     rows.push(header);
 
     let length = txns_map.len();
+
+    let mut tx_type_string = "".to_string();
 
     for txn_num in 1..=length {
 
         let txn_num = txn_num as u32;
         let txn = txns_map.get(&(txn_num)).unwrap();
-        let txn_date_string = txn.date.format("%Y/%m/%d").to_string();
-        let tx_num_string = "Txn ".to_string() + &txn.tx_number.to_string();
-        let tx_type_string = txn.transaction_type(ars, &raw_acct_map, &acct_map)?.to_string();
+        let txn_date_string = txn.date.to_string();
+        let tx_num_string = txn.tx_number.to_string();
+        let tx_type = txn.transaction_type(ars, &raw_acct_map, &acct_map)?;
         let tx_memo_string = txn.user_memo.to_string();
         let mut term_st: Option<Term> = None;
         let mut term_lt: Option<Term> = None;
@@ -390,10 +419,14 @@ pub fn _5_transaction_mvmt_summaries_to_csv(
             txns_map
         )?;
 
+        let mut count = 0;
         for mvmt in flow_or_outgoing_exchange_movements.iter() {
             let lot = mvmt.get_lot(acct_map, ars);
             let acct = acct_map.get(&lot.account_key).unwrap();
             let raw_acct = raw_acct_map.get(&acct.raw_key).unwrap();
+
+            if count == 0 { tx_type_string = mvmt.friendly_tx_type(&tx_type) };
+            count += 1;
 
             if let None = ticker { ticker = Some(raw_acct.ticker.clone()) };
 
@@ -449,7 +482,7 @@ pub fn _5_transaction_mvmt_summaries_to_csv(
 
         if let Some(term) = term_st {
 
-            let mut row: Vec<String> = Vec::with_capacity(12);
+            let mut row: Vec<String> = Vec::with_capacity(total_columns);
 
             row.push(txn_date_string.clone());
             row.push(tx_num_string.clone());
@@ -468,11 +501,11 @@ pub fn _5_transaction_mvmt_summaries_to_csv(
         }
         if let Some(term) = term_lt {
 
-            let mut row: Vec<String> = Vec::with_capacity(12);
+            let mut row: Vec<String> = Vec::with_capacity(total_columns);
 
             row.push(txn_date_string);
             row.push(tx_num_string);
-            row.push(tx_type_string);
+            row.push(tx_type_string.clone());
             row.push(tx_memo_string);
             row.push(amount_lt.to_string());
             row.push(ticker.unwrap());
@@ -511,9 +544,10 @@ pub fn _6_transaction_mvmt_detail_to_csv_w_orig(
 ) -> Result<(), Box<dyn Error>> {
 
     let mut rows: Vec<Vec<String>> = [].to_vec();
-    let mut header: Vec<String> = Vec::with_capacity(16);
 
-    header.extend_from_slice(&[
+    let lk = settings.lk_treatment_enabled;
+
+    let columns = [
         "Date".to_string(),
         "Txn#".to_string(),
         "Type".to_string(),
@@ -527,10 +561,27 @@ pub fn _6_transaction_mvmt_detail_to_csv_w_orig(
         "Gain/loss".to_string(),
         "Income".to_string(),
         "Expense".to_string(),
+    ];
+
+    let lk_columns = [
         "Orig. Proceeds".to_string(),
         "Orig. Cost basis".to_string(),
         "Orig. Gain/loss".to_string(),
-    ]);
+    ];
+
+    let total_columns = if lk {
+        columns.len() + lk_columns.len()
+    } else {
+        columns.len()
+    };
+
+    let mut header: Vec<String> = Vec::with_capacity(total_columns);
+
+    header.extend_from_slice(&columns);
+
+    if lk {
+        header.extend_from_slice(&lk_columns)
+    }
     rows.push(header);
 
     let length = txns_map.len();
@@ -553,9 +604,10 @@ pub fn _6_transaction_mvmt_detail_to_csv_w_orig(
             let acct = acct_map.get(&lot.account_key).unwrap();
             let raw_acct = raw_acct_map.get(&acct.raw_key).unwrap();
 
-            let date = txn.date.format("%Y/%m/%d").to_string();
+            let date = txn.date.to_string();
             let tx_number = txn.tx_number.to_string();
             let tx_type = txn.transaction_type(&ars, &raw_acct_map, &acct_map)?;
+            let tx_type_string = mvmt.friendly_tx_type(&tx_type);
             let user_memo = txn.user_memo.to_string();
             let auto_memo = txn.get_auto_memo(ars, raw_acct_map,acct_map, &settings.home_currency)?;
             let mut amount = d128!(0);
@@ -570,6 +622,7 @@ pub fn _6_transaction_mvmt_detail_to_csv_w_orig(
             let mut orig_proc = mvmt.proceeds.get();
             let mut orig_cost = mvmt.cost_basis.get();
             let mut orig_gain_loss = mvmt.get_orig_gain_or_loss();
+            println!("{:?}", expense);
 
             if tx_type == TxType::Flow && amount > d128!(0) {
                 proceeds_lk = d128!(0);
@@ -580,11 +633,11 @@ pub fn _6_transaction_mvmt_detail_to_csv_w_orig(
                 orig_gain_loss = d128!(0);
             }
 
-            let mut row: Vec<String> = Vec::with_capacity(16);
+            let mut row: Vec<String> = Vec::with_capacity(total_columns);
 
             row.push(date);
-            row.push("Txn ".to_string() + &tx_number);
-            row.push(tx_type.to_string());
+            row.push(tx_number);
+            row.push(tx_type_string);
             row.push(user_memo);
             row.push(auto_memo);
             row.push(amount.to_string());
@@ -595,14 +648,16 @@ pub fn _6_transaction_mvmt_detail_to_csv_w_orig(
             row.push(gain_loss.to_string());
             row.push(income.to_string());
             row.push(expense.to_string());
-            row.push(orig_proc.to_string());
-            row.push(orig_cost.to_string());
-            row.push(orig_gain_loss.to_string());
+            if lk {
+                row.push(orig_proc.to_string());
+                row.push(orig_cost.to_string());
+                row.push(orig_gain_loss.to_string());
+            }
             rows.push(row);
         }
     }
 
-    let file_name = PathBuf::from("C6_Txns_mvmts_detail_w_orig.csv");
+    let file_name = PathBuf::from("C6_Txns_mvmts_more_detail.csv");
     let path = PathBuf::from(&settings.export_path);
 
     let full_path: PathBuf = [path, file_name].iter().collect();

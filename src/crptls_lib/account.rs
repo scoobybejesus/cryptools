@@ -282,7 +282,7 @@ impl Movement {
                     let acct = acct_map.get(&ar.account_key).unwrap();
                     let raw_acct = raw_accts.get(&acct.raw_key).unwrap();
 
-                    if !raw_acct.is_margin {
+                    if raw_acct.is_margin {
 
                        Ok(d128!(0))
 
@@ -297,7 +297,32 @@ impl Movement {
 			TxType::Exchange => { Ok(d128!(0)) }
 			TxType::ToSelf => { Ok(d128!(0)) }
 		}
-	}
+    }
+
+    pub fn friendly_tx_type(&self, tx_type: &TxType) -> String {
+
+        let tx_type_string = match tx_type {
+
+            TxType::Exchange => { tx_type.to_string() },
+
+            TxType::ToSelf => { tx_type.to_string() },
+
+            TxType::Flow => {
+
+                let direction: String;
+
+                if self.amount > d128!(0) {
+                    direction = "In".to_string();
+                } else {
+                    direction = "Out".to_string()
+                }
+
+                direction + &tx_type.to_string().to_lowercase()
+            },
+        };
+
+        tx_type_string
+    }
 
 }
 
