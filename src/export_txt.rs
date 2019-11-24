@@ -148,7 +148,7 @@ Enable like-kind treatment: {}",
                 let lot_sum_row;
 
                 if raw_acct.is_home_currency(home_currency) {
-                    lot_sum_row = format!("\t• Σ: {:.2} {}, with remaining cost basis of {:.2} {} and basis date of {}",
+                    lot_sum_row = format!("    • Σ: {:.2} {}, with remaining cost basis of {:.2} {} and basis date of {}",
                         formatted_sum.to_string().as_str().parse::<f32>()?,
                         ticker,
                         formatted_basis.to_string().as_str().parse::<f32>()?,
@@ -156,7 +156,7 @@ Enable like-kind treatment: {}",
                         lot.date_for_basis_purposes
                     )
                 } else {
-                    lot_sum_row = format!("\t• Σ: {} {}, with remaining cost basis of {:.2} {} and basis date of {}",
+                    lot_sum_row = format!("    • Σ: {} {}, with remaining cost basis of {:.2} {} and basis date of {}",
                         formatted_sum,
                         ticker,
                         formatted_basis.to_string().as_str().parse::<f32>()?,
@@ -165,7 +165,7 @@ Enable like-kind treatment: {}",
                     )
                 }
                 writeln!(file, "{}", lot_sum_row)?;
-                writeln!(file, "\t Movements:")?;
+                writeln!(file, "     Movements:")?;
 
                 for (m_idx, mvmt) in lot.movements.borrow().iter().enumerate() {
 
@@ -175,7 +175,7 @@ Enable like-kind treatment: {}",
                     let description_string: String;
 
                     if raw_acct.is_home_currency(home_currency) {
-                        description_string = format!("\t\t{}.\t{:<8.2} {} (Txn #{:>4}) {:>9} txn on {:10}. - {}",
+                        description_string = format!("\t{}.  {:<8.2} {} (Txn #{:>4}) {:>9} txn on {:10}. - {}",
                             (m_idx+1),
                             mvmt.amount.to_string().as_str().parse::<f32>()?,
                             ticker,
@@ -185,7 +185,7 @@ Enable like-kind treatment: {}",
                             txn.user_memo
                         );
                     } else {
-                        description_string = format!("\t\t{}.\t{:<8} {} (Txn #{:>4}) {:>9} txn on {:10}. - {}",
+                        description_string = format!("\t{}.  {:<8} {} (Txn #{:>4}) {:>9} txn on {:10}. - {}",
                             (m_idx+1),
                             mvmt.amount,
                             ticker,
@@ -216,7 +216,7 @@ Enable like-kind treatment: {}",
                     let income = mvmt.get_income(ars, raw_acct_map,	acct_map, txns_map)?;
                     let expense = mvmt.get_expense(ars, raw_acct_map, acct_map, txns_map)?;
 
-                    let activity_str = format!("\t\t\tProceeds: {:>10.2}; Cost basis: {:>10.2}; for Gain/loss: {} {:>10.2}; Inc.: {:>10.2}; Exp.: {:>10.2}.",
+                    let activity_str = format!("\t    Proceeds: {:>10.2}; Cost basis: {:>10.2}; for Gain/loss: {} {:>10.2}; Inc.: {:>10.2}; Exp.: {:>10.2}.",
                         lk_proceeds.to_string().as_str().parse::<f32>()?,
                         lk_cost_basis.to_string().as_str().parse::<f32>()?,
                         mvmt.get_term(acct_map, ars),

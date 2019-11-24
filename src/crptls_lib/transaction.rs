@@ -241,16 +241,36 @@ impl Transaction {
                 let ic_raw_acct = raw_accts.get(&ic_acct.raw_key).unwrap();
                 let ic_ticker = &ic_raw_acct.ticker;
 
-                if tx_type == TxType::Exchange {
-                    format!("Paid {} {} for {} {}, valued at {} {}.",
-                        og_amt, og_ticker, ic_amt, ic_ticker, self.proceeds, home_currency)
+                let og_amt_and_ticker;
+                if og_raw_acct.is_home_currency(home_currency) {
+                    og_amt_and_ticker = format!("{:.2} {}",
+                        og_amt.to_string().as_str().parse::<f32>()?, og_ticker
+                    );
                 } else {
-                    format!("Transferred {} {} to another account. Received {} {}, likely after a transaction fee.",
-                        og_amt, og_ticker, ic_amt, ic_ticker)
+                    og_amt_and_ticker = format!("{} {}", og_amt, og_ticker);
+                }
+
+                let ic_amt_and_ticker;
+                if ic_raw_acct.is_home_currency(home_currency) {
+                    ic_amt_and_ticker = format!("{:.2} {}",
+                        ic_amt.to_string().as_str().parse::<f32>()?, ic_ticker
+                    );
+                } else {
+                    ic_amt_and_ticker = format!("{} {}", ic_amt, ic_ticker);
+                }
+
+                if tx_type == TxType::Exchange {
+                    format!("Paid {} for {}, valued at {:.2} {}.",
+                        og_amt_and_ticker, ic_amt_and_ticker,
+                        self.proceeds.to_string().as_str().parse::<f32>()?, home_currency)
+                } else {
+                    format!("Transferred {} to another account. Received {}, likely after a transaction fee.",
+                        og_amt_and_ticker, ic_amt_and_ticker)
                 }
             } else {
 
-                format!("Margin profit or loss valued at {} {}.", self.proceeds, home_currency)
+                format!("Margin profit or loss valued at {:.2} {}.",
+                self.proceeds.to_string().as_str().parse::<f32>()?, home_currency)
             }
 
         } else {
@@ -263,11 +283,13 @@ impl Transaction {
 
             if amt > d128!(0.0) {
 
-                format!("Received {} {} valued at {} {}.", amt, ticker, self.proceeds, home_currency)
+                format!("Received {} {} valued at {:.2} {}.", amt, ticker,
+                self.proceeds.to_string().as_str().parse::<f32>()?, home_currency)
 
             } else {
 
-                format!("Spent {} {} valued at {} {}.", amt, ticker, self.proceeds, home_currency)
+                format!("Spent {} {} valued at {:.2} {}.", amt, ticker,
+                self.proceeds.to_string().as_str().parse::<f32>()?, home_currency)
 
             }
         };

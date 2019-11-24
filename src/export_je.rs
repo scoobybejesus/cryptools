@@ -174,10 +174,10 @@ depending on the bookkeeping practices you employ.";
 
         if let Some(cb) = cost_basis_ic {
             debits += cb;
-            writeln!(file, "{:50}{:5}{:>20}{:5}{:>20}",
+            writeln!(file, "{:50}{:5}{:>20.2}{:5}{:>20}",
             acct_string_ic,
             "",
-            cb.to_string(),
+            cb.to_string().as_str().parse::<f32>()?,
             "",
             "",
             )?;
@@ -185,12 +185,12 @@ depending on the bookkeeping practices you employ.";
 
         if let Some(cb) = cost_basis_og {
             credits += cb;
-            writeln!(file, "{:50}{:5}{:>20}{:5}{:>20}",
+            writeln!(file, "{:50}{:5}{:>20}{:5}{:>20.2}",
             acct_string_og,
             "",
             "",
             "",
-            cb.to_string(),
+            cb.to_string().as_str().parse::<f32>()?,
             )?;
         }
 
@@ -199,20 +199,20 @@ depending on the bookkeeping practices you employ.";
             if lt_gain_loss > d128!(0) {
                 credits += lt_gain_loss.abs();
                 let ltg_string = format!("Long-term gain disposing {}", amount_lt.abs());
-                writeln!(file, "{:50}{:5}{:>20}{:5}{:>20}",
+                writeln!(file, "{:50}{:5}{:>20}{:5}{:>20.2}",
                 ltg_string,
                 "",
                 "",
                 "",
-                lt_gain_loss.to_string(),
+                lt_gain_loss.to_string().as_str().parse::<f32>()?,
                 )?;
             } else {
                 debits += lt_gain_loss.abs();
                 let ltl_string = format!("Long-term loss disposing {}", amount_lt.abs());
-                writeln!(file, "{:50}{:5}{:>20}{:5}{:>20}",
+                writeln!(file, "{:50}{:5}{:>20.2}{:5}{:>20}",
                 ltl_string,
                 "",
-                lt_gain_loss.abs().to_string(),
+                lt_gain_loss.abs().to_string().as_str().parse::<f32>()?,
                 "",
                 "",
                 )?;
@@ -224,20 +224,20 @@ depending on the bookkeeping practices you employ.";
             if st_gain_loss > d128!(0) {
                 credits += st_gain_loss.abs();
                 let stg_string = format!("Short-term gain disposing {}", amount_st.abs());
-                writeln!(file, "{:50}{:5}{:>20}{:5}{:>20}",
+                writeln!(file, "{:50}{:5}{:>20}{:5}{:>20.2}",
                 stg_string,
                 "",
                 "",
                 "",
-                st_gain_loss.to_string(),
+                st_gain_loss.to_string().as_str().parse::<f32>()?,
                 )?;
             } else {
                 debits += st_gain_loss.abs();
                 let stl_string = format!("Short-term loss disposing {}", amount_st.abs());
-                writeln!(file, "{:50}{:5}{:>20}{:5}{:>20}",
+                writeln!(file, "{:50}{:5}{:>20.2}{:5}{:>20}",
                 stl_string,
                 "",
-                st_gain_loss.abs().to_string(),
+                st_gain_loss.abs().to_string().as_str().parse::<f32>()?,
                 "",
                 "",
                 )?;
@@ -246,21 +246,21 @@ depending on the bookkeeping practices you employ.";
 
         if income != d128!(0) {
             credits += income;
-            writeln!(file, "{:50}{:5}{:>20}{:5}{:>20}",
+            writeln!(file, "{:50}{:5}{:>20}{:5}{:>20.2}",
             "Income",
             "",
             "",
             "",
-            income.to_string(),
+            income.to_string().as_str().parse::<f32>()?,
             )?;
         }
 
         if expense != d128!(0) {
             debits += expense.abs();
-            writeln!(file, "{:50}{:5}{:>20}{:5}{:>20}",
+            writeln!(file, "{:50}{:5}{:>20.2}{:5}{:>20}",
             "Expense",
             "",
-            expense.abs().to_string(),
+            expense.abs().to_string().as_str().parse::<f32>()?,
             "",
             "",
             )?;
@@ -274,12 +274,12 @@ depending on the bookkeeping practices you employ.";
             "--------------------",
         )?;
 
-        writeln!(file, "{:50}{:5}{:>20}{:5}{:>20}",
+        writeln!(file, "{:50}{:5}{:>20.2}{:5}{:>20.2}",
             "    Totals",
             "",
-            debits,
+            debits.to_string().as_str().parse::<f32>()?,
             "",
-            credits,
+            credits.to_string().as_str().parse::<f32>()?,
         )?;
 
         writeln!(file, "\n    (Txn {} on {}. {}. {})",
