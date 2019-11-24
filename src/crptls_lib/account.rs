@@ -25,7 +25,15 @@ pub struct RawAccount {
 impl RawAccount {
 	pub fn is_home_currency(&self, compare: &String) -> bool {
 		&self.ticker == compare
-	}
+    }
+
+    pub fn margin_string(&self) -> String {
+        if self.is_margin {
+            "Margin".to_string()
+        } else {
+            "Non-margin".to_string()
+        }
+    }
 }
 
 #[derive(Clone, Debug)]

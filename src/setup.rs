@@ -73,6 +73,7 @@ pub (crate) fn run_setup(args: super::Cli) -> Result<(PathBuf, ImportProcessPara
         should_export: should_export,
         export_path: output_dir_path,
         print_menu: args.flags.print_menu,
+        journal_entry_export: args.flags.journal_entries_only,
     };
 
     Ok((input_file_path, settings))

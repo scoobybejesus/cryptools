@@ -9,6 +9,7 @@ use crptls::account::{Account, RawAccount};
 use crptls::core_functions::{ImportProcessParameters};
 use crate::export_csv;
 use crate::export_txt;
+use crate::export_je;
 
 
 pub fn export(
@@ -84,6 +85,16 @@ pub fn export(
         &raw_acct_map,
         &account_map,
     )?;
+
+    if !settings.lk_treatment_enabled {
+        export_je::prepare_non_lk_journal_entries(
+            &settings,
+            &action_records_map,
+            &raw_acct_map,
+            &account_map,
+            &transactions_map,
+        )?;
+    }
 
 Ok(())
 }

@@ -32,6 +32,7 @@ pub struct ImportProcessParameters {
     pub input_file_has_iso_date_style: bool,
     pub should_export: bool,
     pub print_menu: bool,
+    pub journal_entry_export: bool,
 }
 
 pub fn import_and_process_final(

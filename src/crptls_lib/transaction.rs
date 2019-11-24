@@ -223,6 +223,8 @@ impl Transaction {
 
         let auto_memo = if self.action_record_idx_vec.len() == 2 {
 
+            let tx_type = self.transaction_type(ars, raw_accts, acct_map)?;
+
             let marginness = self.marginness(ars, raw_accts, acct_map);
 
             if (marginness == TxHasMargin::NoARs) | (marginness == TxHasMargin::TwoARs)  {
@@ -239,9 +241,13 @@ impl Transaction {
                 let ic_raw_acct = raw_accts.get(&ic_acct.raw_key).unwrap();
                 let ic_ticker = &ic_raw_acct.ticker;
 
-                format!("Paid {} {} for {} {}, valued at {} {}.",
-                    og_amt, og_ticker, ic_amt, ic_ticker, self.proceeds, home_currency)
-
+                if tx_type == TxType::Exchange {
+                    format!("Paid {} {} for {} {}, valued at {} {}.",
+                        og_amt, og_ticker, ic_amt, ic_ticker, self.proceeds, home_currency)
+                } else {
+                    format!("Transferred {} {} to another account. Received {} {}, likely after a transaction fee.",
+                        og_amt, og_ticker, ic_amt, ic_ticker)
+                }
             } else {
 
                 format!("Margin profit or loss valued at {} {}.", self.proceeds, home_currency)
@@ -284,7 +290,18 @@ impl ActionRecord {
 	pub fn direction(&self) -> Polarity {
 		if self.amount < d128!(0.0) { Polarity::Outgoing}
 		else { Polarity::Incoming }
-	}
+    }
+
+    pub fn cost_basis_in_ar(&self) -> d128 {
+
+        let mut cb = d128!(0);
+
+        for mvmt in self.movements.borrow().iter() {
+            cb += mvmt.cost_basis.get()
+        }
+
+        cb.abs()
+    }
 
 	// pub fn is_quote_acct_for_margin_exch(
 	// 	&self,

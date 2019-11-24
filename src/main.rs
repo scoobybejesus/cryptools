@@ -21,6 +21,7 @@ mod skip_wizard;
 mod mytui;
 mod export_csv;
 mod export_txt;
+mod export_je;
 mod export_all;
 mod tests;
 
@@ -47,6 +48,13 @@ pub struct Flags {
     /// When set, program will error without required command-line args.
     #[structopt(name = "accept args", short = "a", long = "accept")]
     accept_args: bool,
+
+    /// This flag will suppress the printing of "all" reports, except that it will trigger the
+    /// production of a txt file containing an accounting journal entry for every transaction.
+    /// Individual account and transaction reports may still be printed via the print_menu
+    /// with the -p flag. The journal entry report is only suitable for non-like-kind activity.
+    #[structopt(name = "journal entries", short, long = "journal-entries")]
+    journal_entries_only: bool,
 
     /// This will cause the program to expect the txDate field in the file_to_import to use the format
     /// YYYY-MM-dd or YY-MM-dd (or YYYY/MM/dd or YY/MM/dd, depending on the date-separator option)
@@ -126,8 +134,10 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut should_export_all = settings.should_export;
     let present_print_menu_tui = settings.print_menu;
+    let print_journal_entries_only = settings.journal_entry_export;
 
     if present_print_menu_tui { should_export_all = false }
+    if print_journal_entries_only { should_export_all = false }
 
     if should_export_all {
 
@@ -138,6 +148,19 @@ fn main() -> Result<(), Box<dyn Error>> {
             &account_map,
             &transactions_map
         )?;
+    }
+
+    if print_journal_entries_only {
+
+        if !settings.lk_treatment_enabled {
+            export_je::prepare_non_lk_journal_entries(
+                &settings,
+                &action_records_map,
+                &raw_acct_map,
+                &account_map,
+                &transactions_map,
+            )?;
+        }
     }
 
     if present_print_menu_tui {

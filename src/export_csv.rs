@@ -622,7 +622,6 @@ pub fn _6_transaction_mvmt_detail_to_csv_w_orig(
             let mut orig_proc = mvmt.proceeds.get();
             let mut orig_cost = mvmt.cost_basis.get();
             let mut orig_gain_loss = mvmt.get_orig_gain_or_loss();
-            println!("{:?}", expense);
 
             if tx_type == TxType::Flow && amount > d128!(0) {
                 proceeds_lk = d128!(0);
