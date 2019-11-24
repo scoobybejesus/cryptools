@@ -47,6 +47,12 @@ Enable like-kind treatment: {}",
         )?;
     }
 
+    let note = "
+Note: Home currency account activity may be better represented as equity-type accounts,
+depending on the bookkeeping practices you employ.";
+
+    writeln!(file, "{}", note)?;
+
     let length = txns_map.len();
 
     for txn_num in 1..=length {
@@ -58,13 +64,7 @@ Enable like-kind treatment: {}",
         let auto_memo = txn.get_auto_memo(ars, raw_acct_map,acct_map, &settings.home_currency)?;
         let tx_type = txn.transaction_type(&ars, &raw_acct_map, &acct_map)?;
 
-        writeln!(file, "\n=====================================\n")?;
-        writeln!(file, "Txn {} on {}. {}. {}",
-            txn_num,
-            date,
-            user_memo,
-            auto_memo,
-        )?;
+        writeln!(file, "\n====================================================================================================\n")?;
 
         let mut cost_basis_ic: Option<d128> = None;
         let mut cost_basis_og: Option<d128> = None;
@@ -280,6 +280,13 @@ Enable like-kind treatment: {}",
             debits,
             "",
             credits,
+        )?;
+
+        writeln!(file, "\n    (Txn {} on {}. {}. {})",
+            txn_num,
+            date,
+            user_memo,
+            auto_memo,
         )?;
 
         // if (debits - credits) != d128!(0) {
