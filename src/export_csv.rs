@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2019, scoobybejesus
+// Copyright (c) 2017-2019, scoobybejesus;
 // Redistributions must include the license: https://github.com/scoobybejesus/cryptools/blob/master/LEGAL.txt
 
 use std::fs::File;
@@ -60,12 +60,15 @@ pub fn _1_account_sums_to_csv(
             } else { lk_cost_basis = tentative_lk_cost_basis.to_string() }
         }
 
+        let cb_f32 = lk_cost_basis.as_str().parse::<f32>().unwrap();
+        let cb = format!("{:.2}", cb_f32);
+
         let nonzero_lots = acct.get_num_of_nonzero_lots();
 
         row.push(raw_acct.name.to_string());
         row.push(balance);
         row.push(raw_acct.ticker.to_string());
-        row.push(lk_cost_basis);
+        row.push(cb);
         row.push(acct.list_of_lots.borrow().len().to_string());
         row.push(nonzero_lots.to_string());
         rows.push(row);
@@ -133,13 +136,16 @@ pub fn _2_account_sums_nonzero_to_csv(
             } else { lk_cost_basis = tentative_lk_cost_basis.to_string() }
         }
 
+        let cb_f32 = lk_cost_basis.as_str().parse::<f32>().unwrap();
+        let cb = format!("{:.2}", cb_f32);
+
         let nonzero_lots = acct.get_num_of_nonzero_lots();
 
         if balance_d128 != d128!(0) {
             row.push(name);
             row.push(balance);
             row.push(raw_acct.ticker.to_string());
-            row.push(lk_cost_basis);
+            row.push(cb);
             row.push(acct.list_of_lots.borrow().len().to_string());
             row.push(nonzero_lots.to_string());
             rows.push(row);
@@ -219,13 +225,19 @@ pub fn _3_account_sums_to_csv_with_orig_basis(
             } else { orig_cost_basis = tentative_orig_cost_basis.to_string() }
         }
 
+        let cb_f32 = lk_cost_basis.to_string().as_str().parse::<f32>().unwrap();
+        let cb = format!("{:.2}", cb_f32);
+
+        let ocb_f32 = orig_cost_basis.as_str().parse::<f32>().unwrap();
+        let ocb = format!("{:.2}", ocb_f32);
+
         let nonzero_lots = acct.get_num_of_nonzero_lots();
 
         row.push(raw_acct.name.to_string());
         row.push(balance);
         row.push(raw_acct.ticker.to_string());
-        row.push(orig_cost_basis);
-        row.push(lk_cost_basis);
+        row.push(ocb);
+        row.push(cb);
         row.push(acct.list_of_lots.borrow().len().to_string());
         row.push(nonzero_lots.to_string());
         rows.push(row);
