@@ -43,6 +43,9 @@ the XCP or ETH transaction fee must be reflected in a separate transaction row).
 * Manual adjustments may need to be made to the output files in cases, for example,
 when appreciated cryptocurrency was used to make a tax-deductible charitable contribution.
 
+* Precision is limited to eight decimal places.  Additional digits will be stripped during
+import and may cause unintended rounding issues.
+
 ## Installation
 
 1. `git clone https://github.com/scoobybejesus/cryptools.git`
