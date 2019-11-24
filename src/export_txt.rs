@@ -72,12 +72,14 @@ pub fn _1_account_lot_detail_to_txt(
 
     let length = acct_map.len();
 
+    let home_currency = &settings.home_currency;
+
     writeln!(file, "Account Listing - All Lots - All Movements - with high level of detail.
 \nCosting method used: {}.
 Home currency: {}
 Enable like-kind treatment: {}",
         settings.costing_method,
-        settings.home_currency,
+        home_currency,
         settings.lk_treatment_enabled
     )?;
 
@@ -91,19 +93,35 @@ Enable like-kind treatment: {}",
 
         let acct = acct_map.get(&(j as u16)).unwrap();
         let raw_acct = raw_acct_map.get(&acct.raw_key).unwrap();
+        let ticker = &raw_acct.ticker;
 
         if acct.list_of_lots.borrow().len() > 0 {
 
             writeln!(file, "\n\n=====================================")?;
-            writeln!(file, "{} {}", raw_acct.name, raw_acct.ticker)?;
-            writeln!(file, "Account balance: {} {}; Total cost basis: {}",
-                acct.get_sum_of_amts_in_lots(),
-                raw_acct.ticker,
-                acct.get_sum_of_lk_basis_in_lots()
-            )?;
+            writeln!(file, "{} {}", raw_acct.name, ticker)?;
+
+            let acct_bal_line;
+
+            if raw_acct.is_home_currency(home_currency) {
+                acct_bal_line = format!("Account balance: {:.2} {}; Total cost basis: {:.2}",
+                    acct.get_sum_of_amts_in_lots().to_string().as_str().parse::<f32>()?,
+                    ticker,
+                    acct.get_sum_of_lk_basis_in_lots().to_string().as_str().parse::<f32>()?
+                );
+            } else {
+                acct_bal_line = format!("Account balance: {} {}; Total cost basis: {:.2}",
+                    acct.get_sum_of_amts_in_lots(),
+                    ticker,
+                    acct.get_sum_of_lk_basis_in_lots().to_string().as_str().parse::<f32>()?
+                );
+            }
+
+            writeln!(file, "{}", acct_bal_line)?;
+
         } else {
             continue
         }
+
         if raw_acct.is_margin { writeln!(file, "Margin Account")?; }
 
         for (lot_idx, lot) in acct.list_of_lots.borrow().iter().enumerate() {
@@ -126,11 +144,27 @@ Enable like-kind treatment: {}",
 
                 writeln!(file, "-------------------------")?;
                 writeln!(file, "  Lot {}", (lot_idx+1))?;
-                writeln!(file, "\t• Σ: {}, with remaining cost basis of {} and basis date of {}",
-                    formatted_sum,
-                    formatted_basis,
-                    lot.date_for_basis_purposes
-                )?;
+
+                let lot_sum_row;
+
+                if raw_acct.is_home_currency(home_currency) {
+                    lot_sum_row = format!("\t• Σ: {:.2} {}, with remaining cost basis of {:.2} {} and basis date of {}",
+                        formatted_sum.to_string().as_str().parse::<f32>()?,
+                        ticker,
+                        formatted_basis.to_string().as_str().parse::<f32>()?,
+                        home_currency,
+                        lot.date_for_basis_purposes
+                    )
+                } else {
+                    lot_sum_row = format!("\t• Σ: {} {}, with remaining cost basis of {:.2} {} and basis date of {}",
+                        formatted_sum,
+                        ticker,
+                        formatted_basis.to_string().as_str().parse::<f32>()?,
+                        home_currency,
+                        lot.date_for_basis_purposes
+                    )
+                }
+                writeln!(file, "{}", lot_sum_row)?;
                 writeln!(file, "\t Movements:")?;
 
                 for (m_idx, mvmt) in lot.movements.borrow().iter().enumerate() {
@@ -138,17 +172,31 @@ Enable like-kind treatment: {}",
                     let txn = txns_map.get(&mvmt.transaction_key).unwrap();
                     let tx_type = txn.transaction_type(ars, raw_acct_map, acct_map)?;
 
-                    let description_str = format!("\t\t{}.\t{} {} (Txn #{}) {} txn on {}. - {}",
-                        (m_idx+1),
-                        mvmt.amount,
-                        raw_acct.ticker,
-                        mvmt.transaction_key,
-                        tx_type,
-                        mvmt.date,
-                        txn.user_memo
-                    );
+                    let description_string: String;
 
-                    writeln!(file, "{}", description_str)?;
+                    if raw_acct.is_home_currency(home_currency) {
+                        description_string = format!("\t\t{}.\t{:<8.2} {} (Txn #{:>4}) {:>9} txn on {:10}. - {}",
+                            (m_idx+1),
+                            mvmt.amount.to_string().as_str().parse::<f32>()?,
+                            ticker,
+                            mvmt.transaction_key,
+                            tx_type,
+                            mvmt.date,
+                            txn.user_memo
+                        );
+                    } else {
+                        description_string = format!("\t\t{}.\t{:<8} {} (Txn #{:>4}) {:>9} txn on {:10}. - {}",
+                            (m_idx+1),
+                            mvmt.amount,
+                            ticker,
+                            mvmt.transaction_key,
+                            tx_type,
+                            mvmt.date,
+                            txn.user_memo
+                        );
+                    };
+
+                    writeln!(file, "{}", description_string)?;
 
                     let lk_proceeds = mvmt.proceeds_lk.get();
                     let lk_cost_basis = mvmt.cost_basis_lk.get();
@@ -157,7 +205,7 @@ Enable like-kind treatment: {}",
                     // if mvmt.amount > d128!(0) { // Can't have a gain on an incoming txn
                     //     gain_loss = d128!(0)
                     // } else
-                    if raw_acct.is_home_currency(&settings.home_currency) {  //  Can't have a gain disposing home currency
+                    if raw_acct.is_home_currency(home_currency) {  //  Can't have a gain disposing home currency
                         gain_loss = d128!(0)
                     // } else if tx_type == TxType::ToSelf {   //  Can't have a gain sending to yourself
                     //     gain_loss = d128!(0)
@@ -168,13 +216,13 @@ Enable like-kind treatment: {}",
                     let income = mvmt.get_income(ars, raw_acct_map,	acct_map, txns_map)?;
                     let expense = mvmt.get_expense(ars, raw_acct_map, acct_map, txns_map)?;
 
-                    let activity_str = format!("\t\t\tProceeds: {}; Cost basis: {}; for Gain/loss: {} {}; Inc.: {}; Exp.: {}.",
-                        lk_proceeds,
-                        lk_cost_basis,
+                    let activity_str = format!("\t\t\tProceeds: {:>10.2}; Cost basis: {:>10.2}; for Gain/loss: {} {:>10.2}; Inc.: {:>10.2}; Exp.: {:>10.2}.",
+                        lk_proceeds.to_string().as_str().parse::<f32>()?,
+                        lk_cost_basis.to_string().as_str().parse::<f32>()?,
                         mvmt.get_term(acct_map, ars),
-                        gain_loss,
-                        income,
-                        expense,
+                        gain_loss.to_string().as_str().parse::<f32>()?,
+                        income.to_string().as_str().parse::<f32>()?,
+                        expense.to_string().as_str().parse::<f32>()?,
                     );
 
                     writeln!(file, "{}", activity_str)?;
@@ -244,10 +292,10 @@ Enable like-kind treatment: {}",
 
             writeln!(file, "\n=====================================")?;
             writeln!(file, "{} {}", raw_acct.name, raw_acct.ticker)?;
-            writeln!(file, "Account balance: {} {}; Total cost basis: {}",
+            writeln!(file, "Account balance: {} {}; Total cost basis: {:.2}",
                 acct.get_sum_of_amts_in_lots(),
                 raw_acct.ticker,
-                acct.get_sum_of_lk_basis_in_lots()
+                acct.get_sum_of_lk_basis_in_lots().to_string().as_str().parse::<f32>()?
             )?;
         }
         if raw_acct.is_margin { writeln!(file, "Margin Account")?; }
@@ -270,12 +318,12 @@ Enable like-kind treatment: {}",
 
             if acct.list_of_lots.borrow().len() > 0 {
 
-                writeln!(file, "  Lot {} created {} w/ basis date {} • Σ: {}, and cost basis of {}",
+                writeln!(file, "  Lot {:>3} created {} w/ basis date {} • Σ: {:>12}, and cost basis of {:>10.2}",
                     (lot_idx+1),
                     lot.date_of_first_mvmt_in_lot,
                     lot.date_for_basis_purposes,
                     formatted_sum,
-                    formatted_basis,
+                    formatted_basis.to_string().as_str().parse::<f32>()?,
                 )?;
             }
         }
@@ -340,10 +388,10 @@ Enable like-kind treatment: {}",
 
                 writeln!(file, "\n=====================================")?;
                 writeln!(file, "{} {}", raw_acct.name, raw_acct.ticker)?;
-                writeln!(file, "Account balance: {} {}; Total cost basis: {}",
+                writeln!(file, "Account balance: {} {}; Total cost basis: {:.2}",
                     amt_in_acct,
                     raw_acct.ticker,
-                    acct.get_sum_of_lk_basis_in_lots()
+                    acct.get_sum_of_lk_basis_in_lots().to_string().as_str().parse::<f32>()?
                 )?;
             } else {
                 continue
@@ -365,12 +413,12 @@ Enable like-kind treatment: {}",
             if acct.list_of_lots.borrow().len() > 0 {
                 if movements_sum > d128!(0) {
 
-                    writeln!(file, "  Lot {} created {} w/ basis date {} • Σ: {}, and cost basis of {}",
+                    writeln!(file, "  Lot {:>3} created {} w/ basis date {} • Σ: {:>12}, and cost basis of {:>10.2}",
                         (lot_idx+1),
                         lot.date_of_first_mvmt_in_lot,
                         lot.date_for_basis_purposes,
                         movements_sum,
-                        formatted_basis,
+                        formatted_basis.to_string().as_str().parse::<f32>()?,
                     )?;
                 }
             }
