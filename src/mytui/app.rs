@@ -10,9 +10,10 @@ use crptls::core_functions::{ImportProcessParameters};
 
 use crate::export_csv;
 use crate::export_txt;
+use crate::export_je;
 
 
-pub (crate) const REPORTS: [&'static str; 9] = [
+pub (crate) const REPORTS: [&'static str; 10] = [
     "1. CSV: Account Sums",
     "2. CSV: Account Sums (Non-zero only)",
     "3. CSV: Account Sums (Orig. basis vs like-kind basis)",
@@ -22,6 +23,7 @@ pub (crate) const REPORTS: [&'static str; 9] = [
     "7. TXT: Accounts by lot (every movement)",
     "8. TXT: Accounts by lot (every lot balance)",
     "9. TXT: Accounts by lot (every non-zero lot balance)",
+    "10. TXT: Bookkeeping journal entries",
 ];
 
 pub struct ListState<I> {
@@ -197,6 +199,15 @@ pub fn export(
                     &settings,
                     &raw_acct_map,
                     &account_map,
+                )?;
+            }
+            10 => {
+                export_je::prepare_non_lk_journal_entries(
+                    &settings,
+                    &action_records_map,
+                    &raw_acct_map,
+                    &account_map,
+                    &transactions_map,
                 )?;
             }
             _ => {}
