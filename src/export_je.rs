@@ -62,7 +62,6 @@ depending on the bookkeeping practices you employ.";
         let date = txn.date;
         let user_memo = txn.user_memo.to_string();
         let auto_memo = txn.get_auto_memo(ars, raw_acct_map,acct_map, &settings.home_currency)?;
-        let tx_type = txn.transaction_type(&ars, &raw_acct_map, &acct_map)?;
 
         writeln!(file, "\n====================================================================================================\n")?;
 

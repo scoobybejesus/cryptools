@@ -168,7 +168,7 @@ pub(crate) fn elect_like_kind_treatment(cutoff_date_arg: &mut Option<String>) ->
 
             let provided_date = NaiveDate::parse_from_str(&cutoff_date_arg, "%y-%m-%d")
                 .unwrap_or(NaiveDate::parse_from_str(&cutoff_date_arg, "%Y-%m-%d")
-                .unwrap_or_else(|e| {
+                .unwrap_or_else(|_| {
                     println!("\nWARN: Date entered after -l command line arg (like-kind cutoff date) has an invalid format.");
                     second_date_try_from_user(&mut cutoff_date_arg).unwrap()
                 } ) );
@@ -268,7 +268,7 @@ pub(crate) fn elect_like_kind_treatment(cutoff_date_arg: &mut Option<String>) ->
 
         let successfully_parsed_naive_date = NaiveDate::parse_from_str(&input, "%y-%m-%d")
             .unwrap_or(NaiveDate::parse_from_str(&input, "%Y-%m-%d")
-            .unwrap_or_else(|e| { second_date_try_from_user(input).unwrap() } ));
+            .unwrap_or_else(|_| { second_date_try_from_user(input).unwrap() } ));
 
         Ok(successfully_parsed_naive_date)
     }
@@ -285,7 +285,7 @@ pub(crate) fn elect_like_kind_treatment(cutoff_date_arg: &mut Option<String>) ->
 
         let successfully_parsed_naive_date = NaiveDate::parse_from_str(&input, "%y-%m-%d")
             .unwrap_or(NaiveDate::parse_from_str(&input, "%Y-%m-%d")
-            .unwrap_or_else(|e| { second_date_try_from_user(input).unwrap() } ));
+            .unwrap_or_else(|_| { second_date_try_from_user(input).unwrap() } ));
 
         Ok(successfully_parsed_naive_date)
     }

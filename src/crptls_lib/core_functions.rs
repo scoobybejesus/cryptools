@@ -49,7 +49,7 @@ pub fn import_and_process_final(
     let mut action_records_map: HashMap<u32, ActionRecord> = HashMap::new();
     let mut raw_account_map: HashMap<u16, RawAccount> = HashMap::new();
     let mut account_map: HashMap<u16, Account> = HashMap::new();
-    let mut lot_map: HashMap<(RawAccount, u32), Lot> = HashMap::new();
+    let mut _lot_map: HashMap<(RawAccount, u32), Lot> = HashMap::new();
 
     match import_from_csv(
         input_file_path,
@@ -108,7 +108,7 @@ pub fn import_and_process_final(
         settings.lk_treatment_enabled,
         settings.lk_cutoff_date,
         settings.lk_basis_date_preserved,
-        &mut lot_map,
+        // &mut lot_map,
     )?;
 
     println!("  Successfully created lots and movements.");

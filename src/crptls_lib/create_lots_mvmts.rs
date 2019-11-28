@@ -24,7 +24,7 @@ pub(crate) fn create_lots_and_movements(
     enable_lk_treatment: bool,
     like_kind_cutoff_date: NaiveDate,
     lk_basis_date_preserved: bool,
-    lot_map: &HashMap<(RawAccount, u32), Lot>,
+    // lot_map: &HashMap<(RawAccount, u32), Lot>,
 ) -> Result<HashMap<u32,Transaction>, Box<dyn Error>> {
 
     let multiple_incoming_mvmts_per_ar = lk_basis_date_preserved;

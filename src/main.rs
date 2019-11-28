@@ -1,9 +1,9 @@
 // Copyright (c) 2017-2019, scoobybejesus
 // Redistributions must include the license: https://github.com/scoobybejesus/cryptools/blob/master/LEGAL.txt
 
-#![allow(dead_code)]
-#![allow(unused_variables)]
-#![allow(unused_assignments)]
+// #![allow(dead_code)]
+// #![allow(unused_variables)]
+// #![allow(unused_assignments)]
 // Note: the above are possibly temporary, to silence "x was not used" warnings.
 // #[warn(dead_code)] is the default (same for unused_variables)
 

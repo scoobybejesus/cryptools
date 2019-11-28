@@ -10,28 +10,28 @@ use crptls::account::{Account};
 use crptls::transaction::{Transaction, ActionRecord};
 use crptls::decimal_utils::*;
 
-pub fn run_tests(
+pub fn _run_tests(
     transactions_map: &HashMap<u32, Transaction>,
     action_records_map: &HashMap<u32, ActionRecord>,
     account_map: &HashMap<u16, Account>,
 ) {
 
-    compare_movements_across_implementations(
+    _compare_movements_across_implementations(
         &transactions_map,
         &action_records_map,
         &account_map
     );
 
-    do_mvmts_know_what_lot_they_are_in(&account_map);
+    _do_mvmts_know_what_lot_they_are_in(&account_map);
 
-    test_action_records_amts_vs_mvmt_amts(
+    _test_action_records_amts_vs_mvmt_amts(
         &transactions_map,
         &action_records_map,
         &account_map
     );
 
-    test_quantize_from_incoming_multiple_lots_fn(d128!(20), d128!(200), d128!(50));
-    test_quantize_from_incoming_multiple_lots_fn(d128!(1), d128!(6), d128!(1234567.1234567896));
+    _test_quantize_from_incoming_multiple_lots_fn(d128!(20), d128!(200), d128!(50));
+    _test_quantize_from_incoming_multiple_lots_fn(d128!(1), d128!(6), d128!(1234567.1234567896));
     // test_dec_rounded("123456789.123456789");
     // test_dec_rounded("123456.123456");
     // test_dec_rounded("1234567891234.1234567891234");
@@ -44,7 +44,7 @@ pub fn run_tests(
 
 }
 
-fn compare_movements_across_implementations(
+fn _compare_movements_across_implementations(
     transactions_map: &HashMap<u32, Transaction>,
     action_records_map: &HashMap<u32, ActionRecord>,
     account_map: &HashMap<u16, Account>,
@@ -124,9 +124,9 @@ fn compare_movements_across_implementations(
     fs::write("/tmp/foo2", &line2).expect("Unable to write file");
 }
 
-fn do_mvmts_know_what_lot_they_are_in(account_map: &HashMap<u16, Account>,) {
+fn _do_mvmts_know_what_lot_they_are_in(account_map: &HashMap<u16, Account>,) {
 
-    for (acct_num, acct) in account_map.iter() {
+    for (_acct_num, acct) in account_map.iter() {
         for lot in acct.list_of_lots.borrow().iter() {
             for mvmt in lot.movements.borrow().iter() {
                 if mvmt.lot_num != lot.lot_number {
@@ -138,7 +138,7 @@ fn do_mvmts_know_what_lot_they_are_in(account_map: &HashMap<u16, Account>,) {
     }
 }
 
-pub fn test_action_records_amts_vs_mvmt_amts(
+pub fn _test_action_records_amts_vs_mvmt_amts(
     transactions_map: &HashMap<u32, Transaction>,
     action_records_map: &HashMap<u32, ActionRecord>,
     account_map: &HashMap<u16, Account>,
@@ -194,7 +194,7 @@ pub fn test_action_records_amts_vs_mvmt_amts(
     );
 }
 
-fn test_quantize_from_incoming_multiple_lots_fn (
+fn _test_quantize_from_incoming_multiple_lots_fn (
     outgoing_mvmt_amt: d128,
     outgoing_ar_amt: d128,
     incoming_ar_amt: d128,
@@ -220,7 +220,7 @@ fn test_quantize_from_incoming_multiple_lots_fn (
 //     tentative_inc_amt: 205761.1872427982666
 //     corresponding_inc_amt: 205761.18724280
 
-fn test_dec_rounded(random_float_string: &str) {
+fn _test_dec_rounded(random_float_string: &str) {
     let places_past_decimal = d128!(8);
     let amt = random_float_string.parse::<d128>().unwrap();
     let amt2 = round_d128_generalized(&amt, places_past_decimal);
@@ -228,14 +228,14 @@ fn test_dec_rounded(random_float_string: &str) {
     //  Results of this test suggest that quantize() is off by one.  round_d128_1e8() was adjusted accordingly.
 }
 
-fn test_dec_rounded_1e8(random_float_string: &str) {
+fn _test_dec_rounded_1e8(random_float_string: &str) {
     let amt = random_float_string.parse::<d128>().unwrap();
     let amt2 = round_d128_1e8(&amt);
     println!("Float into d128: {:?}; d128 rounded to 8 places: {:?}", amt, amt2);
     //  Results of this test suggest that quantize() is off by one.  round_d128_1e8() was adjusted accordingly.
 }
 
-fn test_dec_rounded_1e2(random_float_string: &str) {
+fn _test_dec_rounded_1e2(random_float_string: &str) {
     let amt = random_float_string.parse::<d128>().unwrap();
     let amt2 = round_d128_1e2(&amt);
     println!("String into d128: {:?}; d128 rounded to 2 places: {:?}", amt, amt2);
