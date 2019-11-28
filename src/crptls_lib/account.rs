@@ -23,8 +23,8 @@ pub struct RawAccount {
 }
 
 impl RawAccount {
-	pub fn is_home_currency(&self, compare: &String) -> bool {
-		&self.ticker == compare
+	pub fn is_home_currency(&self, compare: &str) -> bool {
+		self.ticker == compare
     }
 
     pub fn margin_string(&self) -> String {

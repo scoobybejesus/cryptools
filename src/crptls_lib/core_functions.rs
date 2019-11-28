@@ -101,9 +101,9 @@ pub fn import_and_process_final(
     transactions_map = create_lots_mvmts::create_lots_and_movements(
         transactions_map,
         &action_records_map,
-        &mut raw_account_map,
-        &mut account_map,
-        &settings.home_currency,
+        &raw_account_map,
+        &account_map,
+        &settings.home_currency.as_str(),
         &settings.costing_method,
         settings.lk_treatment_enabled,
         settings.lk_cutoff_date,

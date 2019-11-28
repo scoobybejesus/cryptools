@@ -122,7 +122,7 @@ depending on the bookkeeping practices you employ.";
 
         for mvmt in flow_or_outgoing_exchange_movements.iter() {
 
-            if let None = polarity {
+            if polarity.is_none() {
                 polarity = if mvmt.amount > d128!(0) {
                     Some(Polarity::Incoming)
                     } else { Some(Polarity::Outgoing)
@@ -135,16 +135,13 @@ depending on the bookkeeping practices you employ.";
                 amount_lt += mvmt.amount;
                 proceeds_lt += mvmt.proceeds_lk.get();
                 cost_basis_lt += mvmt.cost_basis_lk.get();
-                match term_lt {
-                    None => { term_lt = Some(term)}
-                    _ => {}
-                }
+                if term_lt.is_none() { term_lt = Some(term) }
             } else {
                 assert_eq!(term, Term::ST);
                 amount_st += mvmt.amount;
                 proceeds_st += mvmt.proceeds_lk.get();
                 cost_basis_st += mvmt.cost_basis_lk.get();
-                if term_st == None {
+                if term_st.is_none() {
                     term_st = Some(term);
                 }
             }

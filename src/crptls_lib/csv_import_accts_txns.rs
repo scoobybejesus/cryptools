@@ -86,10 +86,10 @@ The next column's value should be 2, then 3, etc, until the final account).";
                 };
 
                 let just_account: RawAccount = RawAccount {
-                    account_num: account_num,
-                    name: name,
-                    ticker: ticker,
-                    is_margin: is_margin,
+                    account_num,
+                    name,
+                    ticker,
+                    is_margin,
                 };
 
                 raw_acct_map.insert(account_num, just_account);
@@ -166,7 +166,7 @@ pub(crate) fn import_transactions(
                 if amount != amount_rounded { changed_action_records += 1; changed_txn_num.push(this_tx_number); }
 
                 let action_record = ActionRecord {
-                    account_key: account_key,
+                    account_key,
                     amount: amount_rounded,
                     tx_key: this_tx_number,
                     self_ar_key: this_ar_number,
@@ -185,35 +185,29 @@ pub(crate) fn import_transactions(
             }
         }
 
-        match incoming_ar {
-            Some(incoming_ar) => {
-                let x = incoming_ar_num.unwrap();
-                action_records.insert(x, incoming_ar);
-            },
-            None => {}
+        if let Some(incoming_ar) = incoming_ar {
+            let x = incoming_ar_num.unwrap();
+            action_records.insert(x, incoming_ar);
         }
 
-        match outgoing_ar {
-            Some(outgoing_ar) => {
-                let y = outgoing_ar_num.unwrap();
-                action_records.insert(y, outgoing_ar);
-            },
-            None => {}
+        if let Some(outgoing_ar) = outgoing_ar {
+            let y = outgoing_ar_num.unwrap();
+            action_records.insert(y, outgoing_ar);
         }
 
         let format_yy: String;
         let format_yyyy: String;
 
         if iso {
-            format_yyyy = "%Y".to_owned() + sep + &"%d" + sep + "%m";
-            format_yy = "%y".to_owned() + sep + &"%d" + sep + "%m";
+            format_yyyy = "%Y".to_owned() + sep + "%d" + sep + "%m";
+            format_yy = "%y".to_owned() + sep + "%d" + sep + "%m";
         } else {
-            format_yyyy = "%m".to_owned() + sep + &"%d" + sep + "%Y";
-            format_yy = "%m".to_owned() + sep + &"%d" + sep + "%y";
+            format_yyyy = "%m".to_owned() + sep + "%d" + sep + "%Y";
+            format_yy = "%m".to_owned() + sep + "%d" + sep + "%y";
         }
 
         let tx_date = NaiveDate::parse_from_str(this_tx_date, &format_yy)
-            .unwrap_or(NaiveDate::parse_from_str(this_tx_date, &format_yyyy)
+            .unwrap_or_else(|_| NaiveDate::parse_from_str(this_tx_date, &format_yyyy)
             .expect("
 Failed to parse date in input file. Check date separator character (which is a hyphen unless modified via Cli option -d).\n")
         );

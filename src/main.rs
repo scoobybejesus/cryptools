@@ -150,17 +150,15 @@ fn main() -> Result<(), Box<dyn Error>> {
         )?;
     }
 
-    if print_journal_entries_only {
+    if print_journal_entries_only && !settings.lk_treatment_enabled {
 
-        if !settings.lk_treatment_enabled {
-            export_je::prepare_non_lk_journal_entries(
-                &settings,
-                &action_records_map,
-                &raw_acct_map,
-                &account_map,
-                &transactions_map,
-            )?;
-        }
+        export_je::prepare_non_lk_journal_entries(
+            &settings,
+            &action_records_map,
+            &raw_acct_map,
+            &account_map,
+            &transactions_map,
+        )?;
     }
 
     if present_print_menu_tui {

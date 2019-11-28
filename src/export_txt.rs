@@ -410,17 +410,15 @@ Enable like-kind treatment: {}",
 
             let movements_sum = lot.get_sum_of_amts_in_lot();
 
-            if acct.list_of_lots.borrow().len() > 0 {
-                if movements_sum > d128!(0) {
+            if acct.list_of_lots.borrow().len() > 0 && movements_sum > d128!(0) {
 
-                    writeln!(file, "  Lot {:>3} created {} w/ basis date {} • Σ: {:>12}, and cost basis of {:>10.2}",
-                        (lot_idx+1),
-                        lot.date_of_first_mvmt_in_lot,
-                        lot.date_for_basis_purposes,
-                        movements_sum,
-                        formatted_basis.to_string().as_str().parse::<f32>()?,
-                    )?;
-                }
+                writeln!(file, "  Lot {:>3} created {} w/ basis date {} • Σ: {:>12}, and cost basis of {:>10.2}",
+                    (lot_idx+1),
+                    lot.date_of_first_mvmt_in_lot,
+                    lot.date_for_basis_purposes,
+                    movements_sum,
+                    formatted_basis.to_string().as_str().parse::<f32>()?,
+                )?;
             }
         }
     }

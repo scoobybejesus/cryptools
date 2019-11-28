@@ -48,9 +48,9 @@ pub (crate) fn print_menu_tui(
 
         ui::draw(&mut terminal, &app)?;
 
-        match events.next()? {
+        if let Event::Input(key) = events.next()? {
 
-            Event::Input(key) => match key {
+            match key {
 
                 Key::Char(c) => {
                     app.on_key(c);
@@ -62,8 +62,7 @@ pub (crate) fn print_menu_tui(
                     app.on_down();
                 }
                 _ => {}
-            },
-            _ => {}
+            }
         }
 
         if app.should_quit {

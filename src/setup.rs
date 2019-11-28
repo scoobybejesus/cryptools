@@ -52,15 +52,11 @@ pub (crate) fn run_setup(args: super::Cli) -> Result<(PathBuf, ImportProcessPara
         output_dir_path,
      ) = wizard_or_not(args.flags.accept_args, wizard_or_not_args)?;
 
-    let like_kind_cutoff_date;
-
-    if like_kind_election {
-        like_kind_cutoff_date = NaiveDate::parse_from_str(&like_kind_cutoff_date_string, "%y-%m-%d")
-            .unwrap_or(NaiveDate::parse_from_str(&like_kind_cutoff_date_string, "%Y-%m-%d")
-            .expect("Command line date (like-kind cutoff option) has an incorrect format. Program must abort."));
-    } else {
-        like_kind_cutoff_date = NaiveDate::parse_from_str(&"1-1-1", "%y-%m-%d").unwrap();
-    }
+    let like_kind_cutoff_date = if like_kind_election {
+        NaiveDate::parse_from_str(&like_kind_cutoff_date_string, "%y-%m-%d")
+            .unwrap_or_else(|_| NaiveDate::parse_from_str(&like_kind_cutoff_date_string, "%Y-%m-%d")
+            .expect("Command line date (like-kind cutoff option) has an incorrect format. Program must abort."))
+    } else { NaiveDate::parse_from_str(&"1-1-1", "%y-%m-%d").unwrap() };
 
     let settings = ImportProcessParameters {
         home_currency: args.opts.home_currency.into_string().unwrap().to_uppercase(),
@@ -70,7 +66,7 @@ pub (crate) fn run_setup(args: super::Cli) -> Result<(PathBuf, ImportProcessPara
         lk_treatment_enabled: like_kind_election,
         lk_cutoff_date: like_kind_cutoff_date,
         lk_basis_date_preserved: true,  //  TODO
-        should_export: should_export,
+        should_export,
         export_path: output_dir_path,
         print_menu: args.flags.print_menu,
         journal_entry_export: args.flags.journal_entries_only,

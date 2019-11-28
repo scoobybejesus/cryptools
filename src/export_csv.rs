@@ -440,9 +440,9 @@ pub fn _5_transaction_mvmt_summaries_to_csv(
             if count == 0 { tx_type_string = mvmt.friendly_tx_type(&tx_type) };
             count += 1;
 
-            if let None = ticker { ticker = Some(raw_acct.ticker.clone()) };
+            if ticker.is_none() { ticker = Some(raw_acct.ticker.clone()) };
 
-            if let None = polarity {
+            if polarity.is_none() {
                 polarity = if mvmt.amount > d128!(0) {
                     Some(Polarity::Incoming)
                     } else { Some(Polarity::Outgoing)
@@ -455,16 +455,13 @@ pub fn _5_transaction_mvmt_summaries_to_csv(
                 amount_lt += mvmt.amount;
                 proceeds_lt += mvmt.proceeds_lk.get();
                 cost_basis_lt += mvmt.cost_basis_lk.get();
-                match term_lt {
-                    None => { term_lt = Some(term)}
-                    _ => {}
-                }
+                if term_lt.is_none() { term_lt = Some(term) }
             } else {
                 assert_eq!(term, Term::ST);
                 amount_st += mvmt.amount;
                 proceeds_st += mvmt.proceeds_lk.get();
                 cost_basis_st += mvmt.cost_basis_lk.get();
-                if term_st == None {
+                if term_st.is_none() {
                     term_st = Some(term);
                 }
             }

@@ -150,7 +150,7 @@ impl Transaction {
 
 	pub fn get_outgoing_exchange_and_flow_mvmts(
         &self,
-        user_home_currency: &String,
+        user_home_currency: &str,
         ars: &HashMap<u32, ActionRecord>,
         raw_acct_map: &HashMap<u16, RawAccount>,
         acct_map: &HashMap<u16, Account>,
@@ -194,7 +194,7 @@ impl Transaction {
         ars: &HashMap<u32, ActionRecord>,
         raw_acct_map: &HashMap<u16, RawAccount>,
         acct_map: &HashMap<u16, Account>,
-        home_currency: &String,
+        home_currency: &str,
     ) -> Result<bool, Box<dyn Error>> {
 
         assert_eq!(self.action_record_idx_vec.len(), (2 as usize));
@@ -218,7 +218,7 @@ impl Transaction {
 		ars: &HashMap<u32, ActionRecord>,
 		raw_accts: &HashMap<u16, RawAccount>,
 		acct_map: &HashMap<u16, Account>,
-        home_currency: &String,
+        home_currency: &str,
 	) -> Result<String, Box<dyn Error>> {
 
         let auto_memo = if self.action_record_idx_vec.len() == 2 {
@@ -363,16 +363,13 @@ impl ActionRecord {
 
             for mvmt in lot.movements.borrow().iter() {
 
-                if (mvmt.date) <= txn.date {
+                if (mvmt.date) <= txn.date && mvmt.action_record_key == self.self_ar_key {
 
-                    if mvmt.action_record_key == self.self_ar_key {
+                    measure += mvmt.amount;
 
-                        measure += mvmt.amount;
+                    movements_in_ar.push(mvmt.clone());
 
-                        movements_in_ar.push(mvmt.clone());
-
-                        if measure == target { return movements_in_ar }
-                    }
+                    if measure == target { return movements_in_ar }
                 }
             }
         }

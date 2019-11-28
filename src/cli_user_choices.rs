@@ -93,16 +93,16 @@ fn _get_path() -> Result<(String, bool), Box<dyn Error>> {
     rl.helper_mut().unwrap().colored_prompt = format!("\x1b[1;32m{}\x1b[0m", p);
     let readline = rl.readline(">> ");
 
-    fn begins_with_tilde(unchecked_path: &String) -> bool {
-        match unchecked_path.find("~") {
-            Some(0) => return true,
-            _ => return false
+    fn begins_with_tilde(unchecked_path: &str) -> bool {
+        match unchecked_path.find('~') {
+            Some(0) => true,
+            _ => false
         }
     }
 
     match readline {
         Ok(line) => {
-            println!("");
+            println!();
             let has_tilde = begins_with_tilde(&line);
             if has_tilde {
                 println!("Unfortunately, the tilde '~' cannot be used as a shortcut for your home directory.\n");
@@ -167,7 +167,7 @@ pub(crate) fn elect_like_kind_treatment(cutoff_date_arg: &mut Option<String>) ->
         Some(mut cutoff_date_arg) => {
 
             let provided_date = NaiveDate::parse_from_str(&cutoff_date_arg, "%y-%m-%d")
-                .unwrap_or(NaiveDate::parse_from_str(&cutoff_date_arg, "%Y-%m-%d")
+                .unwrap_or_else(|_| NaiveDate::parse_from_str(&cutoff_date_arg, "%Y-%m-%d")
                 .unwrap_or_else(|_| {
                     println!("\nWARN: Date entered after -l command line arg (like-kind cutoff date) has an invalid format.");
                     second_date_try_from_user(&mut cutoff_date_arg).unwrap()
@@ -177,7 +177,7 @@ pub(crate) fn elect_like_kind_treatment(cutoff_date_arg: &mut Option<String>) ->
 
             let (election, date_string) = _elect_like_kind_arg(&cutoff_date_arg, provided_date)?;
 
-            fn _elect_like_kind_arg(cutoff_date_arg: &String, provided_date: NaiveDate) -> Result<(bool, String), Box<dyn Error>> {
+            fn _elect_like_kind_arg(cutoff_date_arg: &str, provided_date: NaiveDate) -> Result<(bool, String), Box<dyn Error>> {
 
                 let mut input = String::new();
                 let stdin = io::stdin();
@@ -267,7 +267,7 @@ pub(crate) fn elect_like_kind_treatment(cutoff_date_arg: &mut Option<String>) ->
     fn test_naive_date_from_user_string(input: &mut String) -> Result<NaiveDate, Box<dyn Error>> {
 
         let successfully_parsed_naive_date = NaiveDate::parse_from_str(&input, "%y-%m-%d")
-            .unwrap_or(NaiveDate::parse_from_str(&input, "%Y-%m-%d")
+            .unwrap_or_else(|_| NaiveDate::parse_from_str(&input, "%Y-%m-%d")
             .unwrap_or_else(|_| { second_date_try_from_user(input).unwrap() } ));
 
         Ok(successfully_parsed_naive_date)
@@ -284,7 +284,7 @@ pub(crate) fn elect_like_kind_treatment(cutoff_date_arg: &mut Option<String>) ->
         *input = input2;
 
         let successfully_parsed_naive_date = NaiveDate::parse_from_str(&input, "%y-%m-%d")
-            .unwrap_or(NaiveDate::parse_from_str(&input, "%Y-%m-%d")
+            .unwrap_or_else(|_| NaiveDate::parse_from_str(&input, "%Y-%m-%d")
             .unwrap_or_else(|_| { second_date_try_from_user(input).unwrap() } ));
 
         Ok(successfully_parsed_naive_date)
