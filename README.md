@@ -31,6 +31,8 @@ containing the user's entire cryptocurrency transaction history, the software wi
 
 * Compatible with any home currency
 
+* Will export all bookkeeping journal entries (w/ `-a` or `-j`)
+
 ### Constraints
 
 * *All* cryptocurrency-related activity for the user generally must be included in the
