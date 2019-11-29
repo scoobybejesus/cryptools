@@ -1,6 +1,6 @@
 [package]
 name = "cryptools"
-version = "0.8.3"
+version = "0.8.4"
 authors = ["scoobybejesus <scoobybejesus@users.noreply.github.com>"]
 edition = "2018"
 description = "Command-line utility for processing cryptocurrency transactions into 'lots' and 'movements'."
