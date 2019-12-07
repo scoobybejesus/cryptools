@@ -13,9 +13,9 @@ use crate::crptls_lib::core_functions::{ImportProcessParameters};
 
 pub(crate) fn add_cost_basis_to_movements(
     settings: &ImportProcessParameters,
-    ars: &HashMap<u32, ActionRecord>,
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
+    ars: &HashMap<u32, ActionRecord>,
     txns_map: &HashMap<u32, Transaction>,
 ) -> Result<(), Box<dyn Error>> {
 
@@ -183,9 +183,9 @@ pub(crate) fn add_cost_basis_to_movements(
 }
 
 pub(crate) fn add_proceeds_to_movements(
-    ars: &HashMap<u32, ActionRecord>,
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
+    ars: &HashMap<u32, ActionRecord>,
     txns_map: &HashMap<u32, Transaction>,
 ) -> Result<(), Box<dyn Error>> {
 
@@ -266,9 +266,9 @@ pub(crate) fn add_proceeds_to_movements(
 
 pub(crate) fn apply_like_kind_treatment(
     settings: &ImportProcessParameters,
-    ars: &HashMap<u32, ActionRecord>,
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
+    ars: &HashMap<u32, ActionRecord>,
     txns_map: &HashMap<u32, Transaction>,
 ) -> Result<(), Box<dyn Error>> {
 
@@ -279,10 +279,10 @@ pub(crate) fn apply_like_kind_treatment(
         let txn_num = txn_num as u32;
         let txn = txns_map.get(&(txn_num)).unwrap();
 
-        update_current_txn_for_prior_likekind_treatment(txn_num, &settings, &ars, &raw_acct_map, &acct_map, &txns_map)?;
+        update_current_txn_for_prior_likekind_treatment(txn_num, &settings, &raw_acct_map, &acct_map, &ars, &txns_map)?;
 
         if txn.date <= cutoff_date {
-            perform_likekind_treatment_on_txn(txn_num, &settings, &ars, &raw_acct_map, &acct_map, &txns_map)?;
+            perform_likekind_treatment_on_txn(txn_num, &settings, &raw_acct_map, &acct_map, &ars, &txns_map)?;
         }
     }
 
@@ -292,9 +292,9 @@ pub(crate) fn apply_like_kind_treatment(
 fn update_current_txn_for_prior_likekind_treatment(
     txn_num: u32,
     settings: &ImportProcessParameters,
-    ars: &HashMap<u32, ActionRecord>,
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
+    ars: &HashMap<u32, ActionRecord>,
     txns_map: &HashMap<u32, Transaction>,
 ) -> Result<(), Box<dyn Error>> {
 
@@ -382,9 +382,9 @@ fn update_current_txn_for_prior_likekind_treatment(
 fn perform_likekind_treatment_on_txn(
     txn_num: u32,
     settings: &ImportProcessParameters,
-    ars: &HashMap<u32, ActionRecord>,
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
+    ars: &HashMap<u32, ActionRecord>,
     txns_map: &HashMap<u32, Transaction>,
 ) -> Result<(), Box<dyn Error>> {
 

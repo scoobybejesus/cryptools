@@ -6,16 +6,45 @@ use std::process;
 use std::fs::File;
 use std::cell::{RefCell};
 use std::collections::{HashMap};
+use std::path::PathBuf;
 
 use chrono::NaiveDate;
 use decimal::d128;
 
+use crate::crptls_lib::core_functions::{ImportProcessParameters};
 use crate::crptls_lib::transaction::{Transaction, ActionRecord};
 use crate::crptls_lib::account::{Account, RawAccount};
 use crate::crptls_lib::decimal_utils::{round_d128_1e8};
 
 
-pub(crate) fn import_accounts(
+pub(crate) fn import_from_csv(
+    import_file_path: PathBuf,
+    settings: &ImportProcessParameters,
+    raw_acct_map: &mut HashMap<u16, RawAccount>,
+    acct_map: &mut HashMap<u16, Account>,
+    action_records: &mut HashMap<u32, ActionRecord>,
+    transactions_map: &mut HashMap<u32, Transaction>,
+) -> Result<(), Box<dyn Error>> {
+
+    let file = File::open(import_file_path)?; println!("CSV ledger file opened successfully.\n");
+
+    let mut rdr = csv::ReaderBuilder::new()
+        .has_headers(true)
+        .from_reader(file);
+
+    import_accounts(&mut rdr, raw_acct_map, acct_map)?;
+
+    import_transactions(
+        &mut rdr,
+        settings,
+        action_records,
+        transactions_map,
+    )?;
+
+    Ok(())
+}
+
+fn import_accounts(
     rdr: &mut csv::Reader<File>,
     raw_acct_map: &mut HashMap<u16, RawAccount>,
     acct_map: &mut HashMap<u16, Account>,
@@ -107,12 +136,11 @@ The next column's value should be 2, then 3, etc, until the final account).";
     Ok(())
 }
 
-pub(crate) fn import_transactions(
+fn import_transactions(
     rdr: &mut csv::Reader<File>,
-    txns_map: &mut HashMap<u32, Transaction>,
+    settings: &ImportProcessParameters,
     action_records: &mut HashMap<u32, ActionRecord>,
-    sep: &str,
-    iso: bool,
+    txns_map: &mut HashMap<u32, Transaction>,
 ) -> Result<(), Box<dyn Error>> {
 
     let mut this_tx_number = 0;
@@ -198,12 +226,15 @@ pub(crate) fn import_transactions(
         let format_yy: String;
         let format_yyyy: String;
 
-        if iso {
-            format_yyyy = "%Y".to_owned() + sep + "%d" + sep + "%m";
-            format_yy = "%y".to_owned() + sep + "%d" + sep + "%m";
+        let iso_date_style = settings.input_file_uses_iso_date_style;
+        let separator = &settings.input_file_date_separator;
+
+        if iso_date_style {
+            format_yyyy = "%Y".to_owned() + separator + "%d" + separator + "%m";
+            format_yy = "%y".to_owned() + separator + "%d" + separator + "%m";
         } else {
-            format_yyyy = "%m".to_owned() + sep + "%d" + sep + "%Y";
-            format_yy = "%m".to_owned() + sep + "%d" + sep + "%y";
+            format_yyyy = "%m".to_owned() + separator + "%d" + separator + "%Y";
+            format_yy = "%m".to_owned() + separator + "%d" + separator + "%y";
         }
 
         let tx_date = NaiveDate::parse_from_str(this_tx_date, &format_yy)

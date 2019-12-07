@@ -14,9 +14,9 @@ use crate::export_je;
 
 pub fn export(
     settings: &ImportProcessParameters,
-    action_records_map: &HashMap<u32, ActionRecord>,
     raw_acct_map: &HashMap<u16, RawAccount>,
     account_map: &HashMap<u16, Account>,
+    action_records_map: &HashMap<u32, ActionRecord>,
     transactions_map: &HashMap<u32, Transaction>,
 ) -> Result<(), Box<dyn Error>> {
 
@@ -29,9 +29,9 @@ pub fn export(
     );
 
     export_csv::_2_account_sums_nonzero_to_csv(
-        &account_map,
         &settings,
-        &raw_acct_map
+        &raw_acct_map,
+        &account_map,
     );
 
     if settings.lk_treatment_enabled {
@@ -44,25 +44,25 @@ pub fn export(
 
     export_csv::_4_transaction_mvmt_detail_to_csv(
         &settings,
-        &action_records_map,
         &raw_acct_map,
         &account_map,
+        &action_records_map,
         &transactions_map
     )?;
 
     export_csv::_5_transaction_mvmt_summaries_to_csv(
         &settings,
-        &action_records_map,
         &raw_acct_map,
         &account_map,
+        &action_records_map,
         &transactions_map
     )?;
 
     export_csv::_6_transaction_mvmt_detail_to_csv_w_orig(
         &settings,
-        &action_records_map,
         &raw_acct_map,
         &account_map,
+        &action_records_map,
         &transactions_map
     )?;
 
@@ -70,8 +70,8 @@ pub fn export(
         &settings,
         &raw_acct_map,
         &account_map,
+        &action_records_map,
         &transactions_map,
-        &action_records_map
     )?;
 
     export_txt::_2_account_lot_summary_to_txt(
@@ -89,9 +89,9 @@ pub fn export(
     if !settings.lk_treatment_enabled {
         export_je::prepare_non_lk_journal_entries(
             &settings,
-            &action_records_map,
             &raw_acct_map,
             &account_map,
+            &action_records_map,
             &transactions_map,
         )?;
     }

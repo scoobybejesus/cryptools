@@ -87,9 +87,9 @@ pub fn _1_account_sums_to_csv(
 }
 
 pub fn _2_account_sums_nonzero_to_csv(
-    acct_map: &HashMap<u16, Account>,
     settings: &ImportProcessParameters,
-    raw_acct_map: &HashMap<u16, RawAccount>
+    raw_acct_map: &HashMap<u16, RawAccount>,
+    acct_map: &HashMap<u16, Account>,
 ) {
 
     let mut rows: Vec<Vec<String>> = Vec::with_capacity(acct_map.len());    //  more than needed...
@@ -257,9 +257,9 @@ pub fn _3_account_sums_to_csv_with_orig_basis(
 
 pub fn _4_transaction_mvmt_detail_to_csv(
     settings: &ImportProcessParameters,
-    ars: &HashMap<u32, ActionRecord>,
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
+    ars: &HashMap<u32, ActionRecord>,
     txns_map: &HashMap<u32, Transaction>,
 ) -> Result<(), Box<dyn Error>> {
 
@@ -363,9 +363,9 @@ pub fn _4_transaction_mvmt_detail_to_csv(
 
 pub fn _5_transaction_mvmt_summaries_to_csv(
     settings: &ImportProcessParameters,
-    ars: &HashMap<u32, ActionRecord>,
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
+    ars: &HashMap<u32, ActionRecord>,
     txns_map: &HashMap<u32, Transaction>,
 ) -> Result<(), Box<dyn Error>> {
 
@@ -546,9 +546,9 @@ pub fn _5_transaction_mvmt_summaries_to_csv(
 
 pub fn _6_transaction_mvmt_detail_to_csv_w_orig(
     settings: &ImportProcessParameters,
-    ars: &HashMap<u32, ActionRecord>,
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
+    ars: &HashMap<u32, ActionRecord>,
     txns_map: &HashMap<u32, Transaction>,
 ) -> Result<(), Box<dyn Error>> {
 

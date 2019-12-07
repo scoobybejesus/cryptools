@@ -126,8 +126,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     let (input_file_path, settings) = setup::run_setup(args)?;
 
     let (
-        account_map,
         raw_acct_map,
+        account_map,
         action_records_map,
         transactions_map,
     ) = crptls::core_functions::import_and_process_final(input_file_path, &settings)?;
@@ -143,9 +143,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         export_all::export(
             &settings,
-            &action_records_map,
             &raw_acct_map,
             &account_map,
+            &action_records_map,
             &transactions_map
         )?;
     }
@@ -154,9 +154,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         export_je::prepare_non_lk_journal_entries(
             &settings,
-            &action_records_map,
             &raw_acct_map,
             &account_map,
+            &action_records_map,
             &transactions_map,
         )?;
     }
@@ -165,9 +165,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         mytui::print_menu_tui::print_menu_tui(
             &settings,
-            &action_records_map,
             &raw_acct_map,
             &account_map,
+            &action_records_map,
             &transactions_map
         )?;
     }

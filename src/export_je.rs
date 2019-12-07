@@ -16,9 +16,9 @@ use crptls::core_functions::{ImportProcessParameters};
 
 pub fn prepare_non_lk_journal_entries(
     settings: &ImportProcessParameters,
-    ars: &HashMap<u32, ActionRecord>,
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
+    ars: &HashMap<u32, ActionRecord>,
     txns_map: &HashMap<u32, Transaction>,
 )  -> Result<(), Box<dyn Error>> {
 

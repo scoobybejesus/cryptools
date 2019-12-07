@@ -59,9 +59,9 @@ pub (crate) fn run_setup(args: super::Cli) -> Result<(PathBuf, ImportProcessPara
     } else { NaiveDate::parse_from_str(&"1-1-1", "%y-%m-%d").unwrap() };
 
     let settings = ImportProcessParameters {
-        home_currency: args.opts.home_currency.into_string().unwrap().to_uppercase(),
-        input_file_has_iso_date_style: args.flags.iso_date,
+        input_file_uses_iso_date_style: args.flags.iso_date,
         input_file_date_separator: date_separator.to_string(),
+        home_currency: args.opts.home_currency.into_string().unwrap().to_uppercase(),
         costing_method: costing_method_choice,
         lk_treatment_enabled: like_kind_election,
         lk_cutoff_date: like_kind_cutoff_date,

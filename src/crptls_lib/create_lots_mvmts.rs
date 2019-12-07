@@ -7,25 +7,27 @@ use std::collections::{HashMap};
 use std::error::Error;
 
 use decimal::d128;
-use chrono::NaiveDate;
 
+use crate::crptls_lib::core_functions::{ImportProcessParameters};
 use crate::crptls_lib::transaction::{Transaction, ActionRecord, TxType, Polarity, TxHasMargin};
 use crate::crptls_lib::account::{Account, RawAccount, Lot, Movement};
 use crate::crptls_lib::costing_method::{InventoryCostingMethod};
 use crate::crptls_lib::decimal_utils::{round_d128_1e8};
 
 pub(crate) fn create_lots_and_movements(
-    txns_map: HashMap<u32, Transaction>,
-    ar_map: &HashMap<u32, ActionRecord>,
+    settings: &ImportProcessParameters,
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
-    chosen_home_currency: &str,
-    chosen_costing_method: &InventoryCostingMethod,
-    enable_lk_treatment: bool,
-    like_kind_cutoff_date: NaiveDate,
-    lk_basis_date_preserved: bool,
+    ar_map: &HashMap<u32, ActionRecord>,
+    txns_map: HashMap<u32, Transaction>,
     // lot_map: &HashMap<(RawAccount, u32), Lot>,
 ) -> Result<HashMap<u32,Transaction>, Box<dyn Error>> {
+
+    let chosen_home_currency = &settings.home_currency;
+    let chosen_costing_method = &settings.costing_method;
+    let enable_lk_treatment = settings.lk_treatment_enabled;
+    let like_kind_cutoff_date = settings.lk_cutoff_date;
+    let lk_basis_date_preserved = settings.lk_basis_date_preserved;
 
     let multiple_incoming_mvmts_per_ar = lk_basis_date_preserved;
 

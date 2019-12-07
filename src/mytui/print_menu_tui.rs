@@ -24,9 +24,9 @@ use crate::mytui::app as app;
 
 pub (crate) fn print_menu_tui(
     settings: &ImportProcessParameters,
-    action_records_map: &HashMap<u32, ActionRecord>,
     raw_acct_map: &HashMap<u16, RawAccount>,
     account_map: &HashMap<u16, Account>,
+    action_records_map: &HashMap<u32, ActionRecord>,
     transactions_map: &HashMap<u32, Transaction>,
 ) -> Result<(), Box<dyn Error>> {
 
@@ -77,9 +77,9 @@ pub (crate) fn print_menu_tui(
     app::export(
         &app,
         &settings,
-        &action_records_map,
         &raw_acct_map,
         &account_map,
+        &action_records_map,
         &transactions_map
     )?;
 

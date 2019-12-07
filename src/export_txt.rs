@@ -18,8 +18,8 @@ pub fn _1_account_lot_detail_to_txt(
     settings: &ImportProcessParameters,
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
-    txns_map: &HashMap<u32, Transaction>,
     ars: &HashMap<u32, ActionRecord>,
+    txns_map: &HashMap<u32, Transaction>,
 ) -> Result<(), Box<dyn Error>> {
 
     // =====================================
