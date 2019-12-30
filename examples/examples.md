@@ -57,12 +57,14 @@ plus the memos are more descriptive.
 
 ##### Run **`cargo run -- --help`** to see descriptions for the parameters we can use, or just enter:
 
-##### &nbsp;&nbsp;&nbsp;&nbsp;`cargo run -- -a -o ~/Documents ./examples/resources/faker2__sample_input.csv`
+##### &nbsp;&nbsp;&nbsp;&nbsp;`cargo run -- -ds -a -o ~/Documents ./examples/resources/faker2__sample_input.csv`
 
 &nbsp;&nbsp;&nbsp;&nbsp;\* Substitute `~/Documents` with your desired output directory.
 Substitute a Windows-style file path, if necessary.
 
 ##### Again, the program runs, and you should have reports in the location you provided.
+
+###### &nbsp;&nbsp;Try once more. This time, after `-a`, type `-p`, to be presented a "print menu" for choosing individual reports.
 
 We were able to bypass the wizard because:
 
