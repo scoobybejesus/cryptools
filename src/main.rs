@@ -36,7 +36,7 @@ pub struct Cli {
     #[structopt(flatten)]
     opts: Options,
 
-    /// File to be imported.  (Currently, the only supported date format is %m/%d/%y.)
+    /// File to be imported.  (The default date format is %m/%d/%y. See -i flag and -d option for more formatting choices.)
     #[structopt(name = "file", parse(from_os_str))]
     file_to_import: Option<PathBuf>,
 }
@@ -45,7 +45,7 @@ pub struct Cli {
 pub struct Flags {
 
     /// User is instructing the program to skip the data entry wizard.
-    /// When set, program will error without required command-line args.
+    /// When set, default settings will be assumed if they are not indicated by flag or option.
     #[structopt(name = "accept args", short = "a", long = "accept")]
     accept_args: bool,
 
