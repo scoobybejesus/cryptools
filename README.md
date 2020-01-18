@@ -72,7 +72,7 @@ At the same time, there are plenty of bells and whistles, creature comforts, etc
 Additionally, the code could use factoring or general re-working in several areas.
 In fact, it may be nice to use the business logic as a library instead of running a full binary.
 
-The software has been tested on Mac and Linux.
+The software has been tested on Mac, Linux, and FreeBSD.
 Additional testers/users are encouraged and welcome.
 
 ## Contributing
