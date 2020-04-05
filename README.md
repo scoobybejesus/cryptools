@@ -4,8 +4,8 @@
 
 ###### (The package produces a binary and accompanying library)
 
-This software calculates income, expenses, realized gains, and realized losses (and holding period)
-from cryptocurrency activity and denominates the results in the user's home currency.
+This is a command-line tool that calculates income, expenses, realized gains, and realized losses
+(and holding period) from cryptocurrency activity and denominates the results in the user's home currency.
 The default home currency is USD, but any currency can be substituted.
 This tool is probably most useful for filling out a tax return or making tax planning decisions.
 
@@ -21,7 +21,7 @@ containing the user's entire cryptocurrency transaction history, the software wi
 * record income for incoming transactions and expenses for outgoing transactions
 * print/export the results as CSV and TXT files
 
-*The tracking isn't pooled by `ticker`.  Rather, it's tracked at the wallet level.
+*The tracking isn't pooled by `ticker`.  Rather, it's tracked at the account/wallet level.
 
 ---
 
