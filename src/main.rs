@@ -8,7 +8,6 @@
 // #[warn(dead_code)] is the default (same for unused_variables)
 
 
-use std::ffi::OsString;
 use std::path::PathBuf;
 use std::error::Error;
 
@@ -30,41 +29,22 @@ mod tests;
 #[structopt(name = "cryptools")]
 pub struct Cli {
 
-    #[structopt(flatten)]
-    flags: Flags,
-
-    #[structopt(flatten)]
-    opts: Options,
-
-    /// File to be imported.  (The default date format is %m/%d/%y. See -i flag and -d option for more formatting choices.)
-    #[structopt(name = "file", parse(from_os_str))]
-    file_to_import: Option<PathBuf>,
-}
-
-#[derive(StructOpt, Debug)]
-pub struct Flags {
-
     /// User is instructing the program to skip the data entry wizard.
-    /// When set, default settings will be assumed if they are not indicated by flag or option.
+    /// When set, default settings will be assumed if they are not set by 
+    /// environment variables (or .env file).
     #[structopt(name = "accept args", short = "a", long = "accept")]
     accept_args: bool,
 
-    /// This flag will suppress the printing of "all" reports, except that it will trigger the
-    /// production of a txt file containing an accounting journal entry for every transaction.
+    /// This flag will suppress the printing of "all" reports, except that it *will* trigger the
+    /// exporting of a txt file containing an accounting journal entry for every transaction.
     /// Individual account and transaction reports may still be printed via the print_menu
-    /// with the -p flag. The journal entry report is only suitable for non-like-kind activity.
+    /// with the -p flag. Note: the journal entries are not suitable for like-kind transactions.
     #[structopt(name = "journal entries", short, long = "journal-entries")]
     journal_entries_only: bool,
 
-    /// This will cause the program to expect the txDate field in the file_to_import to use the format
-    /// YYYY-MM-dd or YY-MM-dd (or YYYY/MM/dd or YY/MM/dd, depending on the date-separator option)
-    /// instead of the default US-style MM-dd-YYYY or MM-dd-YY (or MM/dd/YYYY or MM/dd/YY, depending on the
-    /// date separator option).
-    #[structopt(name = "date conforms to ISO 8601", short = "i", long = "iso")]
-    iso_date: bool,
-
     /// Once the import file has been fully processed, the user will be presented
-    /// with a menu for manually selecting which reports to print/export.
+    /// with a menu for manually selecting which reports to print/export. If this flag is not
+    /// set, the program will print/export all available reports.
     #[structopt(name = "print menu", short, long = "print-menu")]
     print_menu: bool,
 
@@ -72,58 +52,66 @@ pub struct Flags {
     /// This will be ignored if -a is not set (the wizard will always ask to output).
     #[structopt(name = "suppress reports", short, long = "suppress")]
     suppress_reports: bool,
-}
-
-#[derive(StructOpt, Debug)]
-pub struct Options {
-
-    /// Choose "h", "s", or "p" for hyphen, slash, or period (i.e., "-", "/", or ".") to indicate the separator
-    /// character used in the file_to_import txDate column (i.e. 2017/12/31, 2017-12-31, or 2017.12.31).
-    #[structopt(name = "date separator character", short, long = "date-separator", default_value = "h", parse(from_os_str))]
-    date_separator: OsString,
-
-    /// Home currency (currency in which all resulting reports are denominated).
-    /// (Only available as a command line setting.)
-    #[structopt(name = "home currency", short = "c", long = "currency", default_value = "USD", parse(from_os_str))]
-    home_currency: OsString,
-
-    /// Cutoff date through which like-kind exchange treatment should be applied.
-    /// Please use %y-%m-%d (or %Y-%m-%d) format for like-kind cutoff date entry.
-    #[structopt(name = "like-kind cutoff date", short, long = "lk-cutoff", parse(from_os_str))]
-    lk_cutoff_date: Option<OsString>,
-
-    /// Inventory costing method (in terms of lot selection, i.e., LIFO, FIFO, etc.).
-    /// There are currently four options (1 through 4).
-    #[structopt(name = "method number for lot selection", short, long, default_value = "1", parse(from_os_str), long_help =
-    r"    1. LIFO according to the order the lot was created.
-    2. LIFO according to the basis date of the lot.
-    3. FIFO according to the order the lot was created.
-    4. FIFO according to the basis date of the lot.
-    ")]
-    inv_costing_method: OsString,
 
     /// Output directory for exported reports.
     #[structopt(name = "output directory", short, long = "output", default_value = ".", parse(from_os_str))]
     output_dir_path: PathBuf,
+
+    /// File to be imported.  By default, the program expects the `txDate` column to be formatted as %m/%d/%y. 
+    /// You may alter this with ISO_DATE and DATE_SEPARATOR environment variables.  See .env.example for
+    /// further details.
+    #[structopt(name = "file", parse(from_os_str))]
+    file_to_import: Option<PathBuf>,
 }
 
+/// These are the values able to be captured from environment variables.
+#[derive(Debug)]
+pub struct Cfg {
+    /// Setting the corresponding environment variable to `true` (or `1`) will cause the program to expect the `txDate` field in the 
+    /// `Cli::file_to_import` to use the format YYYY-MM-dd or YY-MM-dd (or YYYY/MM/dd or YY/MM/dd, depending on the date-separator option).
+    /// The default value is `false`, meaning the program will expect default US-style MM-dd-YYYY or MM-dd-YY (or MM/dd/YYYY 
+    /// or MM/dd/YY, depending on the date separator option).   
+    iso_date: bool,
+    /// Set the corresponding environment variable to "h", "s", or "p" for hyphen, slash, or period (i.e., "-", "/", or ".") 
+    /// to indicate the separator character used in the `Cli::file_to_import` `txDate` column (i.e. 2017/12/31, 2017-12-31, or 2017.12.31).
+    /// The default is `h`.
+    date_separator: String,
+    /// Home currency (currency from the `proceeds` column of the `Cli::file_to_import` and in which all resulting reports are denominated).  
+    /// Default is `USD`.
+    home_currency: String,
+    /// Cutoff date through which like-kind exchange treatment should be applied. You must use %y-%m-%d (or %Y-%m-%d)
+    /// format for like-kind cutoff date entry.  The default is blank/commented/`None`.
+    lk_cutoff_date: Option<String>,
+    /// method number for lot selection <method number for lot selection>
+    /// 1. LIFO according to the order the lot was created.
+    /// 2. LIFO according to the basis date of the lot.
+    /// 3. FIFO according to the order the lot was created.
+    /// 4. FIFO according to the basis date of the lot.
+     /// [default: 1]
+    inv_costing_method: String,
+}
 
 fn main() -> Result<(), Box<dyn Error>> {
 
     let args = Cli::from_args();
 
+    let cfg = setup::get_env()?;
+
     println!(
     "
-    Hello, crypto-folk!  Welcome to cryptools!
+    Hello,
 
     This software will import your csv file's ledger of cryptocurrency transactions.
     It will then process it by creating 'lots' and posting 'movements' to those lots.
     Along the way, it will keep track of income, expenses, gains, and losses.
 
-    Note: it is designed to import a full history. Gains and losses may be incorrect otherwise.
+    See .env.example for environment variables that may be set in a .env file in order to
+    change default program behavior.
+
+    Note: The software is designed to import a full history. Gains and losses may be incorrect otherwise.
     ");
 
-    let (input_file_path, settings) = setup::run_setup(args)?;
+    let (input_file_path, settings) = setup::run_setup(args, cfg)?;
 
     let (
         raw_acct_map,

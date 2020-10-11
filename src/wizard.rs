@@ -27,7 +27,7 @@ pub(crate) fn wizard(args: ArgsForImportVarsTBD) -> Result<(
     let mut lk_cutoff_date_opt_string;
 
     if let Some(lk_cutoff) = args.lk_cutoff_date_arg {
-        lk_cutoff_date_opt_string = Some(lk_cutoff.into_string().unwrap())
+        lk_cutoff_date_opt_string = Some(lk_cutoff)
     } else {
         lk_cutoff_date_opt_string = None
     };

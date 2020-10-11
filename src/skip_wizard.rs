@@ -25,7 +25,7 @@ pub(crate) fn skip_wizard(args: ArgsForImportVarsTBD) -> Result<(
 
     if let Some(date) = args.lk_cutoff_date_arg {
         like_kind_election = true;
-        like_kind_cutoff_date_string = date.into_string().unwrap();
+        like_kind_cutoff_date_string = date;
     } else {
         like_kind_election = false;
         like_kind_cutoff_date_string = "1-1-1".to_string();

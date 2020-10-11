@@ -1,12 +1,14 @@
 // Copyright (c) 2017-2019, scoobybejesus
 // Redistributions must include the license: https://github.com/scoobybejesus/cryptools/blob/master/LEGAL.txt
 
-use std::ffi::OsString;
+// use std::ffi::OsString;
 use std::path::PathBuf;
 use std::error::Error;
 use std::process;
+use std::env;
 
 use chrono::NaiveDate;
+use dotenv;
 
 use crptls::core_functions::ImportProcessParameters;
 use crptls::costing_method::InventoryCostingMethod;
@@ -16,32 +18,81 @@ use crate::skip_wizard;
 use crate::wizard;
 
 
+pub fn get_env() -> Result<super::Cfg, Box<dyn Error>> {
+
+    dotenv::dotenv().expect("Failed to read .env file");
+
+    let iso_date: bool = match env::var("ISO_DATE") {
+        Ok(val) => {
+            let var_lower = val.to_lowercase();
+            let val_str = var_lower.as_str();
+            if val_str == "1" || val == "true" {
+                true
+            } else {
+                false
+            }
+        },
+        Err(_e) => false,
+    };
+
+    let date_separator: String = match env::var("DATE_SEPARATOR") {
+        Ok(val) => val.to_lowercase(),
+        Err(_e) => "h".to_string(),
+    };
+
+    let home_currency = match env::var("HOME_CURRENCY") {
+        Ok(val) => val.to_uppercase(),
+        Err(_e) => "USD".to_string(),
+    };
+
+    let lk_cutoff_date = match env::var("LK_CUTOFF_DATE") {
+        Ok(val) => Some(val),
+        Err(_e) => None,
+    };
+    
+    let inv_costing_method = match env::var("INV_COSTING_METHOD") {
+        Ok(val) => val,
+        Err(_e) => "1".to_string(),
+    };
+
+    let cfg = super::Cfg {
+        iso_date,
+        date_separator,
+        home_currency,
+        lk_cutoff_date,
+        inv_costing_method,
+    };
+
+    Ok(cfg)
+}
+
+// These fields are subject to change by the user if they use the wizard
 pub struct ArgsForImportVarsTBD {
-    pub inv_costing_method_arg: OsString,
-    pub lk_cutoff_date_arg: Option<OsString>,
+    pub inv_costing_method_arg: String,
+    pub lk_cutoff_date_arg: Option<String>,
     pub output_dir_path: PathBuf,
     pub suppress_reports: bool,
 }
 
-pub (crate) fn run_setup(args: super::Cli) -> Result<(PathBuf, ImportProcessParameters), Box<dyn Error>> {
+pub (crate) fn run_setup(cmd_args: super::Cli, cfg: super::Cfg) -> Result<(PathBuf, ImportProcessParameters), Box<dyn Error>> {
 
-    let date_separator = match args.opts.date_separator.into_string().unwrap().as_str() {
-        "h" => { "-" }
+    let date_separator = match cfg.date_separator.as_str() {
+        "h" => { "-" } 
         "s" => { "/" }
         "p" => { "." }
         _ => { println!("\nFATAL: The date-separator arg requires either an 'h', an 's', or a 'p'.\n"); process::exit(1) }
     };
 
-    let input_file_path = match args.file_to_import {
+    let input_file_path = match cmd_args.file_to_import {
         Some(file) => file,
-        None => cli_user_choices::choose_file_for_import(args.flags.accept_args)?
+        None => cli_user_choices::choose_file_for_import(cmd_args.accept_args)?
     };
 
     let wizard_or_not_args = ArgsForImportVarsTBD {
-        inv_costing_method_arg: args.opts.inv_costing_method,
-        lk_cutoff_date_arg: args.opts.lk_cutoff_date,
-        output_dir_path: args.opts.output_dir_path,
-        suppress_reports: args.flags.suppress_reports,
+        inv_costing_method_arg: cfg.inv_costing_method,
+        lk_cutoff_date_arg: cfg.lk_cutoff_date,
+        output_dir_path: cmd_args.output_dir_path,
+        suppress_reports: cmd_args.suppress_reports,
     };
 
     let(
@@ -50,7 +101,7 @@ pub (crate) fn run_setup(args: super::Cli) -> Result<(PathBuf, ImportProcessPara
         like_kind_cutoff_date_string,
         should_export,
         output_dir_path,
-     ) = wizard_or_not(args.flags.accept_args, wizard_or_not_args)?;
+     ) = wizard_or_not(cmd_args.accept_args, wizard_or_not_args)?;
 
     let like_kind_cutoff_date = if like_kind_election {
         NaiveDate::parse_from_str(&like_kind_cutoff_date_string, "%y-%m-%d")
@@ -59,17 +110,17 @@ pub (crate) fn run_setup(args: super::Cli) -> Result<(PathBuf, ImportProcessPara
     } else { NaiveDate::parse_from_str(&"1-1-1", "%y-%m-%d").unwrap() };
 
     let settings = ImportProcessParameters {
-        input_file_uses_iso_date_style: args.flags.iso_date,
+        input_file_uses_iso_date_style: cfg.iso_date,
         input_file_date_separator: date_separator.to_string(),
-        home_currency: args.opts.home_currency.into_string().unwrap().to_uppercase(),
+        home_currency: cfg.home_currency.to_uppercase(),
         costing_method: costing_method_choice,
         lk_treatment_enabled: like_kind_election,
         lk_cutoff_date: like_kind_cutoff_date,
         lk_basis_date_preserved: true,  //  TODO
         should_export,
         export_path: output_dir_path,
-        print_menu: args.flags.print_menu,
-        journal_entry_export: args.flags.journal_entries_only,
+        print_menu: cmd_args.print_menu,
+        journal_entry_export: cmd_args.journal_entries_only,
     };
 
     Ok((input_file_path, settings))

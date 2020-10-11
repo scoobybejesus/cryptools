@@ -5,3 +5,4 @@
 .vscode/*
 rls*
 Cargo.lock
+.env

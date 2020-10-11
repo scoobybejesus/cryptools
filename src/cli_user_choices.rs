@@ -5,7 +5,6 @@ use std::error::Error;
 use std::io::{self, BufRead};
 use std::process;
 use std::path::PathBuf;
-use std::ffi::OsString;
 
 use chrono::NaiveDate;
 use rustyline::completion::{Completer, FilenameCompleter, Pair};
@@ -116,7 +115,7 @@ fn _get_path() -> Result<(String, bool), Box<dyn Error>> {
     }
 }
 
-pub fn choose_inventory_costing_method(cmd_line_arg: OsString) -> Result<InventoryCostingMethod, Box<dyn Error>> {
+pub fn choose_inventory_costing_method(cmd_line_arg: String) -> Result<InventoryCostingMethod, Box<dyn Error>> {
 
     println!("Choose the lot inventory costing method. [Default/Chosen: {:?}]", cmd_line_arg);
     println!("1. LIFO according to the order the lot was created.");
@@ -126,7 +125,7 @@ pub fn choose_inventory_costing_method(cmd_line_arg: OsString) -> Result<Invento
 
     let method = _costing_method(cmd_line_arg)?;
 
-    fn _costing_method(cmd_line_arg: OsString) -> Result<InventoryCostingMethod, Box<dyn Error>> {
+    fn _costing_method(cmd_line_arg: String) -> Result<InventoryCostingMethod, Box<dyn Error>> {
 
         let mut input = String::new();
         let stdin = io::stdin();
@@ -144,19 +143,18 @@ pub fn choose_inventory_costing_method(cmd_line_arg: OsString) -> Result<Invento
 
     Ok(method)
 }
-pub fn inv_costing_from_cmd_arg(arg: OsString) -> Result<InventoryCostingMethod, &'static str> {
+pub fn inv_costing_from_cmd_arg(arg: String) -> Result<InventoryCostingMethod, &'static str> {
 
-    let inv_costing_arg = match arg.into_string().expect("Could not convert OsString to String.").trim() {
-        "1" => {"1"} "2" => {"2"} "3" => {"3"} "4" => {"4"}
-        _ => { println!("WARN: Invalid command line arg passed for 'inv_costing_method'. Using default."); "1" }
-    };
-
-    match inv_costing_arg {
+    match arg.trim() {
         "1" => Ok(InventoryCostingMethod::LIFObyLotCreationDate),
         "2" => Ok(InventoryCostingMethod::LIFObyLotBasisDate),
         "3" => Ok(InventoryCostingMethod::FIFObyLotCreationDate),
         "4" => Ok(InventoryCostingMethod::FIFObyLotBasisDate),
-        _   => { Err("Invalid input parameter") }   //  Impossible code path
+        _ => { 
+                eprintln!("WARN: Invalid environment variable for 'INV_COSTING_METHOD'. Using default."); 
+                Ok(InventoryCostingMethod::LIFObyLotCreationDate)
+            }
+        // _   => { Err("Invalid input parameter, probably from environment variable INV_COSTING_METHOD") } 
     }
 }
 
