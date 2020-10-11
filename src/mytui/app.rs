@@ -55,9 +55,9 @@ impl<I> ListState<I> {
 pub struct PrintWindow<'a> {
     pub title: &'a str,
     pub should_quit: bool,
-    pub tasks: ListState<(&'a str)>,
+    pub tasks: ListState<&'a str>,
     pub to_print_by_idx: Vec<usize>,
-    pub to_print_by_title: Vec<(&'a str)>,
+    pub to_print_by_title: Vec<&'a str>,
 }
 
 impl<'a> PrintWindow<'a> {
