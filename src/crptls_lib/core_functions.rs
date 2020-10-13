@@ -16,7 +16,7 @@ use crate::crptls_lib::create_lots_mvmts;
 use crate::crptls_lib::costing_method::InventoryCostingMethod;
 
 
-/// `ImportProcessParameters` are determined from command-line args and/or wizard input from the user.
+/// `ImportProcessParameters` are determined from command-line args, environment variables, and/or wizard input from the user.
 /// They are the settings that allow the software to carry out the importing-from-csv of
 /// `Account`s and `Transaction`s, creation of `Lot`s and `Movement`s, addition of cost basis and proceeds
 /// to `Movement`s, and application of like-kind treatment, in a specific and automated fashion.
@@ -26,7 +26,7 @@ pub struct ImportProcessParameters {
     pub home_currency: String,
     pub costing_method: InventoryCostingMethod,
     pub lk_treatment_enabled: bool,
-    /// NaiveDate either from "1-1-1" (default and not to be used) or the actual date chosen (or passed in via Cli option)
+    /// NaiveDate either from "1-1-1" (default and not to be used) or the actual date chosen (or passed in via env var)
     pub lk_cutoff_date: NaiveDate,
     pub lk_basis_date_preserved: bool,
     pub should_export: bool,
@@ -60,7 +60,8 @@ pub fn import_and_process_final(
         &mut transactions_map,
     )?;
 
-    println!("Successfully imported csv file.");
+    println!("  Successfully imported csv file.");
+    println!("Processing the data...");
 
     transactions_map = create_lots_mvmts::create_lots_and_movements(
         &settings,
@@ -71,7 +72,7 @@ pub fn import_and_process_final(
         // &mut lot_map,
     )?;
 
-    println!("  Successfully created lots and movements.");
+    println!("  Created lots and movements.");
 
     import_cost_proceeds_etc::add_cost_basis_to_movements(
         &settings,
@@ -81,7 +82,7 @@ pub fn import_and_process_final(
         &transactions_map
     )?;
 
-    println!("  Successfully added cost basis to movements.");
+    println!("  Added cost basis to movements.");
 
     import_cost_proceeds_etc::add_proceeds_to_movements(
         &raw_account_map,
@@ -90,8 +91,7 @@ pub fn import_and_process_final(
         &transactions_map
     )?;
 
-    println!("  Successfully added proceeds to movements.");
-
+    println!("  Added proceeds to movements.");
 
     if settings.lk_treatment_enabled {
 
