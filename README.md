@@ -4,8 +4,8 @@
 
 ###### (The package produces a binary and accompanying library)
 
-This is a command-line tool that calculates income, expenses, realized gains, and realized losses
-(and holding period) from cryptocurrency activity and denominates the results in the user's home currency.
+This is a command-line tool that calculates income, expenses, realized gains, realized losses,
+and holding period from cryptocurrency activity and denominates the results in the user's home currency.
 The default home currency is USD, but any currency can be substituted.
 This tool is probably most useful for filling out a tax return or making tax planning decisions.
 
@@ -29,7 +29,7 @@ containing the user's entire cryptocurrency transaction history, the software wi
 
 * Two methods each of LIFO or FIFO (compatible w/ the concept of "specific identification")
 
-* Ability to perform like-kind exchange treatment
+* Ability to perform like-kind exchange treatment through a particular date
 
 * Compatible with any (single) home currency
 
@@ -63,16 +63,27 @@ This will build `./target/debug/cryptools` (or `./target/release/cryptools` for 
 ## Usage
 
 Run `./target/debug/cryptools` with no arguments (or with `--help`, or `-h`) to see usage.
-Alternatively, run `cargo run`, in which case command-line arguments for `cryptools` may be entered following `--`, e.g., `cargo run -- -h`.
+Alternatively, run `cargo run`, in which case command-line options for `cryptools` may be entered following `--`, e.g., `cargo run -- -h`.
 
-Running with no arguments will lead the user through a wizard; or all required arguments can be passed as command-line flags/options/args.
+Running with no options/arguments will lead the user through a wizard.
+To skip the wizard, there are three requirements:
+* The [CSV input file](https://github.com/scoobybejesus/cryptools/blob/master/InputFile_CSV.md) is a required command line argument.
+* The `-a` flag must be passed.
+* The configuration settings you require are the same as default, or you set the appropriate environment variables, or you have a `.env` file.
+
 See `/examples/` directory for further guidance,
 or jump directly to the [examples.md](https://github.com/scoobybejesus/cryptools/blob/master/examples/examples.md) file.
 
+###### Note: The import of your [CSV input file](https://github.com/scoobybejesus/cryptools/blob/master/InputFile_CSV.md) may fail or behave undesirably with the default configuration settings.
+See [.env.example](https://github.com/scoobybejesus/cryptools/blob/master/examples/.env.example) for those defaults.
+If you wish to skip the wizard but require changes to default settings, copy `.env.example` to `.env` and make your changes.
+The `.env` file must be placed in the directory from which `cryptools` is run or a parent directory.
+Alternatively, the respective environment variables may be set manually.
+
 ## Development state
 
-As of summer 2019, the code does not require additional features in order for it to serve the project's founder.
-At the same time, there are plenty of bells and whistles, creature comforts, etc. that are desired and may be added.
+As of fall 2020, the code does not require additional features in order for it to serve the project's founder.
+At the same time, there are still bells and whistles, creature comforts, etc. that are desired and may be added.
 Additionally, the code could use factoring or general re-working in several areas.
 
 The software has been tested on Mac, Linux, and FreeBSD.
@@ -101,7 +112,7 @@ My first real progress was with Python, but I still didn't manage to fully devel
 Luckily, I managed to stumble across a mentor who helped me write 80% of an MVP in strongly-typed Swift.
 We coded our way into a corner, but I had learned enough to take the code apart and put it back together correctly and complete it.
 I really enjoyed Swift, but I wanted something even more performant (and cross-platform), and Rust seemed to fit the bill.
-I rewrote the code in Rust (also with a bit of help from my mentor), and it has turned out to be a great choice.
+I rewrote the code in Rust (also with a bit of help), and it has turned out to be a great choice.
 
 ## Legal
 

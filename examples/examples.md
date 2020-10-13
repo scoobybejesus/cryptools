@@ -4,8 +4,8 @@ The sample input files and the resulting reports are in the `/examples/resources
 
 (Note: new reports have been added since the write-up below was written.
 Nevertheless, evaluating the reports should mostly be self-explanatory.
-Pass a -p flag from the command line to see the full list of available
-reports - and select from them - once the import has taken place.)
+Pass a -p flag from the command line to be presented a full list of available
+reports to select from once the import has taken place.)
 
 ## 1. Using the wizard
 
@@ -16,14 +16,14 @@ reports - and select from them - once the import has taken place.)
 ##### We're going to pass in that file as a command-line argument (no flags are required).
 Enter the following:
 
-##### &nbsp;&nbsp;&nbsp;&nbsp;`cargo run -- ./examples/resources/faker1__sample_input.csv`
+##### &nbsp;&nbsp;&nbsp;&nbsp;`cargo run -- examples/resources/faker1__sample_input.csv`
 
 &nbsp;&nbsp;&nbsp;&nbsp; (Substitute a Windows-style file path, if necessary.)
 
 Running the command above takes you through the wizard.
 
 &nbsp;&nbsp;&nbsp;&nbsp; (Note: You can simply run **`cargo run`** instead,
-in which case after answering yes to "Shall we proceed," you will have to enter the path of the input file.)
+in which case after answering 'yes' to "Shall we proceed," you will have to enter the path of the input file.)
 
 ##### Type `<Enter>` to accept default responses to the first three prompts, which are:
 
@@ -33,44 +33,51 @@ in which case after answering yes to "Shall we proceed," you will have to enter 
 
 ##### The final question asks if and where you'd like to save the reports.
 
-The default is the current directory, which is probably undesirable.
+The default is the current directory, which may be undesirable.
 Type `c` and `<Enter>` to change the directory.
-Then tab-complete your way through `/Users/<your-username>/Documents`*, for example, and then `<Enter>`.
+Then tab-complete your way through `/Users/<your-username>/Documents`, for example, and then `<Enter>`.
 
 &nbsp;&nbsp;&nbsp;&nbsp;\* This would be different for Windows, of course.
 
 ##### Now the program has ended, and you should have reports in the directory you provided.
 
-The reports should generally match those in the `examples/resources` directory.
-(Additional reports are created too, but you can generally match the existing reports by title.)
-
+The reports should generally match those in the `examples/resources` directory,
+but additional (newer) reports will be generated too.
 
 ## 2. Skipping the wizard
 
-Let's run the program again.
-This time around, we'll pass command-line parameters to skip the wizard.
+Enter the following:
 
-##### Again, preview the input file `faker2__sample_input.csv`.
+##### &nbsp;&nbsp;&nbsp;&nbsp;`cargo run -- -a examples/resources/faker1__sample_input.csv`
 
-You'll see it's similar to the README example, except that there is a wider variety of transactions,
+&nbsp;&nbsp;&nbsp;&nbsp; (Substitute a Windows-style file path, if necessary.)
+
+This will have quickly and automatically exported all the reports into the current directory.
+Go delete them before you forget (or feel free to take a look at them first).
+
+## 3. Using an input file with a slash (`/`) as the date separator
+
+##### Preview the input file `faker2__sample_input.csv`.
+
+You'll see it's similar to the first example, though with a wider variety of transactions,
 plus the memos are more descriptive.
+More importantly, the date column uses a different format `/` instead of `-`.
 
-##### Run **`cargo run -- --help`** to see descriptions for the parameters we can use, or just enter:
+Run:
 
-##### &nbsp;&nbsp;&nbsp;&nbsp;`cargo run -- -ds -a -o ~/Documents ./examples/resources/faker2__sample_input.csv`
+##### &nbsp;&nbsp;&nbsp;&nbsp;`DATE_SEPARATOR=s cargo run -- -a -o ~/Documents ./examples/resources/faker2__sample_input.csv`
 
 &nbsp;&nbsp;&nbsp;&nbsp;\* Substitute `~/Documents` with your desired output directory.
 Substitute a Windows-style file path, if necessary.
 
-##### Again, the program runs, and you should have reports in the location you provided.
+It worked correctly, right?
+Note that we set an enviroment variable so the program knew how to parse the date column correctly.
+An easier way to do this would be to create a `.env` file and set it there.
+This is described in the README (though there isn't much to it).
 
 ###### &nbsp;&nbsp;Try once more. This time, after `-a`, type `-p`, to be presented a "print menu" for choosing individual reports.
 
-We were able to bypass the wizard because:
-
-1. The required parameters were passed in.
-2. Default values were used for parameters not passed in.
-3. The `-a` flag was set which accepts all parameters without asking twice (i.e., skips the wizard).
+## To recap:
 
 The only "required" parameter is the input file.
 All other parameters have default values.
@@ -78,8 +85,8 @@ The default values may not be desirable for your use case, however.
 For example, you may want FIFO instead of LIFO,
 or you may set your home currency to EUR instead of USD.
 Or maybe you may want to apply like-kind exchange treatment through a particular date.
-These parameters can all be set via command line options.
-See the `--help` screen for all the options.
+These parameters can all be set via environment variables (or in a `.env` file).
+See the `--help` screen for command line options and .env.example for information on environment variables.
 
 As mentioned above, pass the -p flag to be presented with a list of available reports.
 

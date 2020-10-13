@@ -61,11 +61,11 @@ The rules for successfully preparing and maintaining the input file can generall
 
 1. The first account must be given number `1`, and each additional account must count up sequentially.
 2. Margin quote account `ticker`s must be followed by an underscore and the base account ticker (i.e., `BTC_xmr`).
-3. `Proceeds` is the value of the transaction, whether spent, received, or exchanged.
+3. `Proceeds` is the value of the transaction (measured in the home currency), whether spent, received, or exchanged.
 It is **required** in order to properly calculate income/expense/gain/loss.
 4. `Proceeds` must have a period as a decimal separator (`1,000.00` not `1.000,00`) and must not contain the ticker or symbol (USD or $).
 5. Only home currency accounts can have negative balances. Crypto accounts may not go negative at any time.
-(Exception: crypto margin accounts may go negative, of course.)
+(Exception: crypto margin accounts may go negative.)
 
 As you can see, most of the rules can generally be ignored.
 In fact, the only tricky field is the `proceeds` column, but even that becomes second nature soon enough.
@@ -82,18 +82,18 @@ In order to be successfully imported, the CSV input file **must** be in a prescr
 |       |        |            |Bank  |Exchange|Wallet |Exchange|Simplewallet|
 |       |        |            | USD  | BTC    | BTC   | XMR    | XMR        |
 |       |        |            | non  | non    | non   | non    | non        |
-|2/1/16 |0       |Bought      |  -220|    0.25|       |        |            |
-|3/1/16 |250     |Traded      |      |   -0.25|       |     180|            |
-|4/1/16 |0       |Transferred |      |        |       |     -90|          90|
-|5/1/16 |0       |Transferred |      |        |       |      90|         -90|
-|5/2/16 |160     |Traded      |      |     0.3|       |     -90|            |
-|6/1/16 |0       |Transferred |      |    -0.3|    0.3|        |            |
-|7/1/16 |200     |Traded      |      |     0.7|       |     -90|            |
-|8/1/16 |0       |Transferred |      |     0.3|   -0.3|        |            |
-|9/1/16 |400     |Traded      |      |    -0.5|       |     200|            |
-|10/1/16|900     |Traded      |      |       1|       |    -200|            |
-|11/1/16|0       |Transferred |      |    -1.5|    1.5|        |            |
-|12/1/16|2000    |Traded*     |      |        |   -1.5|        |         400|
+|2-1-16 |0       |Bought      |  -220|    0.25|       |        |            |
+|3-1-16 |250     |Traded      |      |   -0.25|       |     180|            |
+|4-1-16 |0       |Transferred |      |        |       |     -90|          90|
+|5-1-16 |0       |Transferred |      |        |       |      90|         -90|
+|5-2-16 |160     |Traded      |      |     0.3|       |     -90|            |
+|6-1-16 |0       |Transferred |      |    -0.3|    0.3|        |            |
+|7-1-16 |200     |Traded      |      |     0.7|       |     -90|            |
+|8-1-16 |0       |Transferred |      |     0.3|   -0.3|        |            |
+|9-1-16 |400     |Traded      |      |    -0.5|       |     200|            |
+|10-1-16|900     |Traded      |      |       1|       |    -200|            |
+|11-1-16|0       |Transferred |      |    -1.5|    1.5|        |            |
+|12-1-16|2000    |Traded*     |      |        |   -1.5|        |         400|
 
 ---
 
@@ -187,9 +187,9 @@ Until "spot" funds are spent to pay off the margin loans, it's simply an [unreco
 ##### Columns
 
 * **txDate**: As a default, this parser expects a format of `MM-dd-YY` or `MM-dd-YYYY`.
-The ISO 8601 date format (`YYYY-MM-dd` or `YY-MM-dd` both work) may be indicated by passing the `-i` flag.
+The ISO 8601 date format (`YYYY-MM-dd` or `YY-MM-dd` both work) may be indicated by setting the environment variable `ISO_DATE` to `1` or `true`.
 The hyphen, slash, or period delimiters (`-`, `/`, or `.`) may be indicated
-by passing the `-d` option followed by `h`, `s`, or `p`, respectively (hyphen, `-`, is default).
+by setting `DATE_SEPARATOR` to `h`, `s`, or `p`, respectively (hyphen, `-`, is default).
 
 * **proceeds**: This is can be any **positive** number that will parse into a floating point 32-bit number,
 as long as the **decimal separator** is a **period**.
@@ -201,7 +201,7 @@ but be sure not to include the ticker or symbol of the currency
 * **memo**: This can be a string of characters of any length, though fewer than 20-30 characters is advised.
 Currently, **commas** in the memo field are **not** supported.
 
-* *value*: This is similar to **proceeds**, in that the **decimal separator** must be a **period**,
+* *quantity*: This is similar to **proceeds**, in that the **decimal separator** must be a **period**,
 and you *cannot* include the ticker or symbol of the currency in that field.
 It is different from **proceeds** in that this will be parsed into a 128-bit precision decimal floating point number,
 and a negative value can be indicated via a preceding `-`.
@@ -226,5 +226,5 @@ Anything aside from those six choices will fail to parse.
 
 * *Transactions*: After the four header rows describing the accounts, the transaction rows follow.
 Each row is a separate transaction.
-For each transaction, input the **date**, **proceeds**, **memo**, and **values** by which the account balances change.
-As mentioned elsewhere, a minimum of one and a maximum of two Accounts can be associated with a single transaction.
+For each transaction, input the **date**, **proceeds**, **memo**, and **quantity** by which the account balances change.
+As mentioned elsewhere, a minimum of one and a maximum of two **Accounts** can be associated with a single transaction.
