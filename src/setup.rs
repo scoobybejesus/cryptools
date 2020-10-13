@@ -1,7 +1,6 @@
 // Copyright (c) 2017-2019, scoobybejesus
 // Redistributions must include the license: https://github.com/scoobybejesus/cryptools/blob/master/LEGAL.txt
 
-// use std::ffi::OsString;
 use std::path::PathBuf;
 use std::error::Error;
 use std::process;
@@ -20,13 +19,14 @@ use crate::wizard;
 
 pub fn get_env() -> Result<super::Cfg, Box<dyn Error>> {
 
-    dotenv::dotenv().expect("Failed to read .env file");
+    match dotenv::dotenv() {
+        Ok(_path) => {println!("Setting environment variables from .env file.")},
+        Err(_e) => println!("Did not find .env file.")
+    }
 
     let iso_date: bool = match env::var("ISO_DATE") {
         Ok(val) => {
-            let var_lower = val.to_lowercase();
-            let val_str = var_lower.as_str();
-            if val_str == "1" || val == "true" {
+            if val == "1" || val.to_lowercase() == "true" {
                 true
             } else {
                 false
@@ -36,23 +36,37 @@ pub fn get_env() -> Result<super::Cfg, Box<dyn Error>> {
     };
 
     let date_separator: String = match env::var("DATE_SEPARATOR") {
-        Ok(val) => val.to_lowercase(),
-        Err(_e) => "h".to_string(),
+        Ok(val) => {
+            println!("  Found DATE_SEPARATOR env var: {}", val);
+            val.to_lowercase()},
+        Err(_e) => {
+            println!("  Using default date separator (hyphen).");
+            "h".to_string()},
     };
 
     let home_currency = match env::var("HOME_CURRENCY") {
-        Ok(val) => val.to_uppercase(),
-        Err(_e) => "USD".to_string(),
+        Ok(val) => {
+            println!("  Found HOME_CURRENCY env var: {}", val);
+            val.to_uppercase()},
+        Err(_e) => {
+            println!("  Using default home currency (USD).");
+            "USD".to_string()},
     };
 
     let lk_cutoff_date = match env::var("LK_CUTOFF_DATE") {
-        Ok(val) => Some(val),
+        Ok(val) => {
+            println!("  Found LK_CUTOFF_DATE env var: {}", val);
+            Some(val)},
         Err(_e) => None,
     };
     
     let inv_costing_method = match env::var("INV_COSTING_METHOD") {
-        Ok(val) => val,
-        Err(_e) => "1".to_string(),
+        Ok(val) => {
+            println!("  Found INV_COSTING_METHOD env var: {}", val);
+            val},
+        Err(_e) => {
+            println!("  Using default inventory costing method (LIFO by lot creation date).");
+            "1".to_string()},
     };
 
     let cfg = super::Cfg {
@@ -106,7 +120,7 @@ pub (crate) fn run_setup(cmd_args: super::Cli, cfg: super::Cfg) -> Result<(PathB
     let like_kind_cutoff_date = if like_kind_election {
         NaiveDate::parse_from_str(&like_kind_cutoff_date_string, "%y-%m-%d")
             .unwrap_or_else(|_| NaiveDate::parse_from_str(&like_kind_cutoff_date_string, "%Y-%m-%d")
-            .expect("Command line date (like-kind cutoff option) has an incorrect format. Program must abort."))
+            .expect("Environment variable for LK_CUTOFF_DATE has an incorrect format. Program must abort. See .env.example."))
     } else { NaiveDate::parse_from_str(&"1-1-1", "%y-%m-%d").unwrap() };
 
     let settings = ImportProcessParameters {

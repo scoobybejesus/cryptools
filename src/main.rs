@@ -95,21 +95,21 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let args = Cli::from_args();
 
-    let cfg = setup::get_env()?;
-
     println!(
-    "
-    Hello,
+        "\
+Hello!
 
-    This software will import your csv file's ledger of cryptocurrency transactions.
-    It will then process it by creating 'lots' and posting 'movements' to those lots.
-    Along the way, it will keep track of income, expenses, gains, and losses.
+This software will import your csv file's ledger of cryptocurrency transactions.
+It will then process it by creating 'lots' and posting 'movements' to those lots.
+Along the way, it will keep track of income, expenses, gains, and losses.
 
-    See .env.example for environment variables that may be set in a .env file in order to
-    change default program behavior.
+See .env.example for environment variables that may be set in a .env file in order to
+change default program behavior.
 
-    Note: The software is designed to import a full history. Gains and losses may be incorrect otherwise.
+  Note: The software is designed to import a full history. Gains and losses may be incorrect otherwise.
     ");
+
+    let cfg = setup::get_env()?;
 
     let (input_file_path, settings) = setup::run_setup(args, cfg)?;
 
