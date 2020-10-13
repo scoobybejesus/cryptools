@@ -26,7 +26,7 @@ pub(crate) fn import_from_csv(
     transactions_map: &mut HashMap<u32, Transaction>,
 ) -> Result<(), Box<dyn Error>> {
 
-    let file = File::open(import_file_path)?; println!("CSV ledger file opened successfully.\n");
+    let file = File::open(import_file_path)?; println!("\nCSV ledger file opened successfully.\n");
 
     let mut rdr = csv::ReaderBuilder::new()
         .has_headers(true)
@@ -240,7 +240,8 @@ fn import_transactions(
         let tx_date = NaiveDate::parse_from_str(this_tx_date, &format_yy)
             .unwrap_or_else(|_| NaiveDate::parse_from_str(this_tx_date, &format_yyyy)
             .expect("
-Failed to parse date in input file. Check date separator character (which is a hyphen unless modified via Cli option -d).\n")
+Failed to parse date in input file. Check date the separator character, which is expected to be a hyphen \
+    unless otherwise set via environment variable or .env file. See `.env.example.`\n")
         );
 
         let transaction = Transaction {
