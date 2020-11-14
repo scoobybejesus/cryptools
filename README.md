@@ -23,6 +23,9 @@ containing the user's entire cryptocurrency transaction history, the software wi
 
 *The tracking isn't pooled by `ticker`.  Rather, it's tracked at the account/wallet level.
 
+There is a helper Python script at the root of the repo that will assist you in sanitizing your CSV file
+so it can be successfully imported into `cryptools`.
+
 ---
 
 ### Features
