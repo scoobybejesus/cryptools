@@ -52,6 +52,19 @@ when appreciated cryptocurrency was used to make a tax-deductible charitable con
 * Precision is limited to eight decimal places.  Additional digits will be stripped during
 import and may cause unintended rounding issues.
 
+* Microsoft Excel.  Don't let this cause you to bang your head against a wall.
+Picture this scenario.  You keep your transactions for your input file in a Google Sheet,
+and you're meticulous about making sure it's perfect.
+You then download it as a CSV file and import it into `cryptools`.  
+It works perfectly, and you have all your reports.
+Then you realize you'd like to quickly change a memo and re-run the reports, so you open the CSV file in Excel and edit it.
+Then you import it into `cryptools` again and the program panics!
+What happened is most likely that Excel changed the rounding of your precise decimals underneath you!
+As a result, it appears your input file has been clearly incorrectly prepared 
+because it appears that you're spending more coins than you actually owned at that time.
+`Cryptools` does not let you spend coins you don't own, and it will exit upon finding such a condition.
+The program is right, and your data is right, but Excel modified your data, and it can be infuriating when the program crashes for "no reason."
+
 ## Installation
 
 1. `git clone https://github.com/scoobybejesus/cryptools.git`
