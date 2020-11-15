@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 ## Purpose:	Allows user to keep additional data in their CSV Input File to increase its usefulness and
 ##			enhance readability, yet be able to properly format it prior to importing into `cryptools`.
