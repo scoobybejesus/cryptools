@@ -106,8 +106,7 @@ stage3 = "InputFile-pycleaned.csv"
 
 ##	 	i.e., (1.01) -> -1.01  (1,000.00) -> -1000.00
 
-with open(stage2) as fin, open(stage3, 'w', newline='') as fout:
-	
+with open(stage2) as fin, open(stage3, 'w') as fout:
 	rdr = csv.reader(fin, quoting=csv.QUOTE_ALL) 	
 	wtr = csv.writer(fout)
 	
