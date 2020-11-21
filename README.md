@@ -89,6 +89,11 @@ To skip the wizard, there are three requirements:
 * The `-a` flag must be passed.
 * The configuration settings you require are the same as default, or you set the appropriate environment variables, or you have a `.env` file.
 
+`cryptools` will panic and spit out an error message if your CSV input file is malformed.
+The error message will generally tell you why.
+Consider using the python script (root directory of the repo) to sanitize your input file,
+in case the file contains negative numbers in parentheses, numbers with commas, or extra rows/columns.
+
 See `/examples/` directory for further guidance,
 or jump directly to the [examples.md](https://github.com/scoobybejesus/cryptools/blob/master/examples/examples.md) file.
 
