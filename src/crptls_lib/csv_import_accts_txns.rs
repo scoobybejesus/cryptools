@@ -230,8 +230,8 @@ fn import_transactions(
         let separator = &settings.input_file_date_separator;
 
         if iso_date_style {
-            format_yyyy = "%Y".to_owned() + separator + "%d" + separator + "%m";
-            format_yy = "%y".to_owned() + separator + "%d" + separator + "%m";
+            format_yyyy = "%Y".to_owned() + separator + "%m" + separator + "%d";
+            format_yy = "%y".to_owned() + separator + "%m" + separator + "%d";
         } else {
             format_yyyy = "%m".to_owned() + separator + "%d" + separator + "%Y";
             format_yy = "%m".to_owned() + separator + "%d" + separator + "%y";
