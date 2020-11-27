@@ -60,11 +60,11 @@ The truth is that the input file is simple to maintain once it is brought curren
 The rules for successfully preparing and maintaining the input file can generally be summarized as follows:
 
 1. The first account must be given number `1`, and each additional account must count up sequentially.
-2. Margin quote account `ticker`s must be followed by an underscore and the base account ticker (i.e., `BTC_xmr`).
-3. `Proceeds` is the value of the transaction (measured in the home currency), whether spent, received, or exchanged.
+2. `Proceeds` is the value of the transaction (measured in the home currency), whether spent, received, or exchanged.
 It is **required** in order to properly calculate income/expense/gain/loss.
-4. `Proceeds` must have a period as a decimal separator (`1,000.00` not `1.000,00`) and must not contain the ticker or symbol (USD or $).
-5. Only home currency accounts can have negative balances. Crypto accounts may not go negative at any time.
+3. `Proceeds` must have a period as the decimal separator (`1,000.00` not `1.000,00`) and must not contain the ticker or symbol (USD or $).
+4. Margin quote account `ticker`s must be followed by an underscore and the base account ticker (i.e., `BTC_xmr`).
+5. Only home currency accounts can have negative balances. Non-margin crypto accounts may not go negative at any time.
 (Exception: crypto margin accounts may go negative.)
 
 As you can see, most of the rules can generally be ignored.

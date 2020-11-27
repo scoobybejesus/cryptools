@@ -8,6 +8,8 @@ This is a command-line tool that calculates income, expenses, realized gains, re
 and holding period from cryptocurrency activity and denominates the results in the user's home currency.
 The default home currency is USD, but any currency can be substituted.
 This tool is probably most useful for filling out a tax return or making tax planning decisions.
+It is already mildly difficult to do the prep work (CSV input file, below) for using a tool like this,
+so a person wanted this for a quick fix may be disappointed.
 
 ---
 
@@ -70,6 +72,8 @@ The program is right, and your data is right, but Excel modified your data, so t
 The solution is to have Excel already open, then in the ribbon's Data tab, you'll import your CSV file "From Text."
 You'll choose Delimited, and Comma, and then highlight every column and choose Text as the data type.
 
+* Currently, does not build on Windows due to the Termion crate (used for the print menu).
+
 ## Installation
 
 1. `git clone https://github.com/scoobybejesus/cryptools.git`
@@ -89,7 +93,7 @@ To skip the wizard, there are three requirements:
 * The `-a` flag must be passed.
 * The configuration settings you require are the same as default, or you set the appropriate environment variables, or you have a `.env` file.
 
-`cryptools` will panic and spit out an error message if your CSV input file is malformed.
+`cryptools` will spit out an error message and then exit/panic if your CSV input file is malformed.
 The error message will generally tell you why.
 Consider using the python script (root directory of the repo) to sanitize your input file,
 in case the file contains negative numbers in parentheses, numbers with commas, or extra rows/columns.
@@ -102,6 +106,12 @@ See [.env.example](https://github.com/scoobybejesus/cryptools/blob/master/exampl
 If you wish to skip the wizard but require changes to default settings, copy `.env.example` to `.env` and make your changes.
 The `.env` file must be placed in the directory from which `cryptools` is run or a parent directory.
 Alternatively, the respective environment variables may be set manually.
+
+#### Pro Tip
+
+Hop into `/usr/local/bin`, and run `ln -s /path/to/cryptools/target/debug/cryptools cryptools`
+and `ln -s /path/to/cryptools/clean_input_csv.py clean_input_csv` to be able to run the sanitizer
+script and `cryptools` from the directory where you keep your CSV Input File.
 
 ## Development state
 
