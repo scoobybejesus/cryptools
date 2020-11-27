@@ -51,20 +51,20 @@ fn import_accounts(
 ) -> Result<(), Box<dyn Error>> {
 
     let header1 = rdr.headers()?.clone();   //  account_num
-    let mut header2: Option<csv::StringRecord> = None;  //  name
-    let mut header3: Option<csv::StringRecord> = None;  //  ticker
+    let mut header2: csv::StringRecord = csv::StringRecord::new();  //  name
+    let mut header3: csv::StringRecord = csv::StringRecord::new();  //  ticker
     let header4: csv::StringRecord; //  is_margin
 
     // Account Creation loop.  With rdr.has_headers() set to true above, the first record here is the second row of the CSV
     for result in rdr.records() {
         //  This initial iteration through records will break after the 4th row, after accounts have been created
         let record = result?;
-        if header2 == None {
-            header2 = Some(record.clone());
+        if header2.len() == 0 {
+            header2 = record.clone();
             continue    //  After header2 is set, continue to next record
         }
-        else if header3 == None {
-            header3 = Some(record.clone());
+        else if header3.len() == 0 {
+            header3 = record.clone();
             continue    //  After header3 is set, continue to next record
         }
         else {
@@ -97,8 +97,8 @@ The next column's value should be 2, then 3, etc, until the final account).";
                 }
 
                 let ind = idx+3; // Add three because the idx skips the first three 'key' columns
-                let name:String = header2.clone().unwrap()[ind].trim().to_string();
-                let ticker:String = header3.clone().unwrap()[ind].trim().to_string();   //  no .to_uppercase() b/c margin...
+                let name:String = header2[ind].trim().to_string();
+                let ticker:String = header3[ind].trim().to_string();   //  no .to_uppercase() b/c margin...
                 let margin_string = &header4.clone()[ind];
 
                 let is_margin:bool = match margin_string.trim().to_lowercase().as_str() {
