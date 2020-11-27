@@ -55,14 +55,7 @@ fn import_accounts(
     let mut header3: Option<csv::StringRecord> = None;  //  ticker
     let header4: csv::StringRecord; //  is_margin
 
-    // A StringRecord doesn't accept the same range indexing we need below, so we create our own
-    let mut headerstrings: Vec<String> = Vec::with_capacity(header1.len());
-
-    for element in header1.into_iter() {
-        headerstrings.push(element.to_string())
-    }
-
-    // Account Creation loop.  We set hasheaders() to true above, so the first record here is the second row of the CSV
+    // Account Creation loop.  With rdr.has_headers() set to true above, the first record here is the second row of the CSV
     for result in rdr.records() {
         //  This initial iteration through records will break after the 4th row, after accounts have been created
         let record = result?;
@@ -78,32 +71,32 @@ fn import_accounts(
             header4 = record.clone();
             // println!("Assigned last header, record: {:?}", record);
 
-            let warn = "FATAL: Transactions will not import correctly if account numbers in the CSV import file aren't
+            // A StringRecord doesn't accept the same range indexing needed below, so a Vec of Strings will be used
+            let mut headerstrings: Vec<String> = Vec::with_capacity(header1.len());
+            for field in header1.into_iter() {
+                headerstrings.push(field.to_string())
+            }
+
+            let acct_num_warn = "Transactions will not import correctly if account numbers in the CSV import file aren't
 ordered chronologically (i.e., beginning in column 4 - the 1st account column - the value should be 1.
 The next column's value should be 2, then 3, etc, until the final account).";
 
-            // We've got all our header rows.  It's now that we set up the accounts.
+            // Header row variables have been set.  It's now time to set up the accounts.
             println!("Attempting to create accounts...");
 
-            let mut no_dup_acct_nums = HashMap::new();
             let length = &headerstrings.len();
 
-            for num in headerstrings[3..*length].iter().enumerate() {
-                let counter = no_dup_acct_nums.entry(num).or_insert(0);
-                *counter += 1;
-            }
+            for (idx, field) in headerstrings[3..*length].iter().enumerate() {
 
-            for acct_num in no_dup_acct_nums.keys() {
-                assert_eq!(no_dup_acct_nums[acct_num], 1, "Found accounts with duplicate numbers during import.");
-            }
+                // Parse account numbers.
+                let account_num = field.parse::<u16>().expect("Header row account number should parse into u16.");
+                // For now, their columns aren't remembered.  Instead, they must have a particular index. 0th idx is the 1st account, and so on.
+                if account_num != ((idx + 1) as u16) {
+                    println!("FATAL: CSV Import: {}", acct_num_warn);
+                    std::process::exit(1);
+                }
 
-            for (idx, item) in headerstrings[3..*length].iter().enumerate() {
-
-                // println!("Headerstrings value: {:?}", item);
                 let ind = idx+3; // Add three because the idx skips the first three 'key' columns
-                let account_num = item.parse::<u16>()?;
-                assert_eq!((idx + 1) as u16, account_num, "Found improper Account Number usage: {}", warn);
-
                 let name:String = header2.clone().unwrap()[ind].trim().to_string();
                 let ticker:String = header3.clone().unwrap()[ind].trim().to_string();   //  no .to_uppercase() b/c margin...
                 let margin_string = &header4.clone()[ind];
@@ -111,7 +104,10 @@ The next column's value should be 2, then 3, etc, until the final account).";
                 let is_margin:bool = match margin_string.trim().to_lowercase().as_str() {
                     "no" | "non" | "false" => false,
                     "yes" | "margin" | "true" => true,
-                    _ => { println!("\n Couldn't parse margin value for acct {} {} \n",account_num, name); process::exit(1) }
+                    _ => {
+                        println!("\n FATAL: CSV Import: Couldn't parse margin value for account {} {} \n",account_num, name);
+                        process::exit(1)
+                    }
                 };
 
                 let just_account: RawAccount = RawAccount {

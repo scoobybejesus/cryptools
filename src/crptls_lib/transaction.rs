@@ -52,7 +52,8 @@ impl Transaction {
 			let ar2_ticker = ar2_ticker_comp[0];
 
 			if first_ar.direction() == second_ar.direction() {
-				println!("Program exiting. Found transaction with two actionRecords with the same polarity: {:?}", self); process::exit(1);
+                println!("FATAL: TxType: Found transaction with two actionRecords with the same polarity: \n{:#?}", self);
+                process::exit(1);
 			}
 			if ar1_ticker == ar2_ticker {
 				if ar1_raw_acct.is_margin != ar2_raw_acct.is_margin {
@@ -67,10 +68,12 @@ impl Transaction {
 			}
 		}
 		else if self.action_record_idx_vec.len() > 2 {
-			println!("Program exiting. Found transaction with too many actionRecords: {:?}", self); process::exit(1);
+            println!("FATAL: TxType: Found transaction with too many actionRecords: \n{:#?}", self);
+            process::exit(1);
 		}
 		else {
-			println!("Program exiting. Found transaction with no actionRecords: {:?}", self); process::exit(1);
+            println!("FATAL: TxType: Found transaction with no actionRecords: \n{:#?}", self);
+            process::exit(1);
 		}
 	}
 
@@ -92,11 +95,23 @@ impl Transaction {
 			}
 		} else {
 
-			assert_eq!(self.action_record_idx_vec.len(),2,
-                "Each txn can only have one or two ARs. Txn has {} ARs.", self.action_record_idx_vec.len());
+            if self.action_record_idx_vec.len() != 2 {
+                println!("FATAL: Each transaction may have up to two actionrecords, and there are {} actionrecords in transaction:\n{:#?}",
+                self.action_record_idx_vec.len(), self);
+            }
 
-			let first_ar = ars.get(&self.action_record_idx_vec[0]).unwrap();
-			let second_ar = ars.get(&self.action_record_idx_vec[1]).unwrap();
+            let first_ar = match ars.get(&self.action_record_idx_vec[0]) {
+                Some(x) => x,
+                None => {
+                    println!("FATAL: ActionRecord not found for: \n{:#?}", self);
+                    process::exit(1)}
+            };
+			let second_ar = match ars.get(&self.action_record_idx_vec[1]) {
+                Some(x) => x,
+                None => {
+                    println!("FATAL: ActionRecord not found for: \n{:#?}", self);
+                    process::exit(1)}
+            };
 
 			let first_acct = acct_map.get(&first_ar.account_key).unwrap();
 			let second_acct = acct_map.get(&second_ar.account_key).unwrap();
@@ -144,7 +159,8 @@ impl Transaction {
 			quote = second_acct_raw_key;
 			Ok((base, quote))
 		} else {
-			println!("{}", VariousErrors::MarginNoUnderbar); use std::process::exit; exit(1)
+            println!("FATAL: {}", VariousErrors::MarginNoUnderbar);
+            std::process::exit(1);
 		}
 	}
 

@@ -94,7 +94,10 @@ pub (crate) fn run_setup(cmd_args: super::Cli, cfg: super::Cfg) -> Result<(PathB
         "h" => { "-" } 
         "s" => { "/" }
         "p" => { "." }
-        _ => { println!("\nFATAL: The date-separator arg requires either an 'h', an 's', or a 'p'.\n"); process::exit(1) }
+        _ => {
+            println!("\nFATAL: ENV: The date-separator arg requires either an 'h', an 's', or a 'p'.\n");
+            process::exit(1)
+        }
     };
 
     let input_file_path = match cmd_args.file_to_import {

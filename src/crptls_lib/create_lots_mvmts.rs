@@ -242,6 +242,12 @@ pub(crate) fn create_lots_and_movements(
                             wrap_mvmt_and_push(whole_mvmt, &ar, &lot, &chosen_home_currency, &raw_acct_map, &acct_map);
                             continue
                         } else {
+
+                            if acct.list_of_lots.borrow().len() == 0 {
+                                println!("FATAL: There are zero lots to spend from in transaction:\n{:#?}",txn);
+                                std::process::exit(1);
+                            }
+
                             let list_of_lots_to_use = acct.list_of_lots.clone();
 
                             //  the following returns vec to be iterated from beginning to end, which provides the index for the correct lot
@@ -557,7 +563,8 @@ pub(crate) fn create_lots_and_movements(
                             }
                             TxType::ToSelf => {
                                 if raw_acct.is_margin {
-                                    { println!("\n Found margin actionrecord in toself txn # {} \n", txn.tx_number); use std::process::exit; exit(1) };
+                                    println!("FATAL: Consult developer. Found margin actionrecord in ToSelf transaction:\n{:#?}", txn);
+                                    std::process::exit(1);
                                 } else {
                                     process_multiple_incoming_lots_and_mvmts(
                                         txn_num,
@@ -729,7 +736,7 @@ fn fit_into_lots(
             &chosen_home_currency,
             &ar_map,
             &raw_acct_map,
-            &acct_map
+            &acct_map,
         );
         return;
     }
@@ -777,6 +784,14 @@ fn fit_into_lots(
     wrap_mvmt_and_push(mvmt_that_fits_in_lot, &spawning_ar, &lot, &chosen_home_currency, &raw_acct_map, &acct_map);
     let remainder_amt_to_recurse = remainder_amt + sum_of_mvmts_in_lot;
     // println!("Remainder amount to recurse: {}", remainder_amt_to_recurse);
+
+    if vec_of_ordered_index_values.len() == current_index_position + 1 {
+        println!("FATAL: Txn {} on {} spending {} {} has run out of lots to spend from.",
+            txn_num, lot.date_as_string, ar.amount, raw_acct.ticker);
+        println!("Account balance is only: {}", acct.get_sum_of_amts_in_lots());
+        std::process::exit(1);
+    }
+
     current_index_position += 1;
     let lot_index = vec_of_ordered_index_values[current_index_position];
     let newly_chosen_lot = list_of_lots_to_use.borrow()[lot_index].clone();
@@ -806,7 +821,7 @@ fn fit_into_lots(
         &chosen_home_currency,
         &ar_map,
         &raw_acct_map,
-        &acct_map
+        &acct_map,
     );
 }
 
