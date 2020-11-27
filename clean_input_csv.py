@@ -24,6 +24,7 @@
 import csv
 import re
 import os
+import sys
 
 unedited = "DigiTrnx.csv" 	# To be replaced with a launch arg, presumably	
 
@@ -47,6 +48,13 @@ with open(unedited) as fin, open(stage1, 'a') as fout:
 	wtr.writerow(header3)
 	wtr.writerow(header4)
 
+	# First, double check there are no account number duplicates
+	for i, val in enumerate(header):
+		if val != "":
+			if header.count(val) > 1:
+				print("### There is a duplicate account number (" + val +").  Please fix and re-run. ###")
+				sys.exit()
+
 	for row in rdr:
 		if row[0] == "" or row[1] == "":
 			pass
@@ -66,12 +74,12 @@ stage2 = "stage2.csv"
 ##		CSV input file.
 
 with open(stage1) as fin, open(stage2, 'a') as fout:
-	rdr = csv.reader(fin) 	
+	rdr = csv.reader(fin)
 	wtr = csv.writer(fout)
 	header = next(rdr)
 	header2 = next(rdr)
 	header3 = next(rdr)
-	header4 = next(rdr)		
+	header4 = next(rdr)
 
 	colListKept = []
 
