@@ -7,8 +7,7 @@ use std::fmt;
 use std::collections::{HashMap};
 use std::error::Error;
 
-use chrono::{NaiveDate, NaiveTime, NaiveDateTime, DateTime, Utc, TimeZone};
-use chrono_tz::US::Eastern;
+use chrono::{NaiveDate};
 use decimal::d128;
 use serde_derive::{Serialize, Deserialize};
 
@@ -198,7 +197,15 @@ impl Movement {
 		self.proceeds.get() + self.cost_basis.get()
 	}
 
-	pub fn get_term(&self, acct_map: &HashMap<u16, Account>, ar_map: &HashMap<u32, ActionRecord>,) -> Term {
+	/// This function is only called during export operations.  In addition, this will
+	/// only be called on flow and outgoing exchange `transactions`. Lastly, the only
+	/// `movement`s subject to this call with have non-margin accounts.
+	pub fn get_term(
+		&self,
+		acct_map: &HashMap<u16, Account>,
+		ar_map: &HashMap<u32, ActionRecord>,
+		txns_map: &HashMap<u32, Transaction>
+	) -> Term {
 
     	use time::Duration;
 		let ar = ar_map.get(&self.action_record_key).unwrap();
@@ -207,14 +214,22 @@ impl Movement {
     	match ar.direction() {
 
 			Polarity::Incoming => {
-				let today = Utc::now();
-				let utc_lot_date = Self::create_date_time_from_atlantic(
-                    lot.date_for_basis_purposes,
-                    NaiveTime::from_hms_milli(12, 34, 56, 789)
-                );
-				// if today.signed_duration_since(self.lot.date_for_basis_purposes) > 365
-				if (today - utc_lot_date) > Duration::days(365) {
-                    //	TODO: figure out how to instantiate today's date and convert it to compare to NaiveDate
+
+				// For a dual-`action record` `transaction` with a non-margin `account` incoming amount,
+				// if there was like-kind treatment, the basis date may be before the `transaction` date.
+				let txn = txns_map.get(&self.transaction_key).unwrap();
+				if txn.action_record_idx_vec.len() == 2 {
+					let lot_date_for_basis_purposes = lot.date_for_basis_purposes;
+					if self.date.signed_duration_since(lot_date_for_basis_purposes) > Duration::days(365) {
+						return Term::LT
+					}
+					return Term::ST
+				}
+
+				// For a single-`action record` `transaction`, term is meaningless, but it is being shown
+				// in the context of the holding period, in the event it were sold "today".
+				let today: NaiveDate = chrono::Local::now().naive_utc().date();
+				if today.signed_duration_since(lot.date_for_basis_purposes) > Duration::days(365) {
 					Term::LT
 				}
 				else {
@@ -232,14 +247,6 @@ impl Movement {
 				Term::ST
 			}
 		}
-	}
-
-	pub fn create_date_time_from_atlantic(date: NaiveDate, time: NaiveTime) -> DateTime<Utc> {
-
-		let naive_datetime = NaiveDateTime::new(date, time);
-		let east_time = Eastern.from_local_datetime(&naive_datetime).unwrap();
-
-        east_time.with_timezone(&Utc)
 	}
 
 	pub fn get_income(

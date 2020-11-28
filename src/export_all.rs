@@ -66,6 +66,14 @@ pub fn export(
         &transactions_map
     )?;
 
+    export_csv::_7_gain_loss_8949_to_csv(
+        &settings,
+        &raw_acct_map,
+        &account_map,
+        &action_records_map,
+        &transactions_map
+    )?;
+
     export_txt::_1_account_lot_detail_to_txt(
         &settings,
         &raw_acct_map,

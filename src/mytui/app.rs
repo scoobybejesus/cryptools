@@ -13,17 +13,18 @@ use crate::export_txt;
 use crate::export_je;
 
 
-pub (crate) const REPORTS: [&'static str; 10] = [
+pub (crate) const REPORTS: [&'static str; 11] = [
     "1. CSV: Account Sums",
     "2. CSV: Account Sums (Non-zero only)",
     "3. CSV: Account Sums (Orig. basis vs like-kind basis)",
     "4. CSV: Transactions by movement (every movement)",
     "5. CSV: Transactions by movement (summarized by long-term/short-term)",
     "6. CSV: Transactions by movement (every movement, w/ orig. and like-kind basis",
-    "7. TXT: Accounts by lot (every movement)",
-    "8. TXT: Accounts by lot (every lot balance)",
-    "9. TXT: Accounts by lot (every non-zero lot balance)",
-    "10. TXT: Bookkeeping journal entries",
+    "7. CSV: Transactions summary by LT/ST for Form 8949",
+    "8. TXT: Accounts by lot (every movement)",
+    "9. TXT: Accounts by lot (every lot balance)",
+    "10. TXT: Accounts by lot (every non-zero lot balance)",
+    "11. TXT: Bookkeeping journal entries",
 ];
 
 pub struct ListState<I> {
@@ -194,6 +195,16 @@ pub fn export(
                 )?;
             }
             7 => {
+                export_csv::_7_gain_loss_8949_to_csv(
+                    &settings,
+                    &raw_acct_map,
+                    &account_map,
+                    &action_records_map,
+                    &transactions_map
+                )?;
+            }
+
+            8 => {
                 export_txt::_1_account_lot_detail_to_txt(
                     &settings,
                     &raw_acct_map,
@@ -202,21 +213,21 @@ pub fn export(
                     &transactions_map,
                 )?;
             }
-            8 => {
+            9 => {
                 export_txt::_2_account_lot_summary_to_txt(
                     &settings,
                     &raw_acct_map,
                     &account_map,
                 )?;
             }
-            9 => {
+            10 => {
                 export_txt::_3_account_lot_summary_non_zero_to_txt(
                     &settings,
                     &raw_acct_map,
                     &account_map,
                 )?;
             }
-            10 => {
+            11 => {
                 if !settings.lk_treatment_enabled {
                     export_je::prepare_non_lk_journal_entries(
                         &settings,

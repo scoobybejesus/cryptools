@@ -129,7 +129,7 @@ depending on the bookkeeping practices you employ.";
                 };
             }
 
-            let term = mvmt.get_term(acct_map, ars);
+            let term = mvmt.get_term(acct_map, ars, txns_map);
 
             if term == Term::LT {
                 amount_lt += mvmt.amount;

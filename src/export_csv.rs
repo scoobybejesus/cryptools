@@ -7,8 +7,9 @@ use std::path::PathBuf;
 use std::error::Error;
 
 use decimal::d128;
+use chrono::NaiveDate;
 
-use crptls::transaction::{Transaction, ActionRecord, Polarity, TxType};
+use crptls::transaction::{ActionRecord, Polarity, Transaction, TxType};
 use crptls::account::{Account, RawAccount, Term};
 use crptls::core_functions::{ImportProcessParameters};
 
@@ -314,7 +315,7 @@ pub fn _4_transaction_mvmt_detail_to_csv(
             let mut amount = d128!(0);
             amount += mvmt.amount;   //  To prevent printing -5E+1 instead of 50, for example
             let ticker = raw_acct.ticker.to_string();
-            let term = mvmt.get_term(acct_map, ars).to_string();
+            let term = mvmt.get_term(acct_map, ars, txns_map).to_string();
             let mut proceeds_lk = mvmt.proceeds_lk.get();
             let mut cost_basis_lk = mvmt.cost_basis_lk.get();
             let mut gain_loss = mvmt.get_lk_gain_or_loss();
@@ -449,7 +450,7 @@ pub fn _5_transaction_mvmt_summaries_to_csv(
                 };
             }
 
-            let term = mvmt.get_term(acct_map, ars);
+            let term = mvmt.get_term(acct_map, ars, txns_map);
 
             if term == Term::LT {
                 amount_lt += mvmt.amount;
@@ -622,7 +623,7 @@ pub fn _6_transaction_mvmt_detail_to_csv_w_orig(
             let mut amount = d128!(0);
             amount += mvmt.amount;   //  To prevent printing -5E+1 instead of 50, for example
             let ticker = raw_acct.ticker.to_string();
-            let term = mvmt.get_term(acct_map, ars).to_string();
+            let term = mvmt.get_term(acct_map, ars, txns_map).to_string();
             let mut proceeds_lk = mvmt.proceeds_lk.get();
             let mut cost_basis_lk = mvmt.cost_basis_lk.get();
             let mut gain_loss = mvmt.get_lk_gain_or_loss();
@@ -666,6 +667,195 @@ pub fn _6_transaction_mvmt_detail_to_csv_w_orig(
     }
 
     let file_name = PathBuf::from("C6_Txns_mvmts_more_detail.csv");
+    let path = PathBuf::from(&settings.export_path);
+
+    let full_path: PathBuf = [path, file_name].iter().collect();
+    let buffer = File::create(full_path).unwrap();
+    let mut wtr = csv::Writer::from_writer(buffer);
+
+    for row in rows.iter() {
+        wtr.write_record(row).expect("Could not write row to CSV file");
+    }
+    wtr.flush().expect("Could not flush Writer, though file should exist and be complete");
+
+    Ok(())
+}
+
+pub fn _7_gain_loss_8949_to_csv(
+    settings: &ImportProcessParameters,
+    raw_acct_map: &HashMap<u16, RawAccount>,
+    acct_map: &HashMap<u16, Account>,
+    ars: &HashMap<u32, ActionRecord>,
+    txns_map: &HashMap<u32, Transaction>,
+) -> Result<(), Box<dyn Error>> {
+
+    let mut rows: Vec<Vec<String>> = [].to_vec();
+
+    let columns = [
+        "Term".to_string(),
+        "Txn#".to_string(),             // not in 8949; just useful
+        "Description".to_string(),      // auto_memo
+        "Amt in term".to_string(),      // auto_memo amt split by ST/LT
+        "Date Acquired".to_string(),    // lot basis date
+        "Date Sold".to_string(),        // txn date
+        "Proceeds".to_string(),         // txn proceeds (for LT or ST portion only)
+        "Cost basis".to_string(),       // txn cost basis (for LT or ST portion only)
+        "Gain/loss".to_string(),
+    ];
+
+    let total_columns = columns.len();
+    let mut header: Vec<String> = Vec::with_capacity(total_columns);
+    header.extend_from_slice(&columns);
+    rows.push(header);
+
+    let length = txns_map.len();
+
+    for txn_num in 1..=length {
+
+        let txn_num = txn_num as u32;
+        let txn = txns_map.get(&(txn_num)).unwrap();
+        let txn_date_string = txn.date.to_string();
+        let tx_num_string = txn.tx_number.to_string();
+        let tx_memo_string = txn.get_auto_memo(ars,raw_acct_map,acct_map, &settings.home_currency)?;
+
+        let mut term_st: Option<Term> = None;
+        let mut term_lt: Option<Term> = None;
+        let mut ticker: Option<String> = None;
+        let mut polarity: Option<Polarity> = None;
+
+        let mut amount_st = d128!(0);
+        let mut proceeds_st = d128!(0);
+        let mut cost_basis_st = d128!(0);
+
+        let mut expense_st = d128!(0);
+
+        let mut amount_lt = d128!(0);
+        let mut proceeds_lt = d128!(0);
+        let mut cost_basis_lt = d128!(0);
+
+        let mut expense_lt = d128!(0);
+
+        let flow_or_outgoing_exchange_movements = txn.get_outgoing_exchange_and_flow_mvmts(
+            &settings.home_currency,
+            ars,
+            raw_acct_map,
+            acct_map,
+            txns_map
+        )?;
+
+        let mut purchase_date_lt: NaiveDate = NaiveDate::parse_from_str("1-1-1", "%y-%m-%d").unwrap();
+        let mut purchase_date_st: NaiveDate = NaiveDate::parse_from_str("1-1-1", "%y-%m-%d").unwrap();
+        let mut various_dates_lt: bool = false;
+        let mut various_dates_st: bool = false;
+        let mut lt_set = false;
+        let mut st_set = false;
+        for mvmt in flow_or_outgoing_exchange_movements.iter() {
+            let lot = mvmt.get_lot(acct_map, ars);
+            let acct = acct_map.get(&lot.account_key).unwrap();
+            let raw_acct = raw_acct_map.get(&acct.raw_key).unwrap();
+
+            if ticker.is_none() { ticker = Some(raw_acct.ticker.clone()) };
+
+            if polarity.is_none() {
+                polarity = if mvmt.amount > d128!(0) {
+                    Some(Polarity::Incoming)
+                    } else { Some(Polarity::Outgoing)
+                };
+            }
+
+            fn dates_are_different(existing: &NaiveDate, current: &NaiveDate) -> bool {
+                if existing != current {true} else {false}
+            }
+
+            let term = mvmt.get_term(acct_map, ars, txns_map);
+
+            if term == Term::LT {
+                if lt_set {} else { purchase_date_lt = lot.date_for_basis_purposes; lt_set = true }
+                various_dates_lt = dates_are_different(&purchase_date_lt, &lot.date_for_basis_purposes);
+
+                amount_lt += mvmt.amount;
+                proceeds_lt += mvmt.proceeds_lk.get();
+                cost_basis_lt += mvmt.cost_basis_lk.get();
+
+                if term_lt.is_none() { term_lt = Some(term) }
+
+            } else {
+                if st_set {} else { purchase_date_st = lot.date_for_basis_purposes; st_set = true}
+                various_dates_st = dates_are_different(&purchase_date_st, &lot.date_for_basis_purposes);
+
+                assert_eq!(term, Term::ST);
+                amount_st += mvmt.amount;
+                proceeds_st += mvmt.proceeds_lk.get();
+                cost_basis_st += mvmt.cost_basis_lk.get();
+
+                if term_st.is_none() {
+                    term_st = Some(term);
+                }
+            }
+        }
+        let lt_purchase_date = if various_dates_lt { "Various".to_string() } else { purchase_date_lt.to_string() };
+        let st_purchase_date = if various_dates_st { "Various".to_string() } else { purchase_date_st.to_string() };
+
+        if (txn.transaction_type(
+            ars,
+            &raw_acct_map,
+            &acct_map)? == TxType::Flow
+        ) & (polarity == Some(Polarity::Incoming)) {
+            // The only incoming flow transaction to report would be margin profit, which is a dual-`action record` `transaction`
+            if txn.action_record_idx_vec.len() == 2 {
+                proceeds_st = -proceeds_st;   //  Proceeds are negative for incoming txns
+                cost_basis_st = d128!(0);
+                proceeds_lt = -proceeds_lt;   //  Proceeds are negative for incoming txns
+                cost_basis_lt = d128!(0);
+            } else {
+                continue    // Plain, old income isn't reported on form 8949
+            }
+        }
+
+        if (txn.transaction_type(
+            ars,
+            &raw_acct_map,
+            &acct_map)? == TxType::Flow
+        ) & (polarity == Some(Polarity::Outgoing)) {
+            expense_st -= proceeds_st;
+            expense_lt -= proceeds_lt;
+        }
+
+        if let Some(term) = term_st {
+
+            let mut row: Vec<String> = Vec::with_capacity(total_columns);
+
+            row.push(term.abbr_string());
+            row.push(tx_num_string.clone());
+            row.push(tx_memo_string.clone());
+            row.push(amount_st.to_string());
+            row.push(st_purchase_date.clone());
+            row.push(txn_date_string.clone());
+            row.push(proceeds_st.to_string());
+            row.push(cost_basis_st.to_string());
+            row.push((proceeds_st + cost_basis_st).to_string());
+
+            rows.push(row);
+        }
+        if let Some(term) = term_lt {
+
+            let mut row: Vec<String> = Vec::with_capacity(total_columns);
+
+            row.push(term.abbr_string());
+            row.push(tx_num_string);
+            row.push(tx_memo_string);
+            row.push(amount_lt.to_string());
+            row.push(lt_purchase_date.clone());
+            row.push(txn_date_string);
+            row.push(proceeds_lt.to_string());
+            row.push(cost_basis_lt.to_string());
+            row.push((proceeds_lt + cost_basis_lt).to_string());
+
+            rows.push(row);
+        }
+    }
+
+    let file_name = PathBuf::from("C7_Form_8949.csv");
     let path = PathBuf::from(&settings.export_path);
 
     let full_path: PathBuf = [path, file_name].iter().collect();

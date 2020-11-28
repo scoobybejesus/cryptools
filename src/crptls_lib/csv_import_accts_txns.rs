@@ -89,7 +89,7 @@ The next column's value should be 2, then 3, etc, until the final account).";
             for (idx, field) in headerstrings[3..*length].iter().enumerate() {
 
                 // Parse account numbers.
-                let account_num = field.parse::<u16>().expect("Header row account number should parse into u16.");
+                let account_num = field.trim().parse::<u16>().expect(&format!("Header row account number should parse into u16: {}", field));
                 // For now, their columns aren't remembered.  Instead, they must have a particular index. 0th idx is the 1st account, and so on.
                 if account_num != ((idx + 1) as u16) {
                     println!("FATAL: CSV Import: {}", acct_num_warn);
