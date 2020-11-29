@@ -188,7 +188,14 @@ pub(crate) fn create_lots_and_movements(
                 proceeds_lk: Cell::new(d128!(0.0)),
                 cost_basis_lk: Cell::new(d128!(0.0)),
             };
-            wrap_mvmt_and_push(base_mvmt, &base_ar, &base_lot, &chosen_home_currency, &raw_acct_map, &acct_map);
+            let raw_base_acct = raw_acct_map.get(&base_acct.raw_key).unwrap();
+            wrap_mvmt_and_push(
+                base_mvmt,
+                &base_ar,
+                &base_lot,
+                &chosen_home_currency,
+                &raw_base_acct,
+            );
 
             let quote_mvmt = Movement {
                 amount: quote_ar.amount,
@@ -204,7 +211,14 @@ pub(crate) fn create_lots_and_movements(
                 proceeds_lk: Cell::new(d128!(0.0)),
                 cost_basis_lk: Cell::new(d128!(0.0)),
             };
-            wrap_mvmt_and_push(quote_mvmt, &quote_ar, &quote_lot, &chosen_home_currency, &raw_acct_map, &acct_map);
+            let raw_quote_acct = raw_acct_map.get(&quote_acct.raw_key).unwrap();
+            wrap_mvmt_and_push(
+                quote_mvmt,
+                &quote_ar,
+                &quote_lot,
+                &chosen_home_currency,
+                &raw_quote_acct,
+            );
 
             // Self-explanatory.  If new `lot`s were created, those `lot`s need to be pushed onto the `account`s.
             if acct_balances_are_zero {
@@ -268,7 +282,13 @@ pub(crate) fn create_lots_and_movements(
                         proceeds_lk: Cell::new(d128!(0.0)),
                         cost_basis_lk: Cell::new(d128!(0.0)),
                     };
-                    wrap_mvmt_and_push(whole_mvmt, &ar, &lot, &chosen_home_currency, &raw_acct_map, &acct_map);
+                    wrap_mvmt_and_push(
+                        whole_mvmt,
+                        &ar,
+                        &lot,
+                        &chosen_home_currency,
+                        &raw_acct,
+                    );
 
                     // If there is a new `lot`, push it onto the `account`
                     if new_lot_created { acct.list_of_lots.borrow_mut().push(lot); }
@@ -316,7 +336,13 @@ pub(crate) fn create_lots_and_movements(
                                 proceeds_lk: Cell::new(d128!(0.0)),
                                 cost_basis_lk: Cell::new(d128!(0.0)),
                             };
-                            wrap_mvmt_and_push(whole_mvmt, &ar, &lot, &chosen_home_currency, &raw_acct_map, &acct_map);
+                            wrap_mvmt_and_push(
+                                whole_mvmt,
+                                &ar,
+                                &lot,
+                                &chosen_home_currency,
+                                &raw_acct,
+                            );
                             continue
 
                         // For an outgoing `action record` with a non-margin `account`, this is where it is determined how to split
@@ -341,6 +367,8 @@ pub(crate) fn create_lots_and_movements(
                                 InventoryCostingMethod::FIFObyLotBasisDate => {
                                     get_fifo_by_lot_basis_date(&list_of_lots_to_use.borrow())}
                             };
+
+                            assert_eq!(vec_of_ordered_index_values.len(), list_of_lots_to_use.borrow().len());
 
                             fn get_lifo_by_creation_date(list_of_lots: &Ref<Vec<Rc<Lot>>>) -> Vec<usize> {
                                 let mut vec_of_indexes = [].to_vec(); // TODO: Add with_capacity()
@@ -420,18 +448,20 @@ pub(crate) fn create_lots_and_movements(
                                 cost_basis_lk: Cell::new(d128!(0.0)),
                             };
 
+                            // Just a last minute check that a home currency `action record` isn't being handled here
+                            assert_eq!(raw_acct.is_home_currency(&chosen_home_currency), false);
+
                             // Beginning here, it will recursively attempt to fit the outgoing amount into `lot`s.
                             fit_into_lots(
-                                txn_num,
-                                *ar_num,
                                 whole_mvmt,
+                                ar.amount,
                                 list_of_lots_to_use,
                                 vec_of_ordered_index_values,
                                 index_position,
                                 &chosen_home_currency,
-                                &ar_map,
-                                &raw_acct_map,
-                                &acct_map,
+                                &ar,
+                                &raw_acct,
+                                &acct,
                             );
 
                             // Once the `action record`'s outgoing amount has been "consumed", the recording of this
@@ -483,7 +513,13 @@ pub(crate) fn create_lots_and_movements(
                                         proceeds_lk: Cell::new(d128!(0.0)),
                                         cost_basis_lk: Cell::new(d128!(0.0)),
                                     };
-                                    wrap_mvmt_and_push(mvmt, &ar, &lot, &chosen_home_currency, &raw_acct_map, &acct_map);
+                                    wrap_mvmt_and_push(
+                                        mvmt,
+                                        &ar,
+                                        &lot,
+                                        &chosen_home_currency,
+                                        &raw_acct,
+                                    );
 
                                     // Since a margin account is being posted new, a new lot is not created.  Once the `movement`
                                     // has been pushed to the `lot`, the recording of the `action record` is complete, and it's
@@ -607,7 +643,13 @@ pub(crate) fn create_lots_and_movements(
                                                     proceeds_lk: Cell::new(d128!(0.0)),
                                                     cost_basis_lk: Cell::new(d128!(0.0)),
                                                 };
-                                                wrap_mvmt_and_push(inner_mvmt, &ar, &inner_lot, &chosen_home_currency, &raw_acct_map, &acct_map);
+                                                wrap_mvmt_and_push(
+                                                    inner_mvmt,
+                                                    &ar,
+                                                    &inner_lot,
+                                                    &chosen_home_currency,
+                                                    &raw_acct,
+                                                );
                                                 acct.list_of_lots.borrow_mut().push(inner_lot);
                                                 amounts_used += amount_used;
                                                 percentages_used += percentage_used;
@@ -675,7 +717,13 @@ pub(crate) fn create_lots_and_movements(
 
                                     // Here, finally, the lot and movement allocated at the top of `match TxType::Flow` have been set
                                     // and can be wrapped/pushed, at which point this `action record` is complete and it's onto the next.
-                                    wrap_mvmt_and_push(mvmt, &ar, &lot, &chosen_home_currency, &raw_acct_map, &acct_map);
+                                    wrap_mvmt_and_push(
+                                        mvmt,
+                                        &ar,
+                                        &lot,
+                                        &chosen_home_currency,
+                                        &raw_acct,
+                                    );
                                     acct.list_of_lots.borrow_mut().push(lot);
                                     continue
                                 }
@@ -706,11 +754,10 @@ pub(crate) fn create_lots_and_movements(
                                             &og_ar,
                                             &ic_ar,
                                             &chosen_home_currency,
-                                            *ar_num,
-                                            &raw_acct_map,
                                             &acct_map,
                                             &txns_map,
                                             &ar_map,
+                                            &raw_acct,
                                         );
                                         continue
 
@@ -772,7 +819,13 @@ pub(crate) fn create_lots_and_movements(
                                     };
                                 }
                                 // The `lot` and `whole_mvmt` variables have been initialized/assigned
-                                wrap_mvmt_and_push(whole_mvmt, &ar, &lot, &chosen_home_currency, &raw_acct_map, &acct_map);
+                                wrap_mvmt_and_push(
+                                    whole_mvmt,
+                                    &ar,
+                                    &lot,
+                                    &chosen_home_currency,
+                                    &raw_acct,
+                                );
                                 acct.list_of_lots.borrow_mut().push(lot);
                                 continue
                             }
@@ -792,11 +845,10 @@ pub(crate) fn create_lots_and_movements(
                                         &ar_map.get(txn.action_record_idx_vec.first().unwrap()).unwrap(), // outgoing
                                         &ar, // incoming
                                         &chosen_home_currency,
-                                        *ar_num,
-                                        &raw_acct_map,
                                         &acct_map,
                                         &txns_map,
                                         &ar_map,
+                                        &raw_acct,
                                     );
                                 }
                                 continue
@@ -874,12 +926,8 @@ fn wrap_mvmt_and_push(
     ar: &ActionRecord,
     lot: &Lot,
     chosen_home_currency: &str,
-    raw_acct_map: &HashMap<u16, RawAccount>,
-    acct_map: &HashMap<u16, Account>,
+    raw_acct: &RawAccount,
 ) {
-
-    let acct = acct_map.get(&ar.account_key).unwrap();
-    let raw_acct = raw_acct_map.get(&acct.raw_key).unwrap();
 
     // For outgoing `action record`s, this is an optimal spot for setting this struct field. Interestingly,
     // at the time of writing this note, this ratio isn't actually used.  The `ratio_of_amt_to_incoming_mvmts_in_a_r`
@@ -909,160 +957,112 @@ fn wrap_mvmt_and_push(
 /// then select the next `lot` and replace the `mvmt_to_fit` with a new `mvmt_to_fit` (reduced by the one
 /// that was pushed to the previous `lot`), and recursively check...
 fn fit_into_lots(
-    txn_num: u32,
-    spawning_ar_key: u32,
     mvmt_to_fit: Movement,
+    amt_to_fit: d128,
     list_of_lots_to_use: RefCell<Vec<Rc<Lot>>>,
     vec_of_ordered_index_values: Vec<usize>,
     index_position: usize,
     chosen_home_currency: &str,
-    ar_map: &HashMap<u32, ActionRecord>,
-    raw_acct_map: &HashMap<u16, RawAccount>,
-    acct_map: &HashMap<u16, Account>,
+    ar: &ActionRecord,
+    raw_acct: &RawAccount,
+    acct: &Account,
 ) {
-
-    let spawning_ar = ar_map.get(&spawning_ar_key).unwrap();
-
-    let acct = acct_map.get(&spawning_ar.account_key).unwrap();
-    let raw_acct = raw_acct_map.get(&acct.raw_key).unwrap();
-    assert_eq!(raw_acct.is_home_currency(&chosen_home_currency), false);
 
     let mut current_index_position = index_position;
 
-    // Get the `lot`, and then get its balance to see how much room there is
-    let lot = mvmt_to_fit.get_lot(acct_map, ar_map);
-    let mut mut_sum_of_mvmts_in_lot: d128 = d128!(0.0);
-    for movement in lot.movements.borrow().iter() {
-        mut_sum_of_mvmts_in_lot += movement.amount;
-    }
-    let sum_of_mvmts_in_lot = mut_sum_of_mvmts_in_lot;
-    assert!(sum_of_mvmts_in_lot >= d128!(0.0));
-
-    //  If the `lot` is "full", try the next
-    if sum_of_mvmts_in_lot == d128!(0.0) {
-        current_index_position += 1;
-        assert!(current_index_position < vec_of_ordered_index_values.len());
-        let lot_index = vec_of_ordered_index_values[current_index_position];
-        let newly_chosen_lot = list_of_lots_to_use.borrow()[lot_index].clone();
-        let possible_mvmt_to_fit = Movement {
-            amount: mvmt_to_fit.amount,
-            date_as_string: mvmt_to_fit.date_as_string.clone(),
-            date: mvmt_to_fit.date,
-            transaction_key: mvmt_to_fit.transaction_key,
-            action_record_key: mvmt_to_fit.action_record_key,
-            cost_basis: mvmt_to_fit.cost_basis,
-            ratio_of_amt_to_incoming_mvmts_in_a_r: d128!(1.0), //  Outgoing mvmt, so it's irrelevant
-            ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
-            lot_num: newly_chosen_lot.lot_number,
-            proceeds: Cell::new(d128!(0.0)),
-            proceeds_lk: Cell::new(d128!(0.0)),
-            cost_basis_lk: Cell::new(d128!(0.0)),
-        };
-        fit_into_lots(
-            txn_num,
-            spawning_ar_key,
-            possible_mvmt_to_fit,
-            list_of_lots_to_use,
-            vec_of_ordered_index_values,
-            current_index_position,
-            &chosen_home_currency,
-            &ar_map,
-            &raw_acct_map,
-            &acct_map,
-        );
-        return;
-    }
-
-    // There is a balance in the `lot`, so check if the tentative amount of the `movement` will fit
-    assert!(sum_of_mvmts_in_lot > d128!(0.0));
-    let remainder_amt = mvmt_to_fit.amount;
-    let does_remainder_fit: bool = (sum_of_mvmts_in_lot + remainder_amt) >= d128!(0.0);
-
-    // If the remainder fits, the `movement` is wrapped/pushed, and the recursion is complete
-    if does_remainder_fit {
-        let remainder_that_fits = Movement {
-            amount: mvmt_to_fit.amount,
-            date_as_string: mvmt_to_fit.date_as_string.clone(),
-            date: mvmt_to_fit.date,
-            transaction_key: mvmt_to_fit.transaction_key,
-            action_record_key: mvmt_to_fit.action_record_key,
-            cost_basis: mvmt_to_fit.cost_basis,
-            ratio_of_amt_to_incoming_mvmts_in_a_r: d128!(1.0), //  Outgoing mvmt, so it's irrelevant
-            ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
-            lot_num: lot.lot_number,
-            proceeds: Cell::new(d128!(0.0)),
-            proceeds_lk: Cell::new(d128!(0.0)),
-            cost_basis_lk: Cell::new(d128!(0.0)),
-        };
-        wrap_mvmt_and_push(remainder_that_fits, &spawning_ar, &lot, &chosen_home_currency, &raw_acct_map, &acct_map);
-        return
-    }
-
-    // The `movement` doesn't fit in the present single `lot`, but some does. Create a `movement` that will fit,
-    // wrap/push it, and then continue to handle the remainder.
-    let mvmt = RefCell::new(mvmt_to_fit);
-    let mvmt_rc = Rc::from(mvmt);
-
-    let mvmt_that_fits_in_lot = Movement {
-        amount: (-sum_of_mvmts_in_lot).reduce(),
-        date_as_string: mvmt_rc.borrow().date_as_string.clone(),
-        date: mvmt_rc.borrow().date,
-        transaction_key: txn_num,
-        action_record_key: spawning_ar_key,
-        cost_basis: Cell::new(d128!(0.0)),
-        ratio_of_amt_to_incoming_mvmts_in_a_r: d128!(1.0), //  Outgoing mvmt, so it's irrelevant
-        ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
-        lot_num: lot.lot_number,
-        proceeds: Cell::new(d128!(0.0)),
-        proceeds_lk: Cell::new(d128!(0.0)),
-        cost_basis_lk: Cell::new(d128!(0.0)),
-    };
-    wrap_mvmt_and_push(mvmt_that_fits_in_lot, &spawning_ar, &lot, &chosen_home_currency, &raw_acct_map, &acct_map);
-
-    if vec_of_ordered_index_values.len() == current_index_position + 1 {
+    // Here is a check to make sure the `lot` will exist. If it won't, then there will be an index
+    // out of bounds error. The account balance should be zero in that case, but it is checked
+    // anyway before printing the error message for the user and exiting.
+    if vec_of_ordered_index_values.len() == current_index_position {
         println!("FATAL: Txn {} on {} spending {} {} has run out of lots to spend from.",
-            txn_num, lot.date_as_string, spawning_ar.amount, raw_acct.ticker);
-            let bal = if acct.get_sum_of_amts_in_lots() == d128!(0) { "0.00000000".to_string() } 
-                else { acct.get_sum_of_amts_in_lots().to_string() };
+            mvmt_to_fit.transaction_key, mvmt_to_fit.date_as_string, ar.amount, raw_acct.ticker);
+        let bal = if acct.get_sum_of_amts_in_lots() == d128!(0) { "0.00000000".to_string() } 
+            else { acct.get_sum_of_amts_in_lots().to_string() };
         println!("Account balance is only: {}", bal);
         std::process::exit(1);
     }
 
-    current_index_position += 1;
+    // Get the `lot`, and then get its balance to see how much room there is
     let lot_index = vec_of_ordered_index_values[current_index_position];
-    let newly_chosen_lot = list_of_lots_to_use.borrow()[lot_index].clone();
+    let lot = acct.list_of_lots.borrow()[lot_index].clone();
+    let mut sum_of_mvmts_in_lot: d128 = d128!(0.0);
+    for movement in lot.movements.borrow().iter() {
+        sum_of_mvmts_in_lot += movement.amount;
+    }
 
-    // Take tentative `movement` amount (negative) and sum with the amount just used from the
-    // `mvmt_that_fits_in_lot` to come up with the unused portion of this `action record` amount.
-    let remainder_amt_to_recurse = remainder_amt + sum_of_mvmts_in_lot;
-    // println!("Remainder amount to recurse: {}", remainder_amt_to_recurse);
-    let remainder_mvmt_to_recurse = Movement {
-        amount: remainder_amt_to_recurse.reduce(),
-        date_as_string: mvmt_rc.borrow().date_as_string.clone(),
-        date: mvmt_rc.borrow().date,
-        transaction_key: txn_num,
-        action_record_key: spawning_ar_key,
-        cost_basis: Cell::new(d128!(0.0)), //  This acts as a dummy value.
-        ratio_of_amt_to_incoming_mvmts_in_a_r: d128!(1.0), //  Outgoing mvmt, so it's irrelevant
-        ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)), //  This acts as a dummy value.
-        lot_num: newly_chosen_lot.lot_number,
-        proceeds: Cell::new(d128!(0.0)),
-        proceeds_lk: Cell::new(d128!(0.0)),
-        cost_basis_lk: Cell::new(d128!(0.0)),
+    assert!(sum_of_mvmts_in_lot >= d128!(0.0));
+
+    //  If the `lot` is "full", try the next.
+    if sum_of_mvmts_in_lot == d128!(0.0) {
+
+        current_index_position += 1;
+
+        fit_into_lots(
+            mvmt_to_fit,
+            amt_to_fit,
+            list_of_lots_to_use,
+            vec_of_ordered_index_values,
+            current_index_position,
+            chosen_home_currency,
+            ar,
+            raw_acct,
+            acct,
+        );
+        return;
+    }
+
+    assert!(sum_of_mvmts_in_lot > d128!(0.0));
+
+    // If `remainder_amt_to_recurse` is positive, it means the `lot` balance exceeded `amt_to_fit`,
+    // therefore, the amount completely fits in the `lot`.  If negative, it is passed as the `amt_to_fit`
+    // for the next round of recursion.
+    let remainder_amt_to_recurse = (amt_to_fit + sum_of_mvmts_in_lot).reduce();
+
+    // If the remainder fits, the `movement` is wrapped/pushed, and the recursion is complete.
+    if remainder_amt_to_recurse >= d128!(0.0) {
+
+        let remainder_mvmt_that_fits: Movement = Movement {
+            amount: amt_to_fit,
+            lot_num: lot.lot_number,
+            ..mvmt_to_fit
+        };
+        wrap_mvmt_and_push(
+            remainder_mvmt_that_fits,
+            &ar,
+            &lot,
+            &chosen_home_currency,
+            &raw_acct
+        );
+        return
+    }
+
+    // The amt_to_fit doesn't completely fit in the present `lot`, but some does. Create a `movement` that will fit.
+    let mvmt_that_fits_in_lot: Movement = Movement {
+        amount: (-sum_of_mvmts_in_lot).reduce(),
+        lot_num: lot.lot_number,
+        ..mvmt_to_fit.clone()
     };
+    wrap_mvmt_and_push(
+        mvmt_that_fits_in_lot,
+        &ar,
+        &lot,
+        &chosen_home_currency,
+        &raw_acct
+    );
 
-    // After applying some of the `action record`'s amount to another `lot`, take the remainder and recurse
+    current_index_position += 1;
+
+    // After applying some of the `amt_to_fit` to the `lot`, increment the index, take the remainder, and recurse
     fit_into_lots(
-        txn_num,
-        spawning_ar_key,
-        remainder_mvmt_to_recurse,
+        mvmt_to_fit,
+        remainder_amt_to_recurse.reduce(),  //  This was updated before recursing
         list_of_lots_to_use,
         vec_of_ordered_index_values,
-        current_index_position,
-        &chosen_home_currency,
-        &ar_map,
-        &raw_acct_map,
-        &acct_map,
+        current_index_position,     //  This was updated before recursing
+        chosen_home_currency,
+        ar,
+        raw_acct,
+        acct,
     );
 }
 
@@ -1074,11 +1074,10 @@ fn process_multiple_incoming_lots_and_mvmts(
     outgoing_ar: &ActionRecord,
     incoming_ar: &ActionRecord,
     chosen_home_currency: &str,
-    incoming_ar_key: u32,
-    raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
     txns_map: &HashMap<u32, Transaction>,
     ar_map: &HashMap<u32, ActionRecord>,
+    raw_acct: &RawAccount,
 ) {
 
     let round_to_places = d128::from(1).scaleb(d128::from(-8));
@@ -1122,7 +1121,7 @@ fn process_multiple_incoming_lots_and_mvmts(
             date_as_string: txn.date_as_string.clone(),
             date: txn.date,
             transaction_key: txn_num,
-            action_record_key: incoming_ar_key,
+            action_record_key: incoming_ar.self_ar_key,
             cost_basis: Cell::new(d128!(0.0)),
             ratio_of_amt_to_incoming_mvmts_in_a_r: round_d128_1e8(&ratio_of_outgoing_mvmt_to_total_ar),
             ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
@@ -1135,7 +1134,13 @@ fn process_multiple_incoming_lots_and_mvmts(
         //     incoming_mvmt.amount, acct_incoming_ar.ticker, acct_incoming_ar.account_num);
         all_but_last_incoming_mvmt_ratio += round_d128_1e8(&ratio_of_outgoing_mvmt_to_total_ar);
         all_but_last_incoming_mvmt_amt += incoming_mvmt.amount;
-        wrap_mvmt_and_push(incoming_mvmt, &incoming_ar, &inner_lot, &chosen_home_currency, &raw_acct_map, &acct_map);
+        wrap_mvmt_and_push(
+            incoming_mvmt,
+            &incoming_ar,
+            &inner_lot,
+            &chosen_home_currency,
+            &raw_acct,
+        );
         this_acct.list_of_lots.borrow_mut().push(inner_lot);
     }
     //  Second iteration, for final movement
@@ -1161,7 +1166,7 @@ fn process_multiple_incoming_lots_and_mvmts(
         date_as_string: txn.date_as_string.clone(),
         date: txn.date,
         transaction_key: txn_num,
-        action_record_key: incoming_ar_key,
+        action_record_key: incoming_ar.self_ar_key,
         cost_basis: Cell::new(d128!(0.0)),
         ratio_of_amt_to_incoming_mvmts_in_a_r: d128!(1.0) - all_but_last_incoming_mvmt_ratio,
         ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
@@ -1172,6 +1177,12 @@ fn process_multiple_incoming_lots_and_mvmts(
     };
     // println!("Final incoming mvmt for this actionrecord, amount: {} {} to account: {}",
     //     incoming_mvmt.amount, acct_incoming_ar.ticker, acct_incoming_ar.account_num);
-    wrap_mvmt_and_push(incoming_mvmt, &incoming_ar, &lot, &chosen_home_currency, &raw_acct_map, &acct_map);
+    wrap_mvmt_and_push(
+        incoming_mvmt,
+        &incoming_ar,
+        &lot,
+        &chosen_home_currency,
+        &raw_acct,
+    );
     this_acct.list_of_lots.borrow_mut().push(lot);
 }
