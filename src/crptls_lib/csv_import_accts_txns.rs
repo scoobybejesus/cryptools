@@ -82,10 +82,7 @@ fn import_accounts(
             // println!("Assigned last header, record: {:?}", record);
 
             // A StringRecord doesn't accept the same range indexing needed below, so a Vec of Strings will be used
-            let mut headerstrings: Vec<String> = Vec::with_capacity(header1.len());
-            for field in header1.into_iter() {
-                headerstrings.push(field.to_string())
-            }
+            let headerstrings: Vec<String> = header1.into_iter().map(|field| field.to_string()).collect();
 
             let acct_num_warn = "Transactions will not import correctly if account numbers in the CSV import file aren't
 ordered chronologically (i.e., beginning in column 4 - the 1st account column - the value should be 1.
@@ -111,7 +108,7 @@ The next column's value should be 2, then 3, etc, until the final account).";
                 let ticker:String = header3[ind].trim().to_string();   //  no .to_uppercase() b/c margin...
                 let margin_string = &header4.clone()[ind];
 
-                let is_margin:bool = match margin_string.trim().to_lowercase().as_str() {
+                let is_margin:bool = match margin_string.to_lowercase().trim() {
                     "no" | "non" | "false" => false,
                     "yes" | "margin" | "true" => true,
                     _ => {
