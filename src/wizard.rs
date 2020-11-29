@@ -20,7 +20,8 @@ pub(crate) fn wizard(args: ArgsForImportVarsTBD) -> Result<(
     PathBuf,
 ), Box<dyn Error>> {
 
-    shall_we_proceed()?;
+    println!("\nThe following wizard will guide you through your choices:\n");
+    // shall_we_proceed()?;
 
     let costing_method_choice = cli_user_choices::choose_inventory_costing_method(args.inv_costing_method_arg)?;
 
@@ -39,9 +40,9 @@ pub(crate) fn wizard(args: ArgsForImportVarsTBD) -> Result<(
     Ok((costing_method_choice, like_kind_election, like_kind_cutoff_date_string, should_export, output_dir_path.to_path_buf()))
 }
 
-fn shall_we_proceed() -> Result<(), Box<dyn Error>> {
+pub fn shall_we_proceed() -> Result<(), Box<dyn Error>> {
 
-    println!("Shall we proceed? [Y/n] ");
+    println!("\n  Shall we proceed? [Y/n] ");
 
     _proceed()?;
 
@@ -64,7 +65,7 @@ fn shall_we_proceed() -> Result<(), Box<dyn Error>> {
 
 fn export_reports_to_output_dir(output_dir_path: PathBuf) -> Result<(bool, PathBuf), Box<dyn Error>> {
 
-    println!("\nThe directory currently selected for exporting reports is: {}", output_dir_path.to_str().unwrap());
+    println!("The directory currently selected for exporting reports is: {}", output_dir_path.to_str().unwrap());
 
     if output_dir_path.to_str().unwrap() == "." {
         println!("  (A 'dot' denotes the default value: current working directory.)");

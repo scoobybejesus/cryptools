@@ -95,7 +95,7 @@ pub fn import_and_process_final(
 
     if settings.lk_treatment_enabled {
 
-        println!(" Applying like-kind treatment for cut-off date: {}.", settings.lk_cutoff_date);
+        println!(" Applying like-kind treatment through cut-off date: {}.", settings.lk_cutoff_date);
 
         import_cost_proceeds_etc::apply_like_kind_treatment(
             &settings,

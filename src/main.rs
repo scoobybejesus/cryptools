@@ -31,24 +31,24 @@ pub struct Cli {
 
     /// User is instructing the program to skip the data entry wizard.
     /// When set, default settings will be assumed if they are not set by 
-    /// environment variables (or .env file).
+    /// environment variables (or .env file) or certain command line flags.
     #[structopt(name = "accept args", short = "a", long = "accept")]
     accept_args: bool,
 
-    /// This flag will suppress the printing of "all" reports, except that it *will* trigger the
+    /// Suppresses the printing of "all" reports, except that it *will* trigger the
     /// exporting of a txt file containing an accounting journal entry for every transaction.
     /// Individual account and transaction reports may still be printed via the print_menu
     /// with the -p flag. Note: the journal entries are not suitable for like-kind transactions.
     #[structopt(name = "journal entries", short, long = "journal-entries")]
     journal_entries_only: bool,
 
-    /// Once the import file has been fully processed, the user will be presented
+    /// Once the file_to_import has been fully processed, the user will be presented
     /// with a menu for manually selecting which reports to print/export. If this flag is not
     /// set, the program will print/export all available reports.
     #[structopt(name = "print menu", short, long = "print-menu")]
     print_menu: bool,
 
-    /// This will prevent the program from writing reports to files.
+    /// Prevents the program from writing reports to files.
     /// This will be ignored if -a is not set (the wizard will always ask to output).
     #[structopt(name = "suppress reports", short, long = "suppress")]
     suppress_reports: bool,
@@ -57,10 +57,26 @@ pub struct Cli {
     #[structopt(name = "output directory", short, long = "output", default_value = ".", parse(from_os_str))]
     output_dir_path: PathBuf,
 
-    /// File to be imported.  By default, the program expects the `txDate` column to be formatted as %m/%d/%y. 
-    /// You may alter this with ISO_DATE and DATE_SEPARATOR environment variables.  See .env.example for
-    /// further details.
-    #[structopt(name = "file", parse(from_os_str))]
+    /// Causes the program to expect the `txDate` field in the file_to_import to use the format YYYY-MM-dd
+    /// or YY-MM-dd (or YYYY/MM/dd or YY/MM/dd) instead of the default US-style MM-dd-YYYY or MM-dd-YY 
+    /// (or MM/dd/YYYY or MM/dd/YY).
+    /// NOTE: this flag overrides the ISO_DATE environment variable, including if set in the .env file.
+    #[structopt(name = "imported file uses ISO 8601 date format", short = "i", long = "iso")]
+    iso_date: bool,
+
+    /// Tells the program a non-default date separator (instead of a hyphen "-", a slash "/") was used
+    /// in the file_to_import `txDate` column (i.e. 2017-12-31 instead of 2017/12/31).
+    /// NOTE: this flag overrides the DATE_SEPARATOR_IS_SLASH environment variable, including if set in the .env file.
+    #[structopt(name = "date separator character is slash", short = "d", long = "date-separator-is-slash")]
+    date_separator_is_slash: bool,
+
+    /// File to be imported.  Some notes on the columns: (a) by default, the program expects the `txDate` column to 
+    /// be formatted as %m-%d-%y. You may alter this with ISO_DATE and DATE_SEPARATOR_IS_SLASH flags or environment
+    /// variables; (b) the `proceeds` column and any values in transactions must have a period (".") as the decimal
+    /// separator; and (c) any transactions with negative values must not be wrapped in parentheses (use the python
+    /// script for sanitizing/converting negative values).
+    /// See .env.example for further details on environment variables.
+    #[structopt(name = "file_to_import", parse(from_os_str))]
     file_to_import: Option<PathBuf>,
 }
 
@@ -72,10 +88,9 @@ pub struct Cfg {
     /// The default value is `false`, meaning the program will expect default US-style MM-dd-YYYY or MM-dd-YY (or MM/dd/YYYY 
     /// or MM/dd/YY, depending on the date separator option).   
     iso_date: bool,
-    /// Set the corresponding environment variable to "h", "s", or "p" for hyphen, slash, or period (i.e., "-", "/", or ".") 
-    /// to indicate the separator character used in the `Cli::file_to_import` `txDate` column (i.e. 2017/12/31, 2017-12-31, or 2017.12.31).
-    /// The default is `h`.
-    date_separator: String,
+    /// Switches the default date separator from hyphen to slash (i.e., from "-" to "/") to indicate the separator
+    /// character used in the file_to_import txDate column (i.e. 2017-12-31 to 2017/12/31).
+    date_separator_is_slash: bool,
     /// Home currency (currency from the `proceeds` column of the `Cli::file_to_import` and in which all resulting reports are denominated).  
     /// Default is `USD`.
     home_currency: String,
@@ -109,7 +124,7 @@ change default program behavior.
   Note: The software is designed to import a full history. Gains and losses may be incorrect otherwise.
     ");
 
-    let cfg = setup::get_env()?;
+    let cfg = setup::get_env(&args)?;
 
     let (input_file_path, settings) = setup::run_setup(args, cfg)?;
 

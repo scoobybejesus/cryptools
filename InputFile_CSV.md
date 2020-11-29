@@ -188,8 +188,9 @@ Until "spot" funds are spent to pay off the margin loans, it's simply an [unreco
 
 * **txDate**: As a default, this parser expects a format of `MM-dd-YY` or `MM-dd-YYYY`.
 The ISO 8601 date format (`YYYY-MM-dd` or `YY-MM-dd` both work) may be indicated by setting the environment variable `ISO_DATE` to `1` or `true`.
-The hyphen, slash, or period delimiters (`-`, `/`, or `.`) may be indicated
-by setting `DATE_SEPARATOR` to `h`, `s`, or `p`, respectively (hyphen, `-`, is default).
+The hyphen date separator character (`-`) is the default.  The slash date separator character (`/`) may be indicated
+by setting the `DATE_SEPARATOR_IS_SLASH` environment variable (or in .env file) to `1` or `true`,
+or by passing the `date_separator_is_slash` command line flag.
 
 * **proceeds**: This is can be any **positive** number that will parse into a floating point 32-bit number,
 as long as the **decimal separator** is a **period**.

@@ -26,7 +26,17 @@ pub(crate) fn import_from_csv(
     transactions_map: &mut HashMap<u32, Transaction>,
 ) -> Result<(), Box<dyn Error>> {
 
-    let file = File::open(import_file_path)?; println!("\nCSV ledger file opened successfully.\n");
+    let file = match File::open(import_file_path) {
+        Ok(x) => {
+            println!("\nCSV ledger file opened successfully.\n");
+            x
+        },
+        Err(e) => {
+            println!("Invalid import_file_path");
+            eprintln!("System error: {}", e);
+            std::process::exit(1);
+        }
+    };
 
     let mut rdr = csv::ReaderBuilder::new()
         .has_headers(true)
@@ -184,6 +194,7 @@ fn import_transactions(
                 let acct_idx = ind - 2; //  acct_num and acct_key would be idx + 1, so subtract 2 from ind to get 1
                 let account_key = acct_idx as u16;
 
+                // TODO: implement conversion for negative numbers surrounded in parentheses
                 let amount_str = field.replace(",", "");
                 let amount = amount_str.parse::<d128>().unwrap();
                 let amount_rounded = round_d128_1e8(&amount);

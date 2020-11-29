@@ -5,6 +5,7 @@ use std::error::Error;
 use std::io::{self, BufRead};
 use std::process;
 use std::path::PathBuf;
+use std::fs::File;
 
 use chrono::NaiveDate;
 use rustyline::completion::{Completer, FilenameCompleter, Pair};
@@ -21,7 +22,7 @@ use crptls::string_utils;
 pub fn choose_file_for_import(flag_to_accept_cli_args: bool) -> Result<PathBuf, Box<dyn Error>> {
 
     if flag_to_accept_cli_args {
-        println!("WARN: Flag to 'accept args' was set, but 'file' is missing.\n");
+        println!("\nWARN: Flag to 'accept args' was set, but 'file_to_import' is missing.\n");
     }
 
     println!("Please input a file (absolute or relative path) to import: ");
@@ -30,6 +31,9 @@ pub fn choose_file_for_import(flag_to_accept_cli_args: bool) -> Result<PathBuf, 
 
     if has_tilde {
         choose_file_for_import(flag_to_accept_cli_args)
+    } else if File::open(&file_string).is_err() {
+        println!("WARN: Invalid file path.");
+        choose_file_for_import(false)
     } else {
         Ok( PathBuf::from(file_string) )
     }
@@ -125,19 +129,19 @@ pub fn choose_inventory_costing_method(cmd_line_arg: String) -> Result<Inventory
 
     let method = _costing_method(cmd_line_arg)?;
 
-    fn _costing_method(cmd_line_arg: String) -> Result<InventoryCostingMethod, Box<dyn Error>> {
+    fn _costing_method(env_var_arg: String) -> Result<InventoryCostingMethod, Box<dyn Error>> {
 
         let mut input = String::new();
         let stdin = io::stdin();
         stdin.lock().read_line(&mut input).expect("Failed to read stdin");
 
         match input.trim() { // Without .trim(), there's a hidden \n or something preventing the match
-            "" => Ok(inv_costing_from_cmd_arg(cmd_line_arg)?),
+            "" => Ok(inv_costing_from_cmd_arg(env_var_arg)?),
             "1" => Ok(InventoryCostingMethod::LIFObyLotCreationDate),
             "2" => Ok(InventoryCostingMethod::LIFObyLotBasisDate),
             "3" => Ok(InventoryCostingMethod::FIFObyLotCreationDate),
             "4" => Ok(InventoryCostingMethod::FIFObyLotBasisDate),
-            _   => { println!("Invalid choice.  Please enter a valid choice."); _costing_method(cmd_line_arg) }
+            _   => { println!("Invalid choice.  Please enter a valid choice."); _costing_method(env_var_arg) }
         }
     }
 
@@ -151,10 +155,9 @@ pub fn inv_costing_from_cmd_arg(arg: String) -> Result<InventoryCostingMethod, &
         "3" => Ok(InventoryCostingMethod::FIFObyLotCreationDate),
         "4" => Ok(InventoryCostingMethod::FIFObyLotBasisDate),
         _ => { 
-                eprintln!("WARN: Invalid environment variable for 'INV_COSTING_METHOD'. Using default."); 
+                println!("WARN: Invalid environment variable for 'INV_COSTING_METHOD'. Using default."); 
                 Ok(InventoryCostingMethod::LIFObyLotCreationDate)
-            }
-        // _   => { Err("Invalid input parameter, probably from environment variable INV_COSTING_METHOD") } 
+        }
     }
 }
 
@@ -171,7 +174,7 @@ pub(crate) fn elect_like_kind_treatment(cutoff_date_arg: &mut Option<String>) ->
                     second_date_try_from_user(&mut cutoff_date_arg).unwrap()
                 } ) );
 
-            println!("\nUse like-kind exchange treatment through {}? [Y/n/c] ('c' to 'change') ", provided_date);
+            println!("Use like-kind exchange treatment through {}? [Y/n/c] ('c' to 'change') ", provided_date);
 
             let (election, date_string) = _elect_like_kind_arg(&cutoff_date_arg, provided_date)?;
 

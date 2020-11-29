@@ -3,8 +3,8 @@
 
 use std::path::PathBuf;
 use std::error::Error;
-use std::process;
 use std::env;
+use std::fs::File;
 
 use chrono::NaiveDate;
 use dotenv;
@@ -17,31 +17,53 @@ use crate::skip_wizard;
 use crate::wizard;
 
 
-pub fn get_env() -> Result<super::Cfg, Box<dyn Error>> {
+pub fn get_env(cmd_args: &super::Cli) -> Result<super::Cfg, Box<dyn Error>> {
 
     match dotenv::dotenv() {
-        Ok(_path) => {println!("Setting environment variables from .env file.")},
+        Ok(_path) => { println!("Setting environment variables from .env file.") },
         Err(_e) => println!("Did not find .env file.")
     }
 
-    let iso_date: bool = match env::var("ISO_DATE") {
-        Ok(val) => {
-            if val == "1" || val.to_lowercase() == "true" {
-                true
-            } else {
+    let iso_date: bool = if cmd_args.iso_date {
+        println!("  Command line flag for ISO_DATE was set. Using YY-mm-dd or YY/mm/dd.");
+        true
+    } else {
+        match env::var("ISO_DATE") {
+            Ok(val) => {
+                if val == "1" || val.to_lowercase() == "true" {
+                    println!("  Found ISO_DATE env var: {}. Using YY-mm-dd or YY/mm/dd.", val);
+                    true
+                } else {
+                    println!("  Found ISO_DATE env var: {} (not 1 or true). Using MM-dd-YY or MM/dd/YY.", val);
+                    false
+                }
+            },
+            Err(_e) => {
+                println!("  Using default dating convention (MM-dd-YY or MM/dd/YY).");
                 false
-            }
-        },
-        Err(_e) => false,
+            },
+        }
     };
 
-    let date_separator: String = match env::var("DATE_SEPARATOR") {
-        Ok(val) => {
-            println!("  Found DATE_SEPARATOR env var: {}", val);
-            val.to_lowercase()},
-        Err(_e) => {
-            println!("  Using default date separator (hyphen).");
-            "h".to_string()},
+    let date_separator_is_slash: bool = if cmd_args.date_separator_is_slash {
+        println!("  Command line flag for DATE_SEPARATOR_IS_SLASH was set. Date separator set to slash (\"/\").");
+        true
+    } else {
+        match env::var("DATE_SEPARATOR_IS_SLASH") {
+            Ok(val) => {
+                if val == "1" || val.to_ascii_lowercase() == "true" {
+                    println!("  Found DATE_SEPARATOR_IS_SLASH env var: {}. Date separator set to slash (\"/\").", val);
+                    true
+                } else {
+                    println!("  Found DATE_SEPARATOR_IS_SLASH env var: {} (not 1 or true). Date separator set to hyphen (\"-\").", val);
+                    false
+                }
+            }
+            Err(_e) => {
+                println!("  Using default date separator, hyphen (\"-\").");
+                false
+            },
+        }
     };
 
     let home_currency = match env::var("HOME_CURRENCY") {
@@ -71,7 +93,7 @@ pub fn get_env() -> Result<super::Cfg, Box<dyn Error>> {
 
     let cfg = super::Cfg {
         iso_date,
-        date_separator,
+        date_separator_is_slash,
         home_currency,
         lk_cutoff_date,
         inv_costing_method,
@@ -90,19 +112,26 @@ pub struct ArgsForImportVarsTBD {
 
 pub (crate) fn run_setup(cmd_args: super::Cli, cfg: super::Cfg) -> Result<(PathBuf, ImportProcessParameters), Box<dyn Error>> {
 
-    let date_separator = match cfg.date_separator.as_str() {
-        "h" => { "-" } 
-        "s" => { "/" }
-        "p" => { "." }
-        _ => {
-            println!("\nFATAL: ENV: The date-separator arg requires either an 'h', an 's', or a 'p'.\n");
-            process::exit(1)
-        }
+    let date_separator = match cfg.date_separator_is_slash {
+        false => { "-" } // Default
+        true => { "/" } // Overridden by env var or cmd line flag
     };
 
     let input_file_path = match cmd_args.file_to_import {
-        Some(file) => file,
-        None => cli_user_choices::choose_file_for_import(cmd_args.accept_args)?
+        Some(file) => { 
+            if File::open(&file).is_ok() {
+                file
+            } else {
+                cli_user_choices::choose_file_for_import(cmd_args.accept_args)?
+            }
+        },
+        None => {
+            if !cmd_args.accept_args {
+                wizard::shall_we_proceed()?;
+                println!("Note: No file was provided as a command line arg, or the provided file wasn't found.\n");
+            }
+            cli_user_choices::choose_file_for_import(cmd_args.accept_args)?
+        }
     };
 
     let wizard_or_not_args = ArgsForImportVarsTBD {
