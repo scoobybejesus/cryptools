@@ -6,3 +6,4 @@
 rls*
 Cargo.lock
 .env
+crptls/target
