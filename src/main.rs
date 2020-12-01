@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2019, scoobybejesus
+// Copyright (c) 2017-2020, scoobybejesus
 // Redistributions must include the license: https://github.com/scoobybejesus/cryptools/blob/master/LEGAL.txt
 
 // #![allow(dead_code)]
@@ -18,11 +18,9 @@ mod cli_user_choices;
 mod wizard;
 mod skip_wizard;
 mod mytui;
-mod export_csv;
-mod export_txt;
-mod export_je;
-mod export_all;
-mod tests;
+mod export;
+
+use export::{export_all, export_je};
 
 
 #[derive(StructOpt, Debug)]

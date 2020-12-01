@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2019, scoobybejesus
+// Copyright (c) 2017-2020, scoobybejesus
 // Redistributions must include the license: https://github.com/scoobybejesus/cryptools/blob/master/LEGAL.txt
 
 use std::error::Error;
@@ -16,7 +16,8 @@ use rustyline::error::ReadlineError;
 use rustyline::highlight::{Highlighter};
 
 use crptls::costing_method::InventoryCostingMethod;
-use crptls::string_utils;
+
+// use crate::string_utils;
 
 
 pub fn choose_file_for_import(flag_to_accept_cli_args: bool) -> Result<PathBuf, Box<dyn Error>> {
@@ -256,7 +257,7 @@ pub(crate) fn elect_like_kind_treatment(cutoff_date_arg: &mut Option<String>) ->
         let mut input = String::new();
         let stdin = io::stdin();
         stdin.lock().read_line(&mut input)?;
-        string_utils::trim_newline(&mut input);
+        trim_newline(&mut input);
 
         let successfully_parsed_naive_date = test_naive_date_from_user_string(&mut input)?;
 
@@ -281,7 +282,7 @@ pub(crate) fn elect_like_kind_treatment(cutoff_date_arg: &mut Option<String>) ->
         let mut input2 = String::new();
         let stdin = io::stdin();
         stdin.lock().read_line(&mut input2)?;
-        string_utils::trim_newline(&mut input2);
+        trim_newline(&mut input2);
         *input = input2;
 
         let successfully_parsed_naive_date = NaiveDate::parse_from_str(&input, "%y-%m-%d")
@@ -289,5 +290,14 @@ pub(crate) fn elect_like_kind_treatment(cutoff_date_arg: &mut Option<String>) ->
             .unwrap_or_else(|_| { second_date_try_from_user(input).unwrap() } ));
 
         Ok(successfully_parsed_naive_date)
+    }
+}
+
+fn trim_newline(s: &mut String) {
+    if s.ends_with('\n') {
+        s.pop();
+        if s.ends_with('\r') {
+            s.pop();
+        }
     }
 }

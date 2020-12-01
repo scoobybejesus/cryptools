@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2019, scoobybejesus
+// Copyright (c) 2017-2020, scoobybejesus
 // Redistributions must include the license: https://github.com/scoobybejesus/cryptools/blob/master/LEGAL.txt
 
 use std::error::Error;
@@ -8,10 +8,7 @@ use crptls::transaction::{Transaction, ActionRecord};
 use crptls::account::{Account, RawAccount};
 use crptls::core_functions::{ImportProcessParameters};
 
-use crate::export_csv;
-use crate::export_txt;
-use crate::export_je;
-
+use crate::export::{export_csv, export_je, export_txt};
 
 pub (crate) const REPORTS: [&'static str; 11] = [
     "1. CSV: Account Sums",

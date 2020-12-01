@@ -1,26 +1,21 @@
 [package]
 name = "cryptools"
-version = "0.10.0"
+version = "0.11.0"
 authors = ["scoobybejesus <scoobybejesus@users.noreply.github.com>"]
 edition = "2018"
 description = "Command-line utility for processing cryptocurrency transactions into 'lots' and 'movements'."
-
-[lib]
-name = "crptls"
-path = "src/lib.rs"
 
 [[bin]]
 name = "cryptools"
 path = "src/main.rs"
 
+[workspace]
+
 [dependencies]
+crptls = { path = "crptls" }
 csv = "1.0.0"
-serde = { version = "1.0.75", features = ["derive"] }
-serde_derive = "1.0.75"
 decimal = "2.0.4"
 chrono = { version = "0.4", features = ["serde"] }
-chrono-tz = "0.5"
-time = "0.1.42"
 structopt = "0.2.10"
 rustyline = "5.0.0"
 tui = "0.5"
