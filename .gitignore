@@ -4,6 +4,6 @@
 .DS_Store
 .vscode/*
 rls*
-Cargo.lock
+crptls/Cargo.lock
 .env
 crptls/target
