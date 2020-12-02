@@ -17,7 +17,7 @@ use crate::account::{Account, RawAccount};
 use crate::decimal_utils::{round_d128_1e8};
 
 
-pub(crate) fn import_from_csv(
+pub fn import_from_csv(
     import_file_path: PathBuf,
     settings: &ImportProcessParameters,
     raw_acct_map: &mut HashMap<u16, RawAccount>,
