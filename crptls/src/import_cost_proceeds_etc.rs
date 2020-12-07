@@ -4,15 +4,15 @@
 use std::collections::{HashMap};
 use std::error::Error;
 
+use chrono::NaiveDate;
 use decimal::d128;
 
 use crate::transaction::{Transaction, TxType, ActionRecord, Polarity};
 use crate::account::{Account, RawAccount};
 use crate::decimal_utils::{round_d128_1e2};
-use crate::core_functions::{ImportProcessParameters};
 
 pub(crate) fn add_cost_basis_to_movements(
-    settings: &ImportProcessParameters,
+    home_currency: &String,
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
     ars: &HashMap<u32, ActionRecord>,
@@ -37,7 +37,7 @@ pub(crate) fn add_cost_basis_to_movements(
 
                 let polarity = ar.direction();
                 let tx_type = txn.transaction_type(ars, raw_acct_map, acct_map)?;
-                let is_home_curr = raw_acct.is_home_currency(&settings.home_currency);
+                let is_home_curr = raw_acct.is_home_currency(home_currency);
                 let mvmt_copy = mvmt.clone();
                 let borrowed_mvmt = mvmt_copy.clone();
                 // println!("Txn: {} on {} of type: {:?}",
@@ -90,7 +90,7 @@ pub(crate) fn add_cost_basis_to_movements(
                                         let other_acct = acct_map.get(&other_ar.account_key).unwrap();
                                         let raw_other_acct = raw_acct_map.get(&other_acct.raw_key).unwrap();
                                         assert_eq!(other_ar.direction(), Polarity::Outgoing);
-                                        let other_ar_is_home_curr = raw_other_acct.is_home_currency(&settings.home_currency);
+                                        let other_ar_is_home_curr = raw_other_acct.is_home_currency(home_currency);
 
                                         if other_ar_is_home_curr {
                                             mvmt.cost_basis.set(-(other_ar.amount));
@@ -265,7 +265,8 @@ pub(crate) fn add_proceeds_to_movements(
 }
 
 pub(crate) fn apply_like_kind_treatment(
-    settings: &ImportProcessParameters,
+    home_currency: &String,
+    cutoff_date: NaiveDate,
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
     ars: &HashMap<u32, ActionRecord>,
@@ -273,16 +274,16 @@ pub(crate) fn apply_like_kind_treatment(
 ) -> Result<(), Box<dyn Error>> {
 
     let length = txns_map.len();
-    let cutoff_date = settings.lk_cutoff_date;
+
     for txn_num in 1..=length {
 
         let txn_num = txn_num as u32;
         let txn = txns_map.get(&(txn_num)).unwrap();
 
-        update_current_txn_for_prior_likekind_treatment(txn_num, &settings, &raw_acct_map, &acct_map, &ars, &txns_map)?;
+        update_current_txn_for_prior_likekind_treatment(txn_num, home_currency, &raw_acct_map, &acct_map, &ars, &txns_map)?;
 
         if txn.date <= cutoff_date {
-            perform_likekind_treatment_on_txn(txn_num, &settings, &raw_acct_map, &acct_map, &ars, &txns_map)?;
+            perform_likekind_treatment_on_txn(txn_num, home_currency, &raw_acct_map, &acct_map, &ars, &txns_map)?;
         }
     }
 
@@ -291,7 +292,7 @@ pub(crate) fn apply_like_kind_treatment(
 
 fn update_current_txn_for_prior_likekind_treatment(
     txn_num: u32,
-    settings: &ImportProcessParameters,
+    home_currency: &String,
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
     ars: &HashMap<u32, ActionRecord>,
@@ -312,7 +313,7 @@ fn update_current_txn_for_prior_likekind_treatment(
 
             let polarity = ar.direction();
             let tx_type = txn.transaction_type(ars, raw_acct_map, acct_map)?;
-            let is_home_curr = raw_acct.is_home_currency(&settings.home_currency);
+            let is_home_curr = raw_acct.is_home_currency(home_currency);
 
             let mvmt_copy = mvmt.clone();
             let borrowed_mvmt = mvmt_copy.clone();
@@ -381,7 +382,7 @@ fn update_current_txn_for_prior_likekind_treatment(
 
 fn perform_likekind_treatment_on_txn(
     txn_num: u32,
-    settings: &ImportProcessParameters,
+    home_currency: &String,
     raw_acct_map: &HashMap<u16, RawAccount>,
     acct_map: &HashMap<u16, Account>,
     ars: &HashMap<u32, ActionRecord>,
@@ -390,7 +391,6 @@ fn perform_likekind_treatment_on_txn(
 
     let txn = txns_map.get(&txn_num).unwrap();
     let tx_type = txn.transaction_type(ars, raw_acct_map, acct_map)?;
-    let home_currency = &settings.home_currency;
 
     match tx_type {
 

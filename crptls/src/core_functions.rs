@@ -53,7 +53,8 @@ pub fn import_and_process_final(
 
     csv_import_accts_txns::import_from_csv(
         input_file_path,
-        settings,
+        settings.input_file_uses_iso_date_style,
+        &settings.input_file_date_separator,
         &mut raw_account_map,
         &mut account_map,
         &mut action_records_map,
@@ -75,7 +76,7 @@ pub fn import_and_process_final(
     println!("  Created lots and movements.");
 
     import_cost_proceeds_etc::add_cost_basis_to_movements(
-        &settings,
+        &settings.home_currency,
         &raw_account_map,
         &account_map,
         &action_records_map,
@@ -98,7 +99,8 @@ pub fn import_and_process_final(
         println!(" Applying like-kind treatment through cut-off date: {}.", settings.lk_cutoff_date);
 
         import_cost_proceeds_etc::apply_like_kind_treatment(
-            &settings,
+            &settings.home_currency,
+            settings.lk_cutoff_date,
             &raw_account_map,
             &account_map,
             &action_records_map,

@@ -11,7 +11,6 @@ use std::path::PathBuf;
 use chrono::NaiveDate;
 use decimal::d128;
 
-use crate::core_functions::{ImportProcessParameters};
 use crate::transaction::{Transaction, ActionRecord};
 use crate::account::{Account, RawAccount};
 use crate::decimal_utils::{round_d128_1e8};
@@ -19,7 +18,8 @@ use crate::decimal_utils::{round_d128_1e8};
 
 pub fn import_from_csv(
     import_file_path: PathBuf,
-    settings: &ImportProcessParameters,
+    iso_date_style: bool,
+    separator: &String,
     raw_acct_map: &mut HashMap<u16, RawAccount>,
     acct_map: &mut HashMap<u16, Account>,
     action_records: &mut HashMap<u32, ActionRecord>,
@@ -46,7 +46,8 @@ pub fn import_from_csv(
 
     import_transactions(
         &mut rdr,
-        settings,
+        iso_date_style,
+        &separator,
         action_records,
         transactions_map,
     )?;
@@ -141,7 +142,8 @@ The next column's value should be 2, then 3, etc, until the final account).";
 
 fn import_transactions(
     rdr: &mut csv::Reader<File>,
-    settings: &ImportProcessParameters,
+    iso_date_style: bool,
+    separator: &String,
     action_records: &mut HashMap<u32, ActionRecord>,
     txns_map: &mut HashMap<u32, Transaction>,
 ) -> Result<(), Box<dyn Error>> {
@@ -230,9 +232,6 @@ fn import_transactions(
         let format_yy: String;
         let format_yyyy: String;
 
-        let iso_date_style = settings.input_file_uses_iso_date_style;
-        let separator = &settings.input_file_date_separator;
-
         if iso_date_style {
             format_yyyy = "%Y".to_owned() + separator + "%m" + separator + "%d";
             format_yy = "%y".to_owned() + separator + "%m" + separator + "%d";
@@ -244,8 +243,9 @@ fn import_transactions(
         let tx_date = NaiveDate::parse_from_str(this_tx_date, &format_yy)
             .unwrap_or_else(|_| NaiveDate::parse_from_str(this_tx_date, &format_yyyy)
             .expect("
-Failed to parse date in input file. Check date the separator character, which is expected to be a hyphen \
-    unless otherwise set via environment variable or .env file. See `.env.example.`\n")
+Failed to parse date in input file. Confirm your choice of the separator character, which is expected to be a hyphen \
+    unless otherwise set via command line flag, environment variable or .env file.  Also confirm your choice of dating format \
+    whether it be American (%m-%d-%y) or ISO (%y-%m-%d). Run with `--help` or see `.env.example.`\n")
         );
 
         let transaction = Transaction {
@@ -261,7 +261,7 @@ Failed to parse date in input file. Check date the separator character, which is
     };
 
     if changed_action_records > 0 {
-        println!("  Changed actionrecord amounts: {}. Changed txn numbers: {:?}.", changed_action_records, changed_txn_num);
+        println!("  Changed actionrecord amounts due to rounding precision: {}. Changed txn numbers: {:?}.", changed_action_records, changed_txn_num);
     }
 
     Ok(())
