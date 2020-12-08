@@ -82,10 +82,15 @@ You'll choose Delimited, and Comma, and then highlight every column and choose T
 
 This will build `./target/debug/cryptools` (or `./target/release/cryptools` for a non-debug build).
 
+### Note on Windows
+
+Windows won't build with the current TUI print menu.  To build on Windows, try with `cargo build --no-default-features`.
+
 ## Usage
 
 Run `./target/debug/cryptools` with no arguments (or with `--help`, or `-h`) to see usage.
-Alternatively, run `cargo run`, in which case command-line options for `cryptools` may be entered following `--`, e.g., `cargo run -- -h`.
+Alternatively, run `cargo run`, in which case command-line parameters for `cryptools` may be entered following `--`,
+e.g., `cargo run -- -h` or `cargo run -- my_input_file.csv -ai`.
 
 Running with no options/arguments will lead the user through a wizard.
 To skip the wizard, there are three requirements:
@@ -105,7 +110,8 @@ or jump directly to the [examples.md](https://github.com/scoobybejesus/cryptools
 See [.env.example](https://github.com/scoobybejesus/cryptools/blob/master/examples/.env.example) for those defaults.
 If you wish to skip the wizard but require changes to default settings, copy `.env.example` to `.env` and make your changes.
 The `.env` file must be placed in the directory from which `cryptools` is run or a parent directory.
-Alternatively, the respective environment variables may be set manually.
+Alternatively, the respective environment variables may be set manually,
+or it may be easier to choose the proper command line flag (such as `-d` for `date_separator_is_slash` or `-i` for `iso_date`.).
 
 #### Pro Tip
 

@@ -17,8 +17,10 @@ mod setup;
 mod cli_user_choices;
 mod wizard;
 mod skip_wizard;
-mod mytui;
 mod export;
+
+#[cfg(feature = "print_menu")]
+mod mytui;
 
 use export::{export_all, export_je};
 
@@ -43,6 +45,7 @@ pub struct Cli {
     /// Once the file_to_import has been fully processed, the user will be presented
     /// with a menu for manually selecting which reports to print/export. If this flag is not
     /// set, the program will print/export all available reports.
+    #[cfg(feature = "print_menu")]
     #[structopt(name = "print menu", short, long = "print-menu")]
     print_menu: bool,
 
@@ -124,7 +127,7 @@ change default program behavior.
 
     let cfg = setup::get_env(&args)?;
 
-    let (input_file_path, settings) = setup::run_setup(args, cfg)?;
+    let (input_file_path, settings) = setup::run_setup(&args, cfg)?;
 
     let (
         raw_acct_map,
@@ -134,10 +137,14 @@ change default program behavior.
     ) = crptls::core_functions::import_and_process_final(input_file_path, &settings)?;
 
     let mut should_export_all = settings.should_export;
-    let present_print_menu_tui = settings.print_menu;
-    let print_journal_entries_only = settings.journal_entry_export;
 
+    #[cfg(feature = "print_menu")]
+    let present_print_menu_tui: bool = args.print_menu.to_owned();
+
+    #[cfg(feature = "print_menu")]
     if present_print_menu_tui { should_export_all = false }
+
+    let print_journal_entries_only = settings.journal_entry_export;
     if print_journal_entries_only { should_export_all = false }
 
     if should_export_all {
@@ -162,6 +169,7 @@ change default program behavior.
         )?;
     }
 
+    #[cfg(feature = "print_menu")]
     if present_print_menu_tui {
 
         mytui::print_menu_tui::print_menu_tui(

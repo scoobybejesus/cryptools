@@ -5,6 +5,13 @@ authors = ["scoobybejesus <scoobybejesus@users.noreply.github.com>"]
 edition = "2018"
 description = "Command-line utility for processing cryptocurrency transactions into 'lots' and 'movements'."
 
+[features]
+# The default optional package. Many people will want to use this feature,
+# but it is optional because Windows doesn't support it.
+default = ["print_menu"]
+
+print_menu = ["tui", "termion"]
+
 [[bin]]
 name = "cryptools"
 path = "src/main.rs"
@@ -18,8 +25,8 @@ decimal = "2.0.4"
 chrono = { version = "0.4", features = ["serde"] }
 structopt = "0.2.10"
 rustyline = "5.0.0"
-tui = "0.5"
-termion = "1.5"
+tui = { version = "0.5", optional = true }
+termion = { version = "1.5", optional = true }
 dotenv = "0.14.1"
 
 [profile.release]

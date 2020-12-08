@@ -110,14 +110,14 @@ pub struct ArgsForImportVarsTBD {
     pub suppress_reports: bool,
 }
 
-pub (crate) fn run_setup(cmd_args: super::Cli, cfg: super::Cfg) -> Result<(PathBuf, ImportProcessParameters), Box<dyn Error>> {
+pub (crate) fn run_setup(cmd_args: &super::Cli, cfg: super::Cfg) -> Result<(PathBuf, ImportProcessParameters), Box<dyn Error>> {
 
     let date_separator = match cfg.date_separator_is_slash {
         false => { "-" } // Default
         true => { "/" } // Overridden by env var or cmd line flag
     };
 
-    let input_file_path = match cmd_args.file_to_import {
+    let input_file_path = match cmd_args.file_to_import.to_owned() {
         Some(file) => { 
             if File::open(&file).is_ok() {
                 file
@@ -137,7 +137,7 @@ pub (crate) fn run_setup(cmd_args: super::Cli, cfg: super::Cfg) -> Result<(PathB
     let wizard_or_not_args = ArgsForImportVarsTBD {
         inv_costing_method_arg: cfg.inv_costing_method,
         lk_cutoff_date_arg: cfg.lk_cutoff_date,
-        output_dir_path: cmd_args.output_dir_path,
+        output_dir_path: cmd_args.output_dir_path.to_owned(),
         suppress_reports: cmd_args.suppress_reports,
     };
 
@@ -165,7 +165,6 @@ pub (crate) fn run_setup(cmd_args: super::Cli, cfg: super::Cfg) -> Result<(PathB
         lk_basis_date_preserved: true,  //  TODO
         should_export,
         export_path: output_dir_path,
-        print_menu: cmd_args.print_menu,
         journal_entry_export: cmd_args.journal_entries_only,
     };
 

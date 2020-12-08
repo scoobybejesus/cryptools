@@ -31,7 +31,6 @@ pub struct ImportProcessParameters {
     pub lk_basis_date_preserved: bool,
     pub should_export: bool,
     pub export_path: PathBuf,
-    pub print_menu: bool,
     pub journal_entry_export: bool,
 }
 
