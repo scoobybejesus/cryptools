@@ -243,9 +243,9 @@ fn import_transactions(
         let tx_date = NaiveDate::parse_from_str(this_tx_date, &format_yy)
             .unwrap_or_else(|_| NaiveDate::parse_from_str(this_tx_date, &format_yyyy)
             .expect("
-Failed to parse date in input file. Confirm your choice of the separator character, which is expected to be a hyphen \
-    unless otherwise set via command line flag, environment variable or .env file.  Also confirm your choice of dating format \
-    whether it be American (%m-%d-%y) or ISO (%y-%m-%d). Run with `--help` or see `.env.example.`\n")
+FATAL: Transaction date parsing failed. You must tell the program the format of the date in your CSV Input File. The date separator \
+is expected to be a hyphen. The dating format is expected to be \"American\" (%m-%d-%y), not ISO 8601 (%y-%m-%d). You may set different \
+date format options via command line flag, environment variable or .env file. Perhaps first run with `--help` or see `.env.example.`\n")
         );
 
         let transaction = Transaction {

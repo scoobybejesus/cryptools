@@ -34,7 +34,7 @@ so it can be successfully imported into `cryptools`.
 
 * Two methods each of LIFO or FIFO (compatible w/ the concept of "specific identification")
 
-* Ability to perform like-kind exchange treatment through a particular date
+* Ability to perform like-kind exchange treatment through a particular date (must use wizard or `.env` file)
 
 * Compatible with any (single) home currency
 

@@ -200,7 +200,6 @@ but be sure not to include the ticker or symbol of the currency
 (i.e., for `$14,567.27 USD`, enter `14567.27` or `14,567.27`).
 
 * **memo**: This can be a string of characters of any length, though fewer than 20-30 characters is advised.
-Currently, **commas** in the memo field are **not** supported.
 
 * *quantity*: This is similar to **proceeds**, in that the **decimal separator** must be a **period**,
 and you *cannot* include the ticker or symbol of the currency in that field.
