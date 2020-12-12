@@ -20,47 +20,49 @@ use crate::wizard;
 pub fn get_env(cmd_args: &super::Cli) -> Result<super::Cfg, Box<dyn Error>> {
 
     match dotenv::dotenv() {
-        Ok(_path) => { println!("Setting environment variables from .env file.") },
+        Ok(_path) => { println!("Exporting temporary environment variables from .env file.") },
         Err(_e) => println!("Did not find .env file.")
     }
 
+    println!("  Setting runtime variables according to command line options or environment variables (the former take precedent).");
+
     let iso_date: bool = if cmd_args.iso_date {
-        println!("  Command line flag for ISO_DATE was set. Using YY-mm-dd or YY/mm/dd.");
+        println!("    Command line flag for ISO_DATE was set. Using YY-mm-dd or YY/mm/dd.");
         true
     } else {
         match env::var("ISO_DATE") {
             Ok(val) => {
                 if val == "1" || val.to_lowercase() == "true" {
-                    println!("  Found ISO_DATE env var: {}. Using YY-mm-dd or YY/mm/dd.", val);
+                    println!("    Found ISO_DATE env var: {}. Using YY-mm-dd or YY/mm/dd.", val);
                     true
                 } else {
-                    println!("  Found ISO_DATE env var: {} (not 1 or true). Using MM-dd-YY or MM/dd/YY.", val);
+                    println!("    Found ISO_DATE env var: {} (not 1 or true). Using MM-dd-YY or MM/dd/YY.", val);
                     false
                 }
             },
             Err(_e) => {
-                println!("  Using default dating convention (MM-dd-YY or MM/dd/YY).");
+                println!("    Using default dating convention (MM-dd-YY or MM/dd/YY).");
                 false
             },
         }
     };
 
     let date_separator_is_slash: bool = if cmd_args.date_separator_is_slash {
-        println!("  Command line flag for DATE_SEPARATOR_IS_SLASH was set. Date separator set to slash (\"/\").");
+        println!("    Command line flag for DATE_SEPARATOR_IS_SLASH was set. Date separator set to slash (\"/\").");
         true
     } else {
         match env::var("DATE_SEPARATOR_IS_SLASH") {
             Ok(val) => {
                 if val == "1" || val.to_ascii_lowercase() == "true" {
-                    println!("  Found DATE_SEPARATOR_IS_SLASH env var: {}. Date separator set to slash (\"/\").", val);
+                    println!("    Found DATE_SEPARATOR_IS_SLASH env var: {}. Date separator set to slash (\"/\").", val);
                     true
                 } else {
-                    println!("  Found DATE_SEPARATOR_IS_SLASH env var: {} (not 1 or true). Date separator set to hyphen (\"-\").", val);
+                    println!("    Found DATE_SEPARATOR_IS_SLASH env var: {} (not 1 or true). Date separator set to hyphen (\"-\").", val);
                     false
                 }
             }
             Err(_e) => {
-                println!("  Using default date separator, hyphen (\"-\").");
+                println!("    Using default date separator, hyphen (\"-\").");
                 false
             },
         }
@@ -68,26 +70,26 @@ pub fn get_env(cmd_args: &super::Cli) -> Result<super::Cfg, Box<dyn Error>> {
 
     let home_currency = match env::var("HOME_CURRENCY") {
         Ok(val) => {
-            println!("  Found HOME_CURRENCY env var: {}", val);
+            println!("    Found HOME_CURRENCY env var: {}", val);
             val.to_uppercase()},
         Err(_e) => {
-            println!("  Using default home currency (USD).");
+            println!("    Using default home currency (USD).");
             "USD".to_string()},
     };
 
     let lk_cutoff_date = match env::var("LK_CUTOFF_DATE") {
         Ok(val) => {
-            println!("  Found LK_CUTOFF_DATE env var: {}", val);
+            println!("    Found LK_CUTOFF_DATE env var: {}", val);
             Some(val)},
         Err(_e) => None,
     };
     
     let inv_costing_method = match env::var("INV_COSTING_METHOD") {
         Ok(val) => {
-            println!("  Found INV_COSTING_METHOD env var: {}", val);
+            println!("    Found INV_COSTING_METHOD env var: {}", val);
             val},
         Err(_e) => {
-            println!("  Using default inventory costing method (LIFO by lot creation date).");
+            println!("    Using default inventory costing method (LIFO by lot creation date).");
             "1".to_string()},
     };
 

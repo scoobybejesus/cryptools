@@ -28,7 +28,7 @@ pub fn import_from_csv(
 
     let file = match File::open(import_file_path) {
         Ok(x) => {
-            println!("\nCSV ledger file opened successfully.\n");
+            // println!("\nCSV ledger file opened successfully.\n");
             x
         },
         Err(e) => {
@@ -90,7 +90,7 @@ ordered chronologically (i.e., beginning in column 4 - the 1st account column - 
 The next column's value should be 2, then 3, etc, until the final account).";
 
             // Header row variables have been set.  It's now time to set up the accounts.
-            println!("Attempting to create accounts...");
+            println!("\nCreating accounts...");
 
             let length = &headerstrings.len();
 
@@ -153,7 +153,7 @@ fn import_transactions(
     let mut changed_action_records = 0;
     let mut changed_txn_num = Vec::new();
 
-    println!("Attempting to create transactions...");
+    println!("Creating transactions...");
 
     for result in rdr.records() {
 

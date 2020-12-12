@@ -60,7 +60,7 @@ pub fn import_and_process_final(
         &mut transactions_map,
     )?;
 
-    println!("  Successfully imported csv file.");
+    println!("  Successfully imported CSV Input File.");
     println!("Processing the data...");
 
     transactions_map = create_lots_mvmts::create_lots_and_movements(

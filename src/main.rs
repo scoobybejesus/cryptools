@@ -119,8 +119,7 @@ This software will import your csv file's ledger of cryptocurrency transactions.
 It will then process it by creating 'lots' and posting 'movements' to those lots.
 Along the way, it will keep track of income, expenses, gains, and losses.
 
-See .env.example for environment variables that may be set in a .env file in order to
-change default program behavior.
+See examples/.env.example or run with --help to learn how to change default program behavior.
 
   Note: The software is designed to import a full history. Gains and losses may be incorrect otherwise.
     ");
