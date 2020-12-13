@@ -165,7 +165,6 @@ fn import_transactions(
         let mut this_tx_date: &str = "";
         let mut this_proceeds: &str;
         let mut this_memo: &str = "";
-        let mut this: String;
         let mut proceeds_parsed = 0f32;
 
         //  Next, create action_records.
@@ -180,10 +179,10 @@ fn import_transactions(
             //  Set metadata fields on first three fields.
             if idx == 0 { this_tx_date = field; }
             else if idx == 1 {
-                this = field.replace(",", "");
-                this_proceeds = this.as_str();
-                proceeds_parsed = this_proceeds.parse::<f32>()?;
+                let no_comma_string = field.replace(",", "");
+                proceeds_parsed = no_comma_string.parse::<f32>()?;
             }
+
             else if idx == 2 { this_memo = field; }
 
             //  Check for empty strings. If not empty, it's a value for an action_record.
@@ -193,9 +192,26 @@ fn import_transactions(
                 let acct_idx = ind - 2; //  acct_num and acct_key would be idx + 1, so subtract 2 from ind to get 1
                 let account_key = acct_idx as u16;
 
-                // TODO: implement conversion for negative numbers surrounded in parentheses
                 let amount_str = field.replace(",", "");
-                let amount = amount_str.parse::<d128>().unwrap();
+                let mut amount = amount_str.parse::<d128>().unwrap();
+
+                // When parsing to a d128, it won't error; rather it'll return a NaN. It must now check for NaN,
+                // and, if found, attempt to sanitize.  These checks will convert accounting/comma format to the expected
+                // format by removing parentheses from negatives and adding a minus sign in the front. It will also
+                // attempt to remove empty spaces and currency symbols or designations (e.g. $ or USD).
+                if amount.is_nan() {
+                    let b = sanitize_string_for_d128_parsing_basic(field).parse::<d128>().unwrap();
+                    amount = b;
+                };
+                if amount.is_nan() {
+                    let c = sanitize_string_for_d128_parsing_full(field).parse::<d128>().unwrap();
+                    amount = c;
+                };
+                if amount.is_nan() {
+                    println!("FATAL: Couldn't convert amount to d128 for transaction:\n{:#?}", record);
+                    std::process::exit(1);
+                }
+
                 let amount_rounded = round_d128_1e8(&amount);
                 if amount != amount_rounded { changed_action_records += 1; changed_txn_num.push(this_tx_number); }
 
@@ -217,6 +233,73 @@ fn import_transactions(
                     action_records_map_keys_vec.insert(0, outgoing_ar_num.unwrap())
                 };
             }
+        }
+
+        // Note: the rust Trait implementation of FromStr for f32 is capable of parsing:
+            // '3.14'
+            // '-3.14'
+            // '2.5E10', or equivalently, '2.5e10'
+            // '2.5E-10'
+            // '5.'
+            // '.5', or, equivalently, '0.5'
+            // 'inf', '-inf', 'NaN'
+        // Notable observations from the list:
+            // (a) scientific notation is accepted
+            // (b) accounting format (numbers in parens representing negative numbers) is not explicitly accepted
+        // Additionally notable:
+            // (a) the decimal separator must be a period
+            // (b) there can be no commas
+            // (c) there can be no currency info ($120 or 120USD, etc. will fail to parse)
+        // In summary, it appears to only allow: (i) numeric chars, (ii) a period, and/or (iii) a minus sign
+        //
+        // The Decimal::d128 implementation of FromStr calls into a C library, and that lib hasn't
+        // been reviewed (by me), but it is thought/hoped to follow similar parsing conventions,
+        // though there's no guarantee.  Nevertheless, the above notes *appear* to hold true for d128.
+        fn sanitize_string_for_d128_parsing_basic(field: &str) -> String {
+
+            // First, remove commas.
+            let no_comma_string = field.replace(",", "");
+            let almost_done = no_comma_string.replace(" ", "");
+
+            // Next, if ASCII (better be), check for accounting formatting
+            if almost_done.is_ascii() {
+                if almost_done.as_bytes()[0] == "(".as_bytes()[0] {
+                    let half_fixed = almost_done.replace("(", "-");
+                    let negative_with_minus = half_fixed.replace(")", "");
+                    return negative_with_minus
+                }
+            }
+            almost_done
+        }
+
+        fn sanitize_string_for_d128_parsing_full(field: &str) -> String {
+
+            let mut near_done = "".to_string();
+            // First, remove commas.
+            let no_comma_string = field.replace(",", "");
+            let almost_done = no_comma_string.replace(" ", "");
+
+            // Next, if ASCII (better be), check for accounting formating
+            if almost_done.is_ascii() {
+                if almost_done.as_bytes()[0] == "(".as_bytes()[0] {
+                    let half_fixed = almost_done.replace("(", "-");
+                    let negative_with_minus = half_fixed.replace(")", "");
+                    near_done = negative_with_minus;
+                } else {
+                    near_done = almost_done;
+                }
+            } else {
+                near_done = almost_done;
+            }
+
+            // Strip non-numeric and non-period characters
+            let all_done: String = near_done.chars()
+                .filter(|x|
+                    x.is_numeric() |
+                    (x == &(".".as_bytes()[0] as char)) |
+                    (x == &("-".as_bytes()[0] as char)))
+                    .collect();
+            all_done
         }
 
         if let Some(incoming_ar) = incoming_ar {

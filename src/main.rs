@@ -74,8 +74,8 @@ pub struct Cli {
     /// File to be imported.  Some notes on the columns: (a) by default, the program expects the `txDate` column to 
     /// be formatted as %m-%d-%y. You may alter this with ISO_DATE and DATE_SEPARATOR_IS_SLASH flags or environment
     /// variables; (b) the `proceeds` column and any values in transactions must have a period (".") as the decimal
-    /// separator; and (c) any transactions with negative values must not be wrapped in parentheses (use the python
-    /// script for sanitizing/converting negative values).
+    /// separator; and (c) there is now experimental support for negative values being wrapped in parentheses. Use
+    /// the python script for sanitizing/converting negative values if they are a problem.
     /// See .env.example for further details on environment variables.
     #[structopt(name = "file_to_import", parse(from_os_str))]
     file_to_import: Option<PathBuf>,

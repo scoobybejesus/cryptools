@@ -61,11 +61,12 @@ The rules for successfully preparing and maintaining the input file can generall
 
 1. The first account must be given number `1`, and each additional account must count up sequentially.
 2. `Proceeds` is the value of the transaction (measured in the home currency), whether spent, received, or exchanged.
-It is **required** in order to properly calculate income/expense/gain/loss.
+It is **required** in order to properly calculate income/expense/gain/loss, and it's always a positive number.
 3. `Proceeds` must have a period as the decimal separator (`1,000.00` not `1.000,00`) and must not contain the ticker or symbol (USD or $).
 4. Margin quote account `ticker`s must be followed by an underscore and the base account ticker (i.e., `BTC_xmr`).
 5. Only home currency accounts can have negative balances. Non-margin crypto accounts may not go negative at any time.
 (Exception: crypto margin accounts may go negative.)
+6. There is now experimental support for values/quantities being in 'Accounting'/'comma' format, meaning negative numbers may be surrounded in parentheses.
 
 As you can see, most of the rules can generally be ignored.
 In fact, the only tricky field is the `proceeds` column, but even that becomes second nature soon enough.
@@ -204,8 +205,8 @@ but be sure not to include the ticker or symbol of the currency
 * *quantity*: This is similar to **proceeds**, in that the **decimal separator** must be a **period**,
 and you *cannot* include the ticker or symbol of the currency in that field.
 It is different from **proceeds** in that this will be parsed into a 128-bit precision decimal floating point number,
-and a negative value can be indicated via a preceding `-`.
-Negative values currently cannot be parsed if they are instead wrapped in parentheses (i.e., `(123.00)`).
+and a negative value should be indicated via a preceding minus sign (`-`),
+though experimental support now exists to parse negative values wrapped in parentheses (i.e., `(123.00)`).
 
 ##### Rows
 

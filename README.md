@@ -58,21 +58,16 @@ when appreciated cryptocurrency was used to make a tax-deductible charitable con
 import and may cause unintended rounding issues.
 
 * Microsoft Excel.  Don't let Excel cause you to bang your head against a wall.
-Picture this scenario.  You keep your transactions for your input file in a Google Sheet,
-and you're meticulous about making sure it's perfect.
-You then download it as a CSV file and import it into `cryptools`.
-It works perfectly, and you have all your reports.
-Then you realize you'd like to quickly change a memo and re-run the reports, so you open the CSV file in Excel and edit it.
-Then you import it into `cryptools` again and the program panics!
-What happened is most likely that Excel changed the rounding of your precise decimals underneath you!
-Depending on the rounding, `cryptools` may think your input file has been incorrectly prepared
-because you've supposedly spent more coins than you actually owned at that time.
-`Cryptools` does not let you spend coins you don't own, and it will exit upon finding such a condition.
-The program is right, and your data is right, but Excel modified your data, so the program crashed for "no reason."
-The solution is to have Excel already open, then in the ribbon's Data tab, you'll import your CSV file "From Text."
-You'll choose Delimited, and Comma, and then highlight every column and choose Text as the data type.
-
-* Currently, does not build on Windows due to the Termion crate (used for the print menu).
+`Cryptools` does not let you spend coins you don't own, and it will panic/exit upon discovering such a condition.
+You may believe your data is perfect, but Excel will change the precision of your numbers from underneath you if you're not careful.
+If automatic rounding causes your values/quantities to change, the data may then suggest you *are* spending coins you don't have.
+You must take steps to account for this.
+    - All your transaction values/quantity must **not** be kept in 'General' formatting. Using 'numeric' or 'comma' is recommended.
+    - If opening a "correct" CSV that isn't otherwise formatted, instead go to the Data tab and import the CSV "From Text," avoiding 'General' as the data type.
+        - In either of these cases, for every cell with crypto transaction quantities/amounts, adjust rounding to view **8** decimal places.
+    - Excel writes numeric values to a CSV file as they appear in the cell, not their underlying actual value, so:
+        - Go into options and choose to "Set precision as displayed."  This is found in different places in Mac and Windows.
+    - If your CSV Input File has MM-dd-YY date format, opening in Excel will change it to MM/dd/YY, so you'll have to pass the -d flag (or related `.env` variable).
 
 ## Installation
 
@@ -101,7 +96,9 @@ To skip the wizard, there are three requirements:
 `cryptools` will spit out an error message and then exit/panic if your CSV input file is malformed.
 The error message will generally tell you why.
 Consider using the python script (root directory of the repo) to sanitize your input file,
-in case the file contains negative numbers in parentheses, numbers with commas, or extra rows/columns.
+in case the file contains negative numbers in parentheses, numbers with commas, or extra rows/columns
+(though now there is experimental support for 'Accounting'/'comma' number formatting,
+meaning negative quantities can now be parsed even if indicated by parentheses instead of a minus sign).
 
 See `/examples/` directory for further guidance,
 or jump directly to the [examples.md](https://github.com/scoobybejesus/cryptools/blob/master/examples/examples.md) file.
