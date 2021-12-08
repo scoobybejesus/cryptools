@@ -21,7 +21,7 @@ path = "src/main.rs"
 [dependencies]
 crptls = { path = "crptls" }
 csv = "1.0.0"
-decimal = "2.0.4"
+decimal = "2.1.0"
 chrono = { version = "0.4", features = ["serde"] }
 structopt = "0.2.10"
 rustyline = "5.0.0"
