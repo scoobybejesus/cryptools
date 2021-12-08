@@ -177,7 +177,7 @@ pub(crate) fn add_cost_basis_to_movements(
         }
 
         vec
-    };
+    }
 
     Ok(())
 }
