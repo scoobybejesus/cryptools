@@ -4,7 +4,7 @@
 use std::path::PathBuf;
 use std::error::Error;
 
-use std::collections::{HashMap};
+use std::collections::HashMap;
 
 use chrono::NaiveDate;
 

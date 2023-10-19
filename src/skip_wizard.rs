@@ -7,7 +7,7 @@ use std::error::Error;
 use crptls::costing_method::InventoryCostingMethod;
 
 use crate::cli_user_choices;
-use crate::setup::{ArgsForImportVarsTBD};
+use crate::setup::ArgsForImportVarsTBD;
 
 
 pub(crate) fn skip_wizard(args: ArgsForImportVarsTBD) -> Result<(

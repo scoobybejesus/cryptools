@@ -1,13 +1,13 @@
 [package]
 name = "crptls"
-version = "0.1.1"
+version = "0.2.0"
 authors = ["scoobybejesus <scoobybejesus@users.noreply.github.com>"]
 edition = "2018"
 
 [dependencies]
-decimal = "2.0.4"
-chrono = { version = "0.4", features = ["serde"] }
-csv = "1.0.0"
-serde = { version = "1.0.75", features = ["derive"] }
-serde_derive = "1.0.75"
-time = "0.1.42"
+decimal = "2.1.0"
+chrono = { version = "0.4.31", features = ["serde"] }
+csv = "1.3.0"
+serde = { version = "1.0.189", features = ["derive"] }
+serde_derive = "1.0.189"
+time = "0.3.30"

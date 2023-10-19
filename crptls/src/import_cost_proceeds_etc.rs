@@ -1,7 +1,7 @@
 // Copyright (c) 2017-2020, scoobybejesus
 // Redistributions must include the license: https://github.com/scoobybejesus/cryptools/blob/master/LEGAL.txt
 
-use std::collections::{HashMap};
+use std::collections::HashMap;
 use std::error::Error;
 
 use chrono::NaiveDate;
@@ -9,7 +9,7 @@ use decimal::d128;
 
 use crate::transaction::{Transaction, TxType, ActionRecord, Polarity};
 use crate::account::{Account, RawAccount};
-use crate::decimal_utils::{round_d128_1e2};
+use crate::decimal_utils::round_d128_1e2;
 
 pub(crate) fn add_cost_basis_to_movements(
     home_currency: &String,

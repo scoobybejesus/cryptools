@@ -1,11 +1,11 @@
 // Copyright (c) 2017-2020, scoobybejesus
 // Redistributions must include the license: https://github.com/scoobybejesus/cryptools/blob/master/LEGAL.txt
 
-use std::rc::{Rc};
-use std::cell::{RefCell};
+use std::rc::Rc;
+use std::cell::RefCell;
 use std::process;
 use std::fmt;
-use std::collections::{HashMap};
+use std::collections::HashMap;
 use std::error::Error;
 
 use decimal::d128;

@@ -4,8 +4,8 @@
 use std::error::Error;
 use std::process;
 use std::fs::File;
-use std::cell::{RefCell};
-use std::collections::{HashMap};
+use std::cell::RefCell;
+use std::collections::HashMap;
 use std::path::PathBuf;
 
 use chrono::NaiveDate;
@@ -13,7 +13,7 @@ use decimal::d128;
 
 use crate::transaction::{Transaction, ActionRecord};
 use crate::account::{Account, RawAccount};
-use crate::decimal_utils::{round_d128_1e8};
+use crate::decimal_utils::round_d128_1e8;
 
 
 pub fn import_from_csv(

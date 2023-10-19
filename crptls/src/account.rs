@@ -4,10 +4,10 @@
 use std::rc::{Rc, Weak};
 use std::cell::{Cell, RefCell};
 use std::fmt;
-use std::collections::{HashMap};
+use std::collections::HashMap;
 use std::error::Error;
 
-use chrono::{NaiveDate};
+use chrono::NaiveDate;
 use decimal::d128;
 use serde_derive::{Serialize, Deserialize};
 
@@ -207,7 +207,6 @@ impl Movement {
 		txns_map: &HashMap<u32, Transaction>
 	) -> Term {
 
-    	use time::Duration;
 		let ar = ar_map.get(&self.action_record_key).unwrap();
 		let lot = Self::get_lot(&self, acct_map, ar_map);
 
@@ -220,7 +219,7 @@ impl Movement {
 				let txn = txns_map.get(&self.transaction_key).unwrap();
 				if txn.action_record_idx_vec.len() == 2 {
 					let lot_date_for_basis_purposes = lot.date_for_basis_purposes;
-					if self.date.signed_duration_since(lot_date_for_basis_purposes) > Duration::days(365) {
+					if self.date.signed_duration_since(lot_date_for_basis_purposes) > chrono::Duration::days(365) {
 						return Term::LT
 					}
 					return Term::ST
@@ -229,7 +228,7 @@ impl Movement {
 				// For a single-`action record` `transaction`, term is meaningless, but it is being shown
 				// in the context of the holding period, in the event it were sold "today".
 				let today: NaiveDate = chrono::Local::now().naive_utc().date();
-				if today.signed_duration_since(lot.date_for_basis_purposes) > Duration::days(365) {
+				if today.signed_duration_since(lot.date_for_basis_purposes) > chrono::Duration::days(365) {
 					Term::LT
 				}
 				else {
@@ -241,7 +240,7 @@ impl Movement {
 
 				let lot_date_for_basis_purposes = lot.date_for_basis_purposes;
 
-                if self.date.signed_duration_since(lot_date_for_basis_purposes) > Duration::days(365) {
+                if self.date.signed_duration_since(lot_date_for_basis_purposes) > chrono::Duration::days(365) {
 					return Term::LT
 				}
 				Term::ST

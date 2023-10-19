@@ -1,8 +1,8 @@
 // Copyright (c) 2017-2020, scoobybejesus
 // Redistributions must include the license: https://github.com/scoobybejesus/cryptools/blob/master/LEGAL.txt
 
-use std::fs::{OpenOptions};
-use std::collections::{HashMap};
+use std::fs::OpenOptions;
+use std::collections::HashMap;
 use std::path::PathBuf;
 use std::error::Error;
 use std::io::prelude::Write;
@@ -11,7 +11,7 @@ use decimal::d128;
 
 use crptls::transaction::{Transaction, ActionRecord};
 use crptls::account::{Account, RawAccount};
-use crptls::core_functions::{ImportProcessParameters};
+use crptls::core_functions::ImportProcessParameters;
 
 
 pub fn _1_account_lot_detail_to_txt(

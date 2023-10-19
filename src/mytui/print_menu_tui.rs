@@ -3,7 +3,7 @@
 
 use std::io;
 use std::time::Duration;
-use std::collections::{HashMap};
+use std::collections::HashMap;
 use std::error::Error;
 
 use tui::Terminal;
@@ -15,7 +15,7 @@ use termion::event::Key;
 
 use crptls::transaction::{Transaction, ActionRecord};
 use crptls::account::{Account, RawAccount};
-use crptls::core_functions::{ImportProcessParameters};
+use crptls::core_functions::ImportProcessParameters;
 
 use crate::mytui::event::{Events, Event, Config};
 use crate::mytui::ui as ui;

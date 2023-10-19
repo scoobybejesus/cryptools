@@ -1,18 +1,18 @@
 // Copyright (c) 2017-2020, scoobybejesus
 // Redistributions must include the license: https://github.com/scoobybejesus/cryptools/blob/master/LEGAL.txt
 
-use std::rc::{Rc};
+use std::rc::Rc;
 use std::cell::{RefCell, Ref, Cell};
-use std::collections::{HashMap};
+use std::collections::HashMap;
 use std::error::Error;
 
 use decimal::d128;
 
-use crate::core_functions::{ImportProcessParameters};
+use crate::core_functions::ImportProcessParameters;
 use crate::transaction::{Transaction, ActionRecord, TxType, Polarity, TxHasMargin};
 use crate::account::{Account, RawAccount, Lot, Movement};
-use crate::costing_method::{InventoryCostingMethod};
-use crate::decimal_utils::{round_d128_1e8};
+use crate::costing_method::InventoryCostingMethod;
+use crate::decimal_utils::round_d128_1e8;
 
 /// This is probably the most important function in the whole program.  Based on the data in the CSV Input File,
 /// the `account`s and `transaction`s will be created.  Once the `account`s and `transaction`s have been created, both
@@ -378,6 +378,7 @@ pub(crate) fn create_lots_and_movements(
                                 vec_of_indexes
                             }
 
+                            #[allow(suspicious_double_ref_op)]
                             fn get_lifo_by_lot_basis_date(list_of_lots: &Ref<Vec<Rc<Lot>>>) -> Vec<usize> {
                                 let mut reordered_vec = list_of_lots.clone().to_vec();
                                 let length = reordered_vec.len();
@@ -403,6 +404,7 @@ pub(crate) fn create_lots_and_movements(
                                 vec_of_indexes
                             }
 
+                            #[allow(suspicious_double_ref_op)]
                             fn get_fifo_by_lot_basis_date(list_of_lots: &Ref<Vec<Rc<Lot>>>) -> Vec<usize> {
                                 let mut reordered_vec = list_of_lots.clone().to_vec();
                                 let length = reordered_vec.len();

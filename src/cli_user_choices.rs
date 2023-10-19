@@ -9,15 +9,13 @@ use std::fs::File;
 
 use chrono::NaiveDate;
 use rustyline::completion::{Completer, FilenameCompleter, Pair};
+use rustyline::validate::Validator;
 use rustyline::{CompletionType, Config, Context, EditMode, Editor, Helper};
-use rustyline::config::OutputStreamType;
-use rustyline::hint::{Hinter};
+use rustyline::hint::{Hinter, Hint};
 use rustyline::error::ReadlineError;
-use rustyline::highlight::{Highlighter};
+use rustyline::highlight::Highlighter;
 
 use crptls::costing_method::InventoryCostingMethod;
-
-// use crate::string_utils;
 
 
 pub fn choose_file_for_import(flag_to_accept_cli_args: bool) -> Result<PathBuf, Box<dyn Error>> {
@@ -74,9 +72,16 @@ fn _get_path() -> Result<(String, bool), Box<dyn Error>> {
         }
     }
 
-    impl Hinter for MyHelper {}
+    impl Hint for MyHelper {
+        fn display(&self) -> &str { todo!() }
+        fn completion(&self) -> Option<&str> { todo!() }
+    }
+    impl Hinter for MyHelper {
+        type Hint = MyHelper;
+    }
     impl Highlighter for MyHelper {}
     impl Helper for MyHelper {}
+    impl Validator for MyHelper {}
 
     let h = MyHelper {
         completer: FilenameCompleter::new(),
@@ -87,11 +92,10 @@ fn _get_path() -> Result<(String, bool), Box<dyn Error>> {
         .history_ignore_space(true)
         .completion_type(CompletionType::Circular)
         .edit_mode(EditMode::Vi)
-        .output_stream(OutputStreamType::Stdout)
         .build();
 
     let count = 1;
-    let mut rl = Editor::with_config(config);
+    let mut rl = Editor::with_config(config)?;
     let p = format!("{}> ", count);
     rl.set_helper(Some(h));
     rl.helper_mut().unwrap().colored_prompt = format!("\x1b[1;32m{}\x1b[0m", p);

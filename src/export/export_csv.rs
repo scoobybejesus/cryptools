@@ -2,7 +2,7 @@
 // Redistributions must include the license: https://github.com/scoobybejesus/cryptools/blob/master/LEGAL.txt
 
 use std::fs::File;
-use std::collections::{HashMap};
+use std::collections::HashMap;
 use std::path::PathBuf;
 use std::error::Error;
 
@@ -11,7 +11,7 @@ use chrono::NaiveDate;
 
 use crptls::transaction::{ActionRecord, Polarity, Transaction, TxType};
 use crptls::account::{Account, RawAccount, Term};
-use crptls::core_functions::{ImportProcessParameters};
+use crptls::core_functions::ImportProcessParameters;
 
 
 pub fn _1_account_sums_to_csv(

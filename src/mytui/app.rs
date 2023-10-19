@@ -2,11 +2,11 @@
 // Redistributions must include the license: https://github.com/scoobybejesus/cryptools/blob/master/LEGAL.txt
 
 use std::error::Error;
-use std::collections::{HashMap};
+use std::collections::HashMap;
 
 use crptls::transaction::{Transaction, ActionRecord};
 use crptls::account::{Account, RawAccount};
-use crptls::core_functions::{ImportProcessParameters};
+use crptls::core_functions::ImportProcessParameters;
 
 use crate::export::{export_csv, export_je, export_txt};
 

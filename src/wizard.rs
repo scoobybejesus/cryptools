@@ -9,7 +9,7 @@ use std::path::PathBuf;
 use crptls::costing_method::InventoryCostingMethod;
 
 use crate::cli_user_choices;
-use crate::setup::{ArgsForImportVarsTBD};
+use crate::setup::ArgsForImportVarsTBD;
 
 
 pub(crate) fn wizard(args: ArgsForImportVarsTBD) -> Result<(
