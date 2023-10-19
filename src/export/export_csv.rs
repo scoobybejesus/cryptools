@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use std::error::Error;
 
-use decimal::d128;
+use rust_decimal_macros::dec;
 use chrono::NaiveDate;
 
 use crptls::transaction::{ActionRecord, Polarity, Transaction, TxType};
@@ -47,7 +47,7 @@ pub fn _1_account_sums_to_csv(
         let balance: String;
         let tentative_balance = acct.get_sum_of_amts_in_lots();
 
-        if tentative_balance == d128!(0) {
+        if tentative_balance == dec!(0) {
             balance = "0.00".to_string()
         } else { balance = tentative_balance.to_string() }
 
@@ -56,7 +56,7 @@ pub fn _1_account_sums_to_csv(
 
         if raw_acct.is_margin { lk_cost_basis = "0.00".to_string() } else {
             let tentative_lk_cost_basis = acct.get_sum_of_lk_basis_in_lots();
-            if tentative_lk_cost_basis == d128!(0) {
+            if tentative_lk_cost_basis == dec!(0) {
                 lk_cost_basis = "0.00".to_string()
             } else { lk_cost_basis = tentative_lk_cost_basis.to_string() }
         }
@@ -121,10 +121,10 @@ pub fn _2_account_sums_nonzero_to_csv(
         let name = raw_acct.name.to_string();
 
         let balance: String;
-        let mut balance_d128 = d128!(0);
+        let mut balance_d128 = dec!(0);
         let tentative_balance = acct.get_sum_of_amts_in_lots();
 
-        if tentative_balance == d128!(0) {
+        if tentative_balance == dec!(0) {
             balance = "0.00".to_string()
         } else { balance_d128 += tentative_balance; balance = tentative_balance.to_string() }
 
@@ -132,7 +132,7 @@ pub fn _2_account_sums_nonzero_to_csv(
 
         if raw_acct.is_margin { lk_cost_basis = "0.00".to_string() } else {
             let tentative_lk_cost_basis = acct.get_sum_of_lk_basis_in_lots();
-            if tentative_lk_cost_basis == d128!(0) {
+            if tentative_lk_cost_basis == dec!(0) {
                 lk_cost_basis = "0.00".to_string()
             } else { lk_cost_basis = tentative_lk_cost_basis.to_string() }
         }
@@ -142,7 +142,7 @@ pub fn _2_account_sums_nonzero_to_csv(
 
         let nonzero_lots = acct.get_num_of_nonzero_lots();
 
-        if balance_d128 != d128!(0) {
+        if balance_d128 != dec!(0) {
             row.push(name);
             row.push(balance);
             row.push(raw_acct.ticker.to_string());
@@ -200,7 +200,7 @@ pub fn _3_account_sums_to_csv_with_orig_basis(
         let balance: String;
         let tentative_balance = acct.get_sum_of_amts_in_lots();
 
-        if tentative_balance == d128!(0) {
+        if tentative_balance == dec!(0) {
             balance = "0.00".to_string()
         } else { balance = tentative_balance.to_string() }
 
@@ -217,11 +217,11 @@ pub fn _3_account_sums_to_csv_with_orig_basis(
             let tentative_lk_cost_basis = acct.get_sum_of_lk_basis_in_lots();
             let tentative_orig_cost_basis = acct.get_sum_of_orig_basis_in_lots();
 
-            if tentative_lk_cost_basis == d128!(0) {
+            if tentative_lk_cost_basis == dec!(0) {
                 lk_cost_basis = "0.00".to_string()
             } else { lk_cost_basis = tentative_lk_cost_basis.to_string() }
 
-            if tentative_orig_cost_basis == d128!(0) {
+            if tentative_orig_cost_basis == dec!(0) {
                 orig_cost_basis = "0.00".to_string()
             } else { orig_cost_basis = tentative_orig_cost_basis.to_string() }
         }
@@ -312,7 +312,7 @@ pub fn _4_transaction_mvmt_detail_to_csv(
             let tx_type = txn.transaction_type(&ars, &raw_acct_map, &acct_map)?;
             let tx_type_string = mvmt.friendly_tx_type(&tx_type);
             let memo = txn.user_memo.to_string();
-            let mut amount = d128!(0);
+            let mut amount = dec!(0);
             amount += mvmt.amount;   //  To prevent printing -5E+1 instead of 50, for example
             let ticker = raw_acct.ticker.to_string();
             let term = mvmt.get_term(acct_map, ars, txns_map).to_string();
@@ -323,10 +323,10 @@ pub fn _4_transaction_mvmt_detail_to_csv(
             let expense = mvmt.get_expense(ars, &raw_acct_map, &acct_map, &txns_map)?;
 
 
-            if tx_type == TxType::Flow && amount > d128!(0) {
-                proceeds_lk = d128!(0);
-                cost_basis_lk = d128!(0);
-                gain_loss = d128!(0);
+            if tx_type == TxType::Flow && amount > dec!(0) {
+                proceeds_lk = dec!(0);
+                cost_basis_lk = dec!(0);
+                gain_loss = dec!(0);
             }
 
             let mut row: Vec<String> = Vec::with_capacity(total_columns);
@@ -410,19 +410,19 @@ pub fn _5_transaction_mvmt_summaries_to_csv(
         let mut ticker: Option<String> = None;
         let mut polarity: Option<Polarity> = None;
 
-        let mut amount_st = d128!(0);
-        let mut proceeds_st = d128!(0);
-        let mut cost_basis_st = d128!(0);
+        let mut amount_st = dec!(0);
+        let mut proceeds_st = dec!(0);
+        let mut cost_basis_st = dec!(0);
 
-        let mut income_st = d128!(0);
-        let mut expense_st = d128!(0);
+        let mut income_st = dec!(0);
+        let mut expense_st = dec!(0);
 
-        let mut amount_lt = d128!(0);
-        let mut proceeds_lt = d128!(0);
-        let mut cost_basis_lt = d128!(0);
+        let mut amount_lt = dec!(0);
+        let mut proceeds_lt = dec!(0);
+        let mut cost_basis_lt = dec!(0);
 
-        let mut income_lt = d128!(0);
-        let mut expense_lt = d128!(0);
+        let mut income_lt = dec!(0);
+        let mut expense_lt = dec!(0);
 
         let flow_or_outgoing_exchange_movements = txn.get_outgoing_exchange_and_flow_mvmts(
             &settings.home_currency,
@@ -444,7 +444,7 @@ pub fn _5_transaction_mvmt_summaries_to_csv(
             if ticker.is_none() { ticker = Some(raw_acct.ticker.clone()) };
 
             if polarity.is_none() {
-                polarity = if mvmt.amount > d128!(0) {
+                polarity = if mvmt.amount > dec!(0) {
                     Some(Polarity::Incoming)
                     } else { Some(Polarity::Outgoing)
                 };
@@ -474,11 +474,11 @@ pub fn _5_transaction_mvmt_summaries_to_csv(
             &acct_map)? == TxType::Flow
         ) & (polarity == Some(Polarity::Incoming)) {
             income_st = -proceeds_st;   //  Proceeds are negative for incoming txns
-            proceeds_st = d128!(0);
-            cost_basis_st = d128!(0);
+            proceeds_st = dec!(0);
+            cost_basis_st = dec!(0);
             income_lt = -proceeds_lt;   //  Proceeds are negative for incoming txns
-            proceeds_lt = d128!(0);
-            cost_basis_lt = d128!(0);
+            proceeds_lt = dec!(0);
+            cost_basis_lt = dec!(0);
         }
 
         if (txn.transaction_type(
@@ -620,7 +620,7 @@ pub fn _6_transaction_mvmt_detail_to_csv_w_orig(
             let tx_type_string = mvmt.friendly_tx_type(&tx_type);
             let user_memo = txn.user_memo.to_string();
             let auto_memo = txn.get_auto_memo(ars, raw_acct_map,acct_map, &settings.home_currency)?;
-            let mut amount = d128!(0);
+            let mut amount = dec!(0);
             amount += mvmt.amount;   //  To prevent printing -5E+1 instead of 50, for example
             let ticker = raw_acct.ticker.to_string();
             let term = mvmt.get_term(acct_map, ars, txns_map).to_string();
@@ -633,13 +633,13 @@ pub fn _6_transaction_mvmt_detail_to_csv_w_orig(
             let mut orig_cost = mvmt.cost_basis.get();
             let mut orig_gain_loss = mvmt.get_orig_gain_or_loss();
 
-            if tx_type == TxType::Flow && amount > d128!(0) {
-                proceeds_lk = d128!(0);
-                cost_basis_lk = d128!(0);
-                gain_loss = d128!(0);
-                orig_proc = d128!(0);
-                orig_cost = d128!(0);
-                orig_gain_loss = d128!(0);
+            if tx_type == TxType::Flow && amount > dec!(0) {
+                proceeds_lk = dec!(0);
+                cost_basis_lk = dec!(0);
+                gain_loss = dec!(0);
+                orig_proc = dec!(0);
+                orig_cost = dec!(0);
+                orig_gain_loss = dec!(0);
             }
 
             let mut row: Vec<String> = Vec::with_capacity(total_columns);
@@ -723,17 +723,17 @@ pub fn _7_gain_loss_8949_to_csv(
         let mut ticker: Option<String> = None;
         let mut polarity: Option<Polarity> = None;
 
-        let mut amount_st = d128!(0);
-        let mut proceeds_st = d128!(0);
-        let mut cost_basis_st = d128!(0);
+        let mut amount_st = dec!(0);
+        let mut proceeds_st = dec!(0);
+        let mut cost_basis_st = dec!(0);
 
-        let mut expense_st = d128!(0);
+        let mut expense_st = dec!(0);
 
-        let mut amount_lt = d128!(0);
-        let mut proceeds_lt = d128!(0);
-        let mut cost_basis_lt = d128!(0);
+        let mut amount_lt = dec!(0);
+        let mut proceeds_lt = dec!(0);
+        let mut cost_basis_lt = dec!(0);
 
-        let mut expense_lt = d128!(0);
+        let mut expense_lt = dec!(0);
 
         let flow_or_outgoing_exchange_movements = txn.get_outgoing_exchange_and_flow_mvmts(
             &settings.home_currency,
@@ -757,7 +757,7 @@ pub fn _7_gain_loss_8949_to_csv(
             if ticker.is_none() { ticker = Some(raw_acct.ticker.clone()) };
 
             if polarity.is_none() {
-                polarity = if mvmt.amount > d128!(0) {
+                polarity = if mvmt.amount > dec!(0) {
                     Some(Polarity::Incoming)
                     } else { Some(Polarity::Outgoing)
                 };
@@ -804,9 +804,9 @@ pub fn _7_gain_loss_8949_to_csv(
             // The only incoming flow transaction to report would be margin profit, which is a dual-`action record` `transaction`
             if txn.action_record_idx_vec.len() == 2 {
                 proceeds_st = -proceeds_st;   //  Proceeds are negative for incoming txns
-                cost_basis_st = d128!(0);
+                cost_basis_st = dec!(0);
                 proceeds_lt = -proceeds_lt;   //  Proceeds are negative for incoming txns
-                cost_basis_lt = d128!(0);
+                cost_basis_lt = dec!(0);
             } else {
                 continue    // Plain, old income isn't reported on form 8949
             }

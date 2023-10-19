@@ -5,7 +5,8 @@ use std::collections::HashMap;
 use std::error::Error;
 
 use chrono::NaiveDate;
-use decimal::d128;
+use rust_decimal::Decimal;
+use rust_decimal_macros::dec;
 
 use crate::transaction::{Transaction, TxType, ActionRecord, Polarity};
 use crate::account::{Account, RawAccount};
@@ -66,8 +67,8 @@ pub(crate) fn add_cost_basis_to_movements(
                                 mvmt.cost_basis.set(rounded_basis);
                                 mvmt.cost_basis_lk.set(rounded_basis);
                             }
-                            assert!(mvmt.cost_basis.get() <= d128!(0));
-                            // assert!(mvmt.cost_basis_lk.get() <= d128!(0));   //  Same as above assert.
+                            assert!(mvmt.cost_basis.get() <= dec!(0));
+                            // assert!(mvmt.cost_basis_lk.get() <= dec!(0));   //  Same as above assert.
                             continue
                         }
 
@@ -102,7 +103,7 @@ pub(crate) fn add_cost_basis_to_movements(
                                                 borrowed_mvmt.ratio_of_amt_to_incoming_mvmts_in_a_r;
                                             let txn_proceeds = txn.proceeds
                                                 .to_string()
-                                                .parse::<d128>()
+                                                .parse::<Decimal>()
                                                 .unwrap();
                                             let unrounded_basis = txn_proceeds * ratio_of_amt_to_incoming_mvmts_in_a_r;
                                             let rounded_basis = round_d128_1e2(&unrounded_basis);
@@ -133,7 +134,7 @@ pub(crate) fn add_cost_basis_to_movements(
 
                                     TxType::Flow => {
 
-                                        let txn_proceeds = txn.proceeds.to_string().parse::<d128>().unwrap();
+                                        let txn_proceeds = txn.proceeds.to_string().parse::<Decimal>().unwrap();
                                         let mvmt_proceeds = round_d128_1e2(
                                             &(txn_proceeds *
                                             borrowed_mvmt.ratio_of_amt_to_incoming_mvmts_in_a_r)
@@ -144,8 +145,8 @@ pub(crate) fn add_cost_basis_to_movements(
                                     }
                                 }
                             }
-                            assert!(mvmt.cost_basis.get() >= d128!(0));
-                            // assert!(mvmt.cost_basis_lk.get() >= d128!(0));   //  Same as above assert.
+                            assert!(mvmt.cost_basis.get() >= dec!(0));
+                            // assert!(mvmt.cost_basis_lk.get() >= dec!(0));   //  Same as above assert.
                             continue
                         }
                     }
@@ -162,7 +163,7 @@ pub(crate) fn add_cost_basis_to_movements(
         ars: &HashMap<u32, ActionRecord>,
         txns_map: &HashMap<u32, Transaction>,
         acct_map: &HashMap<u16, Account>,
-    ) -> Vec<d128> {
+    ) -> Vec<Decimal> {
 
         let txn = txns_map.get(&txn_num).unwrap();
         let other_ar_borrowed = &ars.get(&txn.action_record_idx_vec[0]).unwrap();
@@ -227,7 +228,7 @@ pub(crate) fn add_proceeds_to_movements(
                                     }
 
                                     let ratio = borrowed_mvmt.amount / ar.amount;
-                                    let proceeds_unrounded = txn.proceeds.to_string().parse::<d128>().unwrap() * ratio;
+                                    let proceeds_unrounded = txn.proceeds.to_string().parse::<Decimal>().unwrap() * ratio;
                                     let proceeds_rounded = round_d128_1e2(&proceeds_unrounded);
 
                                     mvmt.proceeds.set(proceeds_rounded);
@@ -299,7 +300,7 @@ fn update_current_txn_for_prior_likekind_treatment(
     txns_map: &HashMap<u32, Transaction>,
 ) -> Result<(), Box<dyn Error>> {
 
-    let mut sum_of_outgoing_lk_cost_basis_in_ar = d128!(0);
+    let mut sum_of_outgoing_lk_cost_basis_in_ar = dec!(0);
     let txn = txns_map.get(&txn_num).unwrap();
 
     for ar_num in txn.action_record_idx_vec.iter() {
@@ -351,8 +352,8 @@ fn update_current_txn_for_prior_likekind_treatment(
                             }
                             TxType::Flow => {
                                 if txn.action_record_idx_vec.len() == 2 {
-                                    mvmt.cost_basis_lk.set(d128!(0));
-                                    mvmt.proceeds_lk.set(d128!(0));
+                                    mvmt.cost_basis_lk.set(dec!(0));
+                                    mvmt.proceeds_lk.set(dec!(0));
                                 }
                                 // Do nothing for non-margin txns.
                             }
@@ -398,7 +399,7 @@ fn perform_likekind_treatment_on_txn(
 
             if txn.both_exch_ars_are_non_home_curr(ars, raw_acct_map, acct_map, home_currency)? {
 
-                let mut sum_of_outgoing_lk_cost_basis_in_ar = d128!(0);
+                let mut sum_of_outgoing_lk_cost_basis_in_ar = dec!(0);
 
                 for ar_num in txn.action_record_idx_vec.iter() {
 
@@ -464,8 +465,8 @@ fn perform_likekind_treatment_on_txn(
 
                             Polarity::Incoming => {
                                 //  Reminder: May need extra logic here if margin exchange trades get cost_basis and proceeds
-                                mvmt.cost_basis.set(d128!(0));
-                                mvmt.proceeds.set(d128!(0));
+                                mvmt.cost_basis.set(dec!(0));
+                                mvmt.proceeds.set(dec!(0));
                             }
                         }
                     }

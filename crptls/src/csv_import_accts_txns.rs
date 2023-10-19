@@ -9,7 +9,8 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 
 use chrono::NaiveDate;
-use decimal::d128;
+use rust_decimal::Decimal;
+use rust_decimal_macros::dec;
 
 use crate::transaction::{Transaction, ActionRecord};
 use crate::account::{Account, RawAccount};
@@ -193,24 +194,30 @@ fn import_transactions(
                 let account_key = acct_idx as u16;
 
                 let amount_str = field.replace(",", "");
-                let mut amount = amount_str.parse::<d128>().unwrap();
+                let amount = match amount_str.parse::<Decimal>() {
+                    Ok(x) => x,
+                    Err(e) => {
+                        println!("FATAL: Couldn't convert amount to d128 for transaction:\n{:#?}", record);
+                        println!("Error: {}", e);
+                        std::process::exit(1);}
+                };
 
                 // When parsing to a d128, it won't error; rather it'll return a NaN. It must now check for NaN,
                 // and, if found, attempt to sanitize.  These checks will convert accounting/comma format to the expected
                 // format by removing parentheses from negatives and adding a minus sign in the front. It will also
                 // attempt to remove empty spaces and currency symbols or designations (e.g. $ or USD).
-                if amount.is_nan() {
-                    let b = sanitize_string_for_d128_parsing_basic(field).parse::<d128>().unwrap();
-                    amount = b;
-                };
-                if amount.is_nan() {
-                    let c = sanitize_string_for_d128_parsing_full(field).parse::<d128>().unwrap();
-                    amount = c;
-                };
-                if amount.is_nan() {
-                    println!("FATAL: Couldn't convert amount to d128 for transaction:\n{:#?}", record);
-                    std::process::exit(1);
-                }
+                // if amount.is_none() {
+                //     let b = sanitize_string_for_d128_parsing_basic(field).parse::<Decimal>().unwrap();
+                //     amount = b;
+                // };
+                // if amount.is_none() {
+                //     let c = sanitize_string_for_d128_parsing_full(field).parse::<Decimal>().unwrap();
+                //     amount = c;
+                // };
+                // if amount.is_none() {
+                //     println!("FATAL: Couldn't convert amount to d128 for transaction:\n{:#?}", record);
+                //     std::process::exit(1);
+                // }
 
                 let amount_rounded = round_d128_1e8(&amount);
                 if amount != amount_rounded { changed_action_records += 1; changed_txn_num.push(this_tx_number); }
@@ -223,7 +230,7 @@ fn import_transactions(
                     movements: RefCell::new([].to_vec()),
                 };
 
-                if amount > d128!(0.0) {
+                if amount > dec!(0.0) {
                     incoming_ar = Some(action_record);
                     incoming_ar_num = Some(this_ar_number);
                     action_records_map_keys_vec.push(incoming_ar_num.unwrap())
@@ -255,52 +262,52 @@ fn import_transactions(
         // The Decimal::d128 implementation of FromStr calls into a C library, and that lib hasn't
         // been reviewed (by me), but it is thought/hoped to follow similar parsing conventions,
         // though there's no guarantee.  Nevertheless, the above notes *appear* to hold true for d128.
-        fn sanitize_string_for_d128_parsing_basic(field: &str) -> String {
+        // fn sanitize_string_for_d128_parsing_basic(field: &str) -> String {
 
-            // First, remove commas.
-            let no_comma_string = field.replace(",", "");
-            let almost_done = no_comma_string.replace(" ", "");
+        //     // First, remove commas.
+        //     let no_comma_string = field.replace(",", "");
+        //     let almost_done = no_comma_string.replace(" ", "");
 
-            // Next, if ASCII (better be), check for accounting formatting
-            if almost_done.is_ascii() {
-                if almost_done.as_bytes()[0] == "(".as_bytes()[0] {
-                    let half_fixed = almost_done.replace("(", "-");
-                    let negative_with_minus = half_fixed.replace(")", "");
-                    return negative_with_minus
-                }
-            }
-            almost_done
-        }
+        //     // Next, if ASCII (better be), check for accounting formatting
+        //     if almost_done.is_ascii() {
+        //         if almost_done.as_bytes()[0] == "(".as_bytes()[0] {
+        //             let half_fixed = almost_done.replace("(", "-");
+        //             let negative_with_minus = half_fixed.replace(")", "");
+        //             return negative_with_minus
+        //         }
+        //     }
+        //     almost_done
+        // }
 
-        fn sanitize_string_for_d128_parsing_full(field: &str) -> String {
+        // fn sanitize_string_for_d128_parsing_full(field: &str) -> String {
 
-            let mut near_done = "".to_string();
-            // First, remove commas.
-            let no_comma_string = field.replace(",", "");
-            let almost_done = no_comma_string.replace(" ", "");
+        //     let mut near_done = "".to_string();
+        //     // First, remove commas.
+        //     let no_comma_string = field.replace(",", "");
+        //     let almost_done = no_comma_string.replace(" ", "");
 
-            // Next, if ASCII (better be), check for accounting formating
-            if almost_done.is_ascii() {
-                if almost_done.as_bytes()[0] == "(".as_bytes()[0] {
-                    let half_fixed = almost_done.replace("(", "-");
-                    let negative_with_minus = half_fixed.replace(")", "");
-                    near_done = negative_with_minus;
-                } else {
-                    near_done = almost_done;
-                }
-            } else {
-                near_done = almost_done;
-            }
+        //     // Next, if ASCII (better be), check for accounting formating
+        //     if almost_done.is_ascii() {
+        //         if almost_done.as_bytes()[0] == "(".as_bytes()[0] {
+        //             let half_fixed = almost_done.replace("(", "-");
+        //             let negative_with_minus = half_fixed.replace(")", "");
+        //             near_done = negative_with_minus;
+        //         } else {
+        //             near_done = almost_done;
+        //         }
+        //     } else {
+        //         near_done = almost_done;
+        //     }
 
-            // Strip non-numeric and non-period characters
-            let all_done: String = near_done.chars()
-                .filter(|x|
-                    x.is_numeric() |
-                    (x == &(".".as_bytes()[0] as char)) |
-                    (x == &("-".as_bytes()[0] as char)))
-                    .collect();
-            all_done
-        }
+        //     // Strip non-numeric and non-period characters
+        //     let all_done: String = near_done.chars()
+        //         .filter(|x|
+        //             x.is_numeric() |
+        //             (x == &(".".as_bytes()[0] as char)) |
+        //             (x == &("-".as_bytes()[0] as char)))
+        //             .collect();
+        //     all_done
+        // }
 
         if let Some(incoming_ar) = incoming_ar {
             let x = incoming_ar_num.unwrap();

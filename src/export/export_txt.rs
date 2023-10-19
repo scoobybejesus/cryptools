@@ -7,7 +7,8 @@ use std::path::PathBuf;
 use std::error::Error;
 use std::io::prelude::Write;
 
-use decimal::d128;
+use rust_decimal::Decimal;
+use rust_decimal_macros::dec;
 
 use crptls::transaction::{Transaction, ActionRecord};
 use crptls::account::{Account, RawAccount};
@@ -129,14 +130,14 @@ Enable like-kind treatment: {}",
             let lk_lot_basis = lot.get_sum_of_lk_basis_in_lot();
 
             let formatted_basis: String;
-            if lk_lot_basis == d128!(0) {
+            if lk_lot_basis == dec!(0) {
                 formatted_basis = "0.00".to_string()
             } else { formatted_basis = lk_lot_basis.to_string() }
 
             let movements_sum = lot.get_sum_of_amts_in_lot();
 
             let formatted_sum: String;
-            if movements_sum == d128!(0) {
+            if movements_sum == dec!(0) {
                 formatted_sum = "0.00".to_string()
             } else { formatted_sum = movements_sum.to_string() }
 
@@ -200,15 +201,15 @@ Enable like-kind treatment: {}",
 
                     let lk_proceeds = mvmt.proceeds_lk.get();
                     let lk_cost_basis = mvmt.cost_basis_lk.get();
-                    let gain_loss: d128;
+                    let gain_loss: Decimal;
 
-                    // if mvmt.amount > d128!(0) { // Can't have a gain on an incoming txn
-                    //     gain_loss = d128!(0)
+                    // if mvmt.amount > dec!(0) { // Can't have a gain on an incoming txn
+                    //     gain_loss = dec!(0)
                     // } else
                     if raw_acct.is_home_currency(home_currency) {  //  Can't have a gain disposing home currency
-                        gain_loss = d128!(0)
+                        gain_loss = dec!(0)
                     // } else if tx_type == TxType::ToSelf {   //  Can't have a gain sending to yourself
-                    //     gain_loss = d128!(0)
+                    //     gain_loss = dec!(0)
                     } else {
                         gain_loss = lk_proceeds + lk_cost_basis;
                     }
@@ -305,14 +306,14 @@ Enable like-kind treatment: {}",
             let lk_lot_basis = lot.get_sum_of_lk_basis_in_lot();
 
             let formatted_basis: String;
-            if lk_lot_basis == d128!(0) {
+            if lk_lot_basis == dec!(0) {
                 formatted_basis = "0.00".to_string()
             } else { formatted_basis = lk_lot_basis.to_string() }
 
             let movements_sum = lot.get_sum_of_amts_in_lot();
 
             let formatted_sum: String;
-            if movements_sum == d128!(0) {
+            if movements_sum == dec!(0) {
                 formatted_sum = "0.00".to_string()
             } else { formatted_sum = movements_sum.to_string() }
 
@@ -384,7 +385,7 @@ Enable like-kind treatment: {}",
         let amt_in_acct = acct.get_sum_of_amts_in_lots();
 
         if acct.list_of_lots.borrow().len() > 0 {
-            if amt_in_acct > d128!(0) {
+            if amt_in_acct > dec!(0) {
 
                 writeln!(file, "\n=====================================")?;
                 writeln!(file, "{} {}", raw_acct.name, raw_acct.ticker)?;
@@ -404,13 +405,13 @@ Enable like-kind treatment: {}",
             let lk_lot_basis = lot.get_sum_of_lk_basis_in_lot();
 
             let formatted_basis: String;
-            if lk_lot_basis == d128!(0) {
+            if lk_lot_basis == dec!(0) {
                 formatted_basis = "0.00".to_string()
             } else { formatted_basis = lk_lot_basis.to_string() }
 
             let movements_sum = lot.get_sum_of_amts_in_lot();
 
-            if acct.list_of_lots.borrow().len() > 0 && movements_sum > d128!(0) {
+            if acct.list_of_lots.borrow().len() > 0 && movements_sum > dec!(0) {
 
                 writeln!(file, "  Lot {:>3} created {} w/ basis date {} • Σ: {:>12}, and cost basis of {:>10.2}",
                     (lot_idx+1),

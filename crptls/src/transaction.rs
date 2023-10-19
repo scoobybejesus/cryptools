@@ -8,7 +8,8 @@ use std::fmt;
 use std::collections::HashMap;
 use std::error::Error;
 
-use decimal::d128;
+use rust_decimal::Decimal;
+use rust_decimal_macros::dec;
 use chrono::NaiveDate;
 use serde_derive::{Serialize, Deserialize};
 
@@ -297,7 +298,7 @@ impl Transaction {
             let raw_acct = raw_accts.get(&acct.raw_key).unwrap();
             let ticker = &raw_acct.ticker;
 
-            if amt > d128!(0.0) {
+            if amt > dec!(0.0) {
 
                 format!("Received {} {} valued at {:.2} {}.", amt, ticker,
                 self.proceeds.to_string().as_str().parse::<f32>()?, home_currency)
@@ -317,7 +318,7 @@ impl Transaction {
 #[derive(Clone, Debug)]
 pub struct ActionRecord {
 	pub account_key: u16,
-	pub amount: d128,
+	pub amount: Decimal,
     pub tx_key: u32,
     pub self_ar_key: u32,
 	pub movements: RefCell<Vec<Rc<Movement>>>,
@@ -326,13 +327,13 @@ pub struct ActionRecord {
 impl ActionRecord {
 
 	pub fn direction(&self) -> Polarity {
-		if self.amount < d128!(0.0) { Polarity::Outgoing}
+		if self.amount < dec!(0.0) { Polarity::Outgoing}
 		else { Polarity::Incoming }
     }
 
-    pub fn cost_basis_in_ar(&self) -> d128 {
+    pub fn cost_basis_in_ar(&self) -> Decimal {
 
-        let mut cb = d128!(0);
+        let mut cb = dec!(0);
 
         for mvmt in self.movements.borrow().iter() {
             cb += mvmt.cost_basis.get()
@@ -373,7 +374,7 @@ impl ActionRecord {
         let acct = acct_map.get(&self.account_key).unwrap();
 
         let target = self.amount;
-        let mut measure = d128!(0);
+        let mut measure = dec!(0);
 
         for lot in acct.list_of_lots.borrow().iter() {
 

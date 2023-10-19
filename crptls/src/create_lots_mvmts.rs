@@ -6,7 +6,8 @@ use std::cell::{RefCell, Ref, Cell};
 use std::collections::HashMap;
 use std::error::Error;
 
-use decimal::d128;
+use rust_decimal::Decimal;
+use rust_decimal_macros::dec;
 
 use crate::core_functions::ImportProcessParameters;
 use crate::transaction::{Transaction, ActionRecord, TxType, Polarity, TxHasMargin};
@@ -118,8 +119,8 @@ pub(crate) fn create_lots_and_movements(
             if !base_acct_lot_list.is_empty() && !quote_acct_lot_list.is_empty() {
                 // Since we know there has been activity, we set the bool variable above according to whether the `account`
                 // balances are both zero.
-                let base_balance_is_zero = base_acct_lot_list.last().unwrap().get_sum_of_amts_in_lot() == d128!(0);
-                let quote_balance_is_zero = quote_acct_lot_list.last().unwrap().get_sum_of_amts_in_lot() == d128!(0);
+                let base_balance_is_zero = base_acct_lot_list.last().unwrap().get_sum_of_amts_in_lot() == dec!(0);
+                let quote_balance_is_zero = quote_acct_lot_list.last().unwrap().get_sum_of_amts_in_lot() == dec!(0);
                 if base_balance_is_zero && quote_balance_is_zero {
                     acct_balances_are_zero = true
                 } else {
@@ -180,13 +181,13 @@ pub(crate) fn create_lots_and_movements(
                 date: txn.date,
                 transaction_key: txn_num,
                 action_record_key: base_ar_idx,
-                cost_basis: Cell::new(d128!(0.0)),
-                ratio_of_amt_to_incoming_mvmts_in_a_r: d128!(1.0),
-                ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
+                cost_basis: Cell::new(dec!(0.0)),
+                ratio_of_amt_to_incoming_mvmts_in_a_r: dec!(1.0),
+                ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(dec!(1.0)),
                 lot_num: base_lot.lot_number,
-                proceeds: Cell::new(d128!(0.0)),
-                proceeds_lk: Cell::new(d128!(0.0)),
-                cost_basis_lk: Cell::new(d128!(0.0)),
+                proceeds: Cell::new(dec!(0.0)),
+                proceeds_lk: Cell::new(dec!(0.0)),
+                cost_basis_lk: Cell::new(dec!(0.0)),
             };
             let raw_base_acct = raw_acct_map.get(&base_acct.raw_key).unwrap();
             wrap_mvmt_and_push(
@@ -203,13 +204,13 @@ pub(crate) fn create_lots_and_movements(
                 date: txn.date,
                 transaction_key: txn_num,
                 action_record_key: quote_ar_idx,
-                cost_basis: Cell::new(d128!(0.0)),
-                ratio_of_amt_to_incoming_mvmts_in_a_r: d128!(1.0),
-                ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
+                cost_basis: Cell::new(dec!(0.0)),
+                ratio_of_amt_to_incoming_mvmts_in_a_r: dec!(1.0),
+                ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(dec!(1.0)),
                 lot_num: quote_lot.lot_number,
-                proceeds: Cell::new(d128!(0.0)),
-                proceeds_lk: Cell::new(d128!(0.0)),
-                cost_basis_lk: Cell::new(d128!(0.0)),
+                proceeds: Cell::new(dec!(0.0)),
+                proceeds_lk: Cell::new(dec!(0.0)),
+                cost_basis_lk: Cell::new(dec!(0.0)),
             };
             let raw_quote_acct = raw_acct_map.get(&quote_acct.raw_key).unwrap();
             wrap_mvmt_and_push(
@@ -274,13 +275,13 @@ pub(crate) fn create_lots_and_movements(
                         date: txn.date,
                         transaction_key: txn_num,
                         action_record_key: *ar_num,
-                        cost_basis: Cell::new(d128!(0.0)),
-                        ratio_of_amt_to_incoming_mvmts_in_a_r: d128!(1.0),
-                        ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
+                        cost_basis: Cell::new(dec!(0.0)),
+                        ratio_of_amt_to_incoming_mvmts_in_a_r: dec!(1.0),
+                        ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(dec!(1.0)),
                         lot_num: lot.lot_number,
-                        proceeds: Cell::new(d128!(0.0)),
-                        proceeds_lk: Cell::new(d128!(0.0)),
-                        cost_basis_lk: Cell::new(d128!(0.0)),
+                        proceeds: Cell::new(dec!(0.0)),
+                        proceeds_lk: Cell::new(dec!(0.0)),
+                        cost_basis_lk: Cell::new(dec!(0.0)),
                     };
                     wrap_mvmt_and_push(
                         whole_mvmt,
@@ -328,13 +329,13 @@ pub(crate) fn create_lots_and_movements(
                                 date: txn.date,
                                 transaction_key: txn_num,
                                 action_record_key: *ar_num,
-                                cost_basis: Cell::new(d128!(0.0)),
-                                ratio_of_amt_to_incoming_mvmts_in_a_r: d128!(1.0),
-                                ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
+                                cost_basis: Cell::new(dec!(0.0)),
+                                ratio_of_amt_to_incoming_mvmts_in_a_r: dec!(1.0),
+                                ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(dec!(1.0)),
                                 lot_num: lot.lot_number,
-                                proceeds: Cell::new(d128!(0.0)),
-                                proceeds_lk: Cell::new(d128!(0.0)),
-                                cost_basis_lk: Cell::new(d128!(0.0)),
+                                proceeds: Cell::new(dec!(0.0)),
+                                proceeds_lk: Cell::new(dec!(0.0)),
+                                cost_basis_lk: Cell::new(dec!(0.0)),
                             };
                             wrap_mvmt_and_push(
                                 whole_mvmt,
@@ -441,13 +442,13 @@ pub(crate) fn create_lots_and_movements(
                                 date: txn.date,
                                 transaction_key: txn_num,
                                 action_record_key: *ar_num,
-                                cost_basis: Cell::new(d128!(0.0)),
-                                ratio_of_amt_to_incoming_mvmts_in_a_r: d128!(1.0),
-                                ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
+                                cost_basis: Cell::new(dec!(0.0)),
+                                ratio_of_amt_to_incoming_mvmts_in_a_r: dec!(1.0),
+                                ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(dec!(1.0)),
                                 lot_num: lot_to_use.lot_number,
-                                proceeds: Cell::new(d128!(0.0)),
-                                proceeds_lk: Cell::new(d128!(0.0)),
-                                cost_basis_lk: Cell::new(d128!(0.0)),
+                                proceeds: Cell::new(dec!(0.0)),
+                                proceeds_lk: Cell::new(dec!(0.0)),
+                                cost_basis_lk: Cell::new(dec!(0.0)),
                             };
 
                             // Just a last minute check that a home currency `action record` isn't being handled here
@@ -507,13 +508,13 @@ pub(crate) fn create_lots_and_movements(
                                         date: txn.date,
                                         transaction_key: txn_num,
                                         action_record_key: *ar_num,
-                                        cost_basis: Cell::new(d128!(0.0)),
-                                        ratio_of_amt_to_incoming_mvmts_in_a_r: d128!(1.0),
-                                        ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
+                                        cost_basis: Cell::new(dec!(0.0)),
+                                        ratio_of_amt_to_incoming_mvmts_in_a_r: dec!(1.0),
+                                        ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(dec!(1.0)),
                                         lot_num: lot.lot_number,
-                                        proceeds: Cell::new(d128!(0.0)),
-                                        proceeds_lk: Cell::new(d128!(0.0)),
-                                        cost_basis_lk: Cell::new(d128!(0.0)),
+                                        proceeds: Cell::new(dec!(0.0)),
+                                        proceeds_lk: Cell::new(dec!(0.0)),
+                                        cost_basis_lk: Cell::new(dec!(0.0)),
                                     };
                                     wrap_mvmt_and_push(
                                         mvmt,
@@ -553,13 +554,13 @@ pub(crate) fn create_lots_and_movements(
                                             date: txn.date,
                                             transaction_key: txn_num,
                                             action_record_key: *ar_num,
-                                            cost_basis: Cell::new(d128!(0.0)),
-                                            ratio_of_amt_to_incoming_mvmts_in_a_r: d128!(1.0),
-                                            ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
+                                            cost_basis: Cell::new(dec!(0.0)),
+                                            ratio_of_amt_to_incoming_mvmts_in_a_r: dec!(1.0),
+                                            ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(dec!(1.0)),
                                             lot_num: lot.lot_number,
-                                            proceeds: Cell::new(d128!(0.0)),
-                                            proceeds_lk: Cell::new(d128!(0.0)),
-                                            cost_basis_lk: Cell::new(d128!(0.0)),
+                                            proceeds: Cell::new(dec!(0.0)),
+                                            proceeds_lk: Cell::new(dec!(0.0)),
+                                            cost_basis_lk: Cell::new(dec!(0.0)),
                                         };
 
                                     // The more complicated case is the dual-`action record` `flow` `transaction`.
@@ -582,7 +583,7 @@ pub(crate) fn create_lots_and_movements(
                                             // of the margin trade that is now ending in a profit.  And `total_positive_amounts` accounts for the total
                                             // amount of those margin-buys.
                                             let mut positive_mvmt_list: Vec<Rc<Movement>> = [].to_vec();
-                                            let mut total_positive_amounts = d128!(0);
+                                            let mut total_positive_amounts = dec!(0);
 
                                             // This is necessary to find the base account, because the margin-buys are reflected in this account.
                                             let (base_acct_key, quote_acct_key) = get_base_and_quote_acct_for_dual_actionrecord_flow_tx(
@@ -598,7 +599,7 @@ pub(crate) fn create_lots_and_movements(
                                             // It should be apparent that the relevant `lot` has been selected, and its `movement` are now iterated
                                             // over for capturing its `movement`s (for their date) and adding up their amounts.
                                             for base_acct_mvmt in base_acct_lot.movements.borrow().iter() {
-                                                if base_acct_mvmt.amount > d128!(0) {
+                                                if base_acct_mvmt.amount > dec!(0) {
                                                     // println!("In lot# {}, positive mvmt amount: {} {},",
                                                     //     base_acct_lot.lot_number,
                                                     //     mvmt.borrow().amount,
@@ -610,8 +611,8 @@ pub(crate) fn create_lots_and_movements(
 
                                             // These variables track relevant usage in the following for-loop.  These are used after the for-loop
                                             // when creating the final `movement`.
-                                            let mut amounts_used = d128!(0);
-                                            let mut percentages_used = d128!(0);
+                                            let mut amounts_used = dec!(0);
+                                            let mut percentages_used = dec!(0);
 
                                             // Here, the margin-buys are iterated over while creating proportionally-sized new `movement`s.
                                             // Note that this for-loop excludes the final positive `movement` because rounding must be taken into
@@ -637,13 +638,13 @@ pub(crate) fn create_lots_and_movements(
                                                     date: txn.date,
                                                     transaction_key: txn_num,
                                                     action_record_key: *ar_num,
-                                                    cost_basis: Cell::new(d128!(0.0)),
+                                                    cost_basis: Cell::new(dec!(0.0)),
                                                     ratio_of_amt_to_incoming_mvmts_in_a_r: percentage_used,
-                                                    ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
+                                                    ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(dec!(1.0)),
                                                     lot_num: inner_lot.lot_number,
-                                                    proceeds: Cell::new(d128!(0.0)),
-                                                    proceeds_lk: Cell::new(d128!(0.0)),
-                                                    cost_basis_lk: Cell::new(d128!(0.0)),
+                                                    proceeds: Cell::new(dec!(0.0)),
+                                                    proceeds_lk: Cell::new(dec!(0.0)),
+                                                    cost_basis_lk: Cell::new(dec!(0.0)),
                                                 };
                                                 wrap_mvmt_and_push(
                                                     inner_mvmt,
@@ -677,13 +678,13 @@ pub(crate) fn create_lots_and_movements(
                                                 date: txn.date,
                                                 transaction_key: txn_num,
                                                 action_record_key: *ar_num,
-                                                cost_basis: Cell::new(d128!(0.0)),
-                                                ratio_of_amt_to_incoming_mvmts_in_a_r: round_d128_1e8(&(d128!(1.0) - percentages_used)),
-                                                ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
+                                                cost_basis: Cell::new(dec!(0.0)),
+                                                ratio_of_amt_to_incoming_mvmts_in_a_r: round_d128_1e8(&(dec!(1.0) - percentages_used)),
+                                                ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(dec!(1.0)),
                                                 lot_num: lot.lot_number,
-                                                proceeds: Cell::new(d128!(0.0)),
-                                                proceeds_lk: Cell::new(d128!(0.0)),
-                                                cost_basis_lk: Cell::new(d128!(0.0)),
+                                                proceeds: Cell::new(dec!(0.0)),
+                                                proceeds_lk: Cell::new(dec!(0.0)),
+                                                cost_basis_lk: Cell::new(dec!(0.0)),
                                             };
 
                                         // Back to "base case" style treatment, if this is an incoming dual-`action record` `flow` `transaction`, but either
@@ -706,13 +707,13 @@ pub(crate) fn create_lots_and_movements(
                                                 date: txn.date,
                                                 transaction_key: txn_num,
                                                 action_record_key: *ar_num,
-                                                cost_basis: Cell::new(d128!(0.0)),
-                                                ratio_of_amt_to_incoming_mvmts_in_a_r: d128!(1.0),
-                                                ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
+                                                cost_basis: Cell::new(dec!(0.0)),
+                                                ratio_of_amt_to_incoming_mvmts_in_a_r: dec!(1.0),
+                                                ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(dec!(1.0)),
                                                 lot_num: lot.lot_number,
-                                                proceeds: Cell::new(d128!(0.0)),
-                                                proceeds_lk: Cell::new(d128!(0.0)),
-                                                cost_basis_lk: Cell::new(d128!(0.0)),
+                                                proceeds: Cell::new(dec!(0.0)),
+                                                proceeds_lk: Cell::new(dec!(0.0)),
+                                                cost_basis_lk: Cell::new(dec!(0.0)),
                                             };
                                         }
                                     }
@@ -781,13 +782,13 @@ pub(crate) fn create_lots_and_movements(
                                             date: txn.date,
                                             transaction_key: txn_num,
                                             action_record_key: *ar_num,
-                                            cost_basis: Cell::new(d128!(0.0)),
-                                            ratio_of_amt_to_incoming_mvmts_in_a_r: d128!(1.0),
-                                            ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
+                                            cost_basis: Cell::new(dec!(0.0)),
+                                            ratio_of_amt_to_incoming_mvmts_in_a_r: dec!(1.0),
+                                            ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(dec!(1.0)),
                                             lot_num: lot.lot_number,
-                                            proceeds: Cell::new(d128!(0.0)),
-                                            proceeds_lk: Cell::new(d128!(0.0)),
-                                            cost_basis_lk: Cell::new(d128!(0.0)),
+                                            proceeds: Cell::new(dec!(0.0)),
+                                            proceeds_lk: Cell::new(dec!(0.0)),
+                                            cost_basis_lk: Cell::new(dec!(0.0)),
                                         };
                                     }
                                 }
@@ -811,13 +812,13 @@ pub(crate) fn create_lots_and_movements(
                                         date: txn.date,
                                         transaction_key: txn_num,
                                         action_record_key: *ar_num,
-                                        cost_basis: Cell::new(d128!(0.0)),
-                                        ratio_of_amt_to_incoming_mvmts_in_a_r: d128!(1.0),
-                                        ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
+                                        cost_basis: Cell::new(dec!(0.0)),
+                                        ratio_of_amt_to_incoming_mvmts_in_a_r: dec!(1.0),
+                                        ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(dec!(1.0)),
                                         lot_num: lot.lot_number,
-                                        proceeds: Cell::new(d128!(0.0)),
-                                        proceeds_lk: Cell::new(d128!(0.0)),
-                                        cost_basis_lk: Cell::new(d128!(0.0)),
+                                        proceeds: Cell::new(dec!(0.0)),
+                                        proceeds_lk: Cell::new(dec!(0.0)),
+                                        cost_basis_lk: Cell::new(dec!(0.0)),
                                     };
                                 }
                                 // The `lot` and `whole_mvmt` variables have been initialized/assigned
@@ -960,7 +961,7 @@ fn wrap_mvmt_and_push(
 /// that was pushed to the previous `lot`), and recursively check...
 fn fit_into_lots(
     mvmt_to_fit: Movement,
-    amt_to_fit: d128,
+    amt_to_fit: Decimal,
     list_of_lots_to_use: RefCell<Vec<Rc<Lot>>>,
     vec_of_ordered_index_values: Vec<usize>,
     index_position: usize,
@@ -978,7 +979,7 @@ fn fit_into_lots(
     if vec_of_ordered_index_values.len() == current_index_position {
         println!("FATAL: Txn {} on {} spending {} {} has run out of lots to spend from.",
             mvmt_to_fit.transaction_key, mvmt_to_fit.date_as_string, ar.amount, raw_acct.ticker);
-        let bal = if acct.get_sum_of_amts_in_lots() == d128!(0) { "0.00000000".to_string() } 
+        let bal = if acct.get_sum_of_amts_in_lots() == dec!(0) { "0.00000000".to_string() }
             else { acct.get_sum_of_amts_in_lots().to_string() };
         println!("Account balance is only: {}", bal);
         std::process::exit(1);
@@ -987,15 +988,15 @@ fn fit_into_lots(
     // Get the `lot`, and then get its balance to see how much room there is
     let lot_index = vec_of_ordered_index_values[current_index_position];
     let lot = acct.list_of_lots.borrow()[lot_index].clone();
-    let mut sum_of_mvmts_in_lot: d128 = d128!(0.0);
+    let mut sum_of_mvmts_in_lot: Decimal = dec!(0.0);
     for movement in lot.movements.borrow().iter() {
         sum_of_mvmts_in_lot += movement.amount;
     }
 
-    assert!(sum_of_mvmts_in_lot >= d128!(0.0));
+    assert!(sum_of_mvmts_in_lot >= dec!(0.0));
 
     //  If the `lot` is "full", try the next.
-    if sum_of_mvmts_in_lot == d128!(0.0) {
+    if sum_of_mvmts_in_lot == dec!(0.0) {
 
         current_index_position += 1;
 
@@ -1013,15 +1014,15 @@ fn fit_into_lots(
         return;
     }
 
-    assert!(sum_of_mvmts_in_lot > d128!(0.0));
+    assert!(sum_of_mvmts_in_lot > dec!(0.0));
 
     // If `remainder_amt_to_recurse` is positive, it means the `lot` balance exceeded `amt_to_fit`,
     // therefore, the amount completely fits in the `lot`.  If negative, it is passed as the `amt_to_fit`
     // for the next round of recursion.
-    let remainder_amt_to_recurse = (amt_to_fit + sum_of_mvmts_in_lot).reduce();
+    let remainder_amt_to_recurse = (amt_to_fit + sum_of_mvmts_in_lot).round_dp(8);
 
     // If the remainder fits, the `movement` is wrapped/pushed, and the recursion is complete.
-    if remainder_amt_to_recurse >= d128!(0.0) {
+    if remainder_amt_to_recurse >= dec!(0.0) {
 
         let remainder_mvmt_that_fits: Movement = Movement {
             amount: amt_to_fit,
@@ -1040,7 +1041,7 @@ fn fit_into_lots(
 
     // The amt_to_fit doesn't completely fit in the present `lot`, but some does. Create a `movement` that will fit.
     let mvmt_that_fits_in_lot: Movement = Movement {
-        amount: (-sum_of_mvmts_in_lot).reduce(),
+        amount: (-sum_of_mvmts_in_lot).round_dp(8),
         lot_num: lot.lot_number,
         ..mvmt_to_fit.clone()
     };
@@ -1057,7 +1058,7 @@ fn fit_into_lots(
     // After applying some of the `amt_to_fit` to the `lot`, increment the index, take the remainder, and recurse
     fit_into_lots(
         mvmt_to_fit,
-        remainder_amt_to_recurse.reduce(),  //  This was updated before recursing
+        remainder_amt_to_recurse.round_dp(8),  //  This was updated before recursing
         list_of_lots_to_use,
         vec_of_ordered_index_values,
         current_index_position,     //  This was updated before recursing
@@ -1082,13 +1083,12 @@ fn process_multiple_incoming_lots_and_mvmts(
     raw_acct: &RawAccount,
 ) {
 
-    let round_to_places = d128::from(1).scaleb(d128::from(-8));
     let txn = txns_map.get(&txn_num).expect("Couldn't get txn. Tx num invalid?");
 
     let acct_of_incoming_ar = acct_map.get(&incoming_ar.account_key).unwrap();
 
-    let mut all_but_last_incoming_mvmt_amt = d128!(0.0);
-    let mut all_but_last_incoming_mvmt_ratio = d128!(0.0);
+    let mut all_but_last_incoming_mvmt_amt = dec!(0.0);
+    let mut all_but_last_incoming_mvmt_ratio = dec!(0.0);
     // println!("Txn date: {}. Outgoing mvmts: {}, Outgoing amount: {}", txn.date, outgoing_ar.movements.borrow().len(), outgoing_ar.amount);
     let list_of_mvmts_of_outgoing_ar = outgoing_ar.get_mvmts_in_ar_in_lot_date_order(acct_map, txns_map);
     let list_of_mvmts_of_outgoing_ar_len = list_of_mvmts_of_outgoing_ar.len();
@@ -1099,10 +1099,10 @@ fn process_multiple_incoming_lots_and_mvmts(
         // println!("Ratio of outgoing amt to total actionrecord amt: {:.8}", ratio_of_outgoing_to_total_ar);
         let tentative_incoming_amt = ratio_of_outgoing_mvmt_to_total_ar * incoming_ar.amount;
         // println!("Unrounded incoming amt: {}", tentative_incoming_amt);
-        let corresponding_incoming_amt = tentative_incoming_amt.quantize(round_to_places);
+        let corresponding_incoming_amt = tentative_incoming_amt.round_dp(8);
         // println!("Rounded incoming amt: {}", corresponding_incoming_amt);
-        if corresponding_incoming_amt == d128!(0) { continue }  //  Due to rounding, this could be zero.
-        assert!(corresponding_incoming_amt > d128!(0.0));
+        if corresponding_incoming_amt == dec!(0) { continue }  //  Due to rounding, this could be zero.
+        assert!(corresponding_incoming_amt > dec!(0.0));
         let this_acct = acct_of_incoming_ar;
         let length_of_list_of_lots: usize = this_acct.list_of_lots.borrow().len();
         let inherited_date = outgoing_mvmt.get_lot(acct_map, ar_map).date_of_first_mvmt_in_lot;
@@ -1119,18 +1119,18 @@ fn process_multiple_incoming_lots_and_mvmts(
         )
         ;
         let incoming_mvmt = Movement {
-            amount: corresponding_incoming_amt.reduce(),
+            amount: corresponding_incoming_amt.round_dp(8),
             date_as_string: txn.date_as_string.clone(),
             date: txn.date,
             transaction_key: txn_num,
             action_record_key: incoming_ar.self_ar_key,
-            cost_basis: Cell::new(d128!(0.0)),
+            cost_basis: Cell::new(dec!(0.0)),
             ratio_of_amt_to_incoming_mvmts_in_a_r: round_d128_1e8(&ratio_of_outgoing_mvmt_to_total_ar),
-            ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
+            ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(dec!(1.0)),
             lot_num: inner_lot.lot_number,
-            proceeds: Cell::new(d128!(0.0)),
-            proceeds_lk: Cell::new(d128!(0.0)),
-            cost_basis_lk: Cell::new(d128!(0.0)),
+            proceeds: Cell::new(dec!(0.0)),
+            proceeds_lk: Cell::new(dec!(0.0)),
+            cost_basis_lk: Cell::new(dec!(0.0)),
         };
         // println!("From first set of incoming movements, amount: {} {} to account: {}",
         //     incoming_mvmt.amount, acct_incoming_ar.ticker, acct_incoming_ar.account_num);
@@ -1147,7 +1147,7 @@ fn process_multiple_incoming_lots_and_mvmts(
     }
     //  Second iteration, for final movement
     let corresponding_incoming_amt = incoming_ar.amount - all_but_last_incoming_mvmt_amt;
-    assert!(corresponding_incoming_amt > d128!(0.0));
+    assert!(corresponding_incoming_amt > dec!(0.0));
     let this_acct = acct_of_incoming_ar;
     let length_of_list_of_lots = this_acct.list_of_lots.borrow().len();
     let inherited_date = final_og_mvmt.get_lot(acct_map, ar_map).date_of_first_mvmt_in_lot;
@@ -1164,18 +1164,18 @@ fn process_multiple_incoming_lots_and_mvmts(
     )
     ;
     let incoming_mvmt = Movement {
-        amount: corresponding_incoming_amt.reduce(),
+        amount: corresponding_incoming_amt.round_dp(8),
         date_as_string: txn.date_as_string.clone(),
         date: txn.date,
         transaction_key: txn_num,
         action_record_key: incoming_ar.self_ar_key,
-        cost_basis: Cell::new(d128!(0.0)),
-        ratio_of_amt_to_incoming_mvmts_in_a_r: d128!(1.0) - all_but_last_incoming_mvmt_ratio,
-        ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(d128!(1.0)),
+        cost_basis: Cell::new(dec!(0.0)),
+        ratio_of_amt_to_incoming_mvmts_in_a_r: dec!(1.0) - all_but_last_incoming_mvmt_ratio,
+        ratio_of_amt_to_outgoing_mvmts_in_a_r: Cell::new(dec!(1.0)),
         lot_num: lot.lot_number,
-        proceeds: Cell::new(d128!(0.0)),
-        proceeds_lk: Cell::new(d128!(0.0)),
-        cost_basis_lk: Cell::new(d128!(0.0)),
+        proceeds: Cell::new(dec!(0.0)),
+        proceeds_lk: Cell::new(dec!(0.0)),
+        cost_basis_lk: Cell::new(dec!(0.0)),
     };
     // println!("Final incoming mvmt for this actionrecord, amount: {} {} to account: {}",
     //     incoming_mvmt.amount, acct_incoming_ar.ticker, acct_incoming_ar.account_num);

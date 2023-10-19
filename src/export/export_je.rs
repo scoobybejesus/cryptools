@@ -7,7 +7,8 @@ use std::path::PathBuf;
 use std::error::Error;
 use std::io::prelude::Write;
 
-use decimal::d128;
+use rust_decimal::Decimal;
+use rust_decimal_macros::dec;
 
 use crptls::transaction::{Transaction, ActionRecord, Polarity, TxType};
 use crptls::account::{Account, RawAccount, Term};
@@ -65,8 +66,8 @@ depending on the bookkeeping practices you employ.";
 
         writeln!(file, "\n====================================================================================================\n")?;
 
-        let mut cost_basis_ic: Option<d128> = None;
-        let mut cost_basis_og: Option<d128> = None;
+        let mut cost_basis_ic: Option<Decimal> = None;
+        let mut cost_basis_og: Option<Decimal> = None;
 
         let mut acct_string_ic = "".to_string();
         let mut acct_string_og = "".to_string();
@@ -101,16 +102,16 @@ depending on the bookkeeping practices you employ.";
 
         let mut polarity: Option<Polarity> = None;
 
-        let mut amount_st = d128!(0);
-        let mut proceeds_st = d128!(0);
-        let mut cost_basis_st = d128!(0);
+        let mut amount_st = dec!(0);
+        let mut proceeds_st = dec!(0);
+        let mut cost_basis_st = dec!(0);
 
-        let mut amount_lt = d128!(0);
-        let mut proceeds_lt = d128!(0);
-        let mut cost_basis_lt = d128!(0);
+        let mut amount_lt = dec!(0);
+        let mut proceeds_lt = dec!(0);
+        let mut cost_basis_lt = dec!(0);
 
-        let mut income = d128!(0);
-        let mut expense = d128!(0);
+        let mut income = dec!(0);
+        let mut expense = dec!(0);
 
         let flow_or_outgoing_exchange_movements = txn.get_outgoing_exchange_and_flow_mvmts(
             &settings.home_currency,
@@ -123,7 +124,7 @@ depending on the bookkeeping practices you employ.";
         for mvmt in flow_or_outgoing_exchange_movements.iter() {
 
             if polarity.is_none() {
-                polarity = if mvmt.amount > d128!(0) {
+                polarity = if mvmt.amount > dec!(0) {
                     Some(Polarity::Incoming)
                     } else { Some(Polarity::Outgoing)
                 };
@@ -155,18 +156,18 @@ depending on the bookkeeping practices you employ.";
             &acct_map)? == TxType::Flow
         ) & (polarity == Some(Polarity::Incoming)) {
 
-            proceeds_st = d128!(0);
-            cost_basis_st = d128!(0);
+            proceeds_st = dec!(0);
+            cost_basis_st = dec!(0);
 
-            proceeds_lt = d128!(0);
-            cost_basis_lt = d128!(0);
+            proceeds_lt = dec!(0);
+            cost_basis_lt = dec!(0);
         }
 
         let lt_gain_loss = proceeds_lt + cost_basis_lt;
         let st_gain_loss = proceeds_st + cost_basis_st;
 
-        let mut debits = d128!(0);
-        let mut credits = d128!(0);
+        let mut debits = dec!(0);
+        let mut credits = dec!(0);
 
         if let Some(cb) = cost_basis_ic {
             debits += cb;
@@ -190,9 +191,9 @@ depending on the bookkeeping practices you employ.";
             )?;
         }
 
-        if lt_gain_loss != d128!(0) {
+        if lt_gain_loss != dec!(0) {
 
-            if lt_gain_loss > d128!(0) {
+            if lt_gain_loss > dec!(0) {
                 credits += lt_gain_loss.abs();
                 let ltg_string = format!("Long-term gain disposing {}", amount_lt.abs());
                 writeln!(file, "{:50}{:5}{:>20}{:5}{:>20.2}",
@@ -215,9 +216,9 @@ depending on the bookkeeping practices you employ.";
             }
         }
 
-        if st_gain_loss != d128!(0) {
+        if st_gain_loss != dec!(0) {
 
-            if st_gain_loss > d128!(0) {
+            if st_gain_loss > dec!(0) {
                 credits += st_gain_loss.abs();
                 let stg_string = format!("Short-term gain disposing {}", amount_st.abs());
                 writeln!(file, "{:50}{:5}{:>20}{:5}{:>20.2}",
@@ -240,7 +241,7 @@ depending on the bookkeeping practices you employ.";
             }
         }
 
-        if income != d128!(0) {
+        if income != dec!(0) {
             credits += income;
             writeln!(file, "{:50}{:5}{:>20}{:5}{:>20.2}",
             "Income",
@@ -251,7 +252,7 @@ depending on the bookkeeping practices you employ.";
             )?;
         }
 
-        if expense != d128!(0) {
+        if expense != dec!(0) {
             debits += expense.abs();
             writeln!(file, "{:50}{:5}{:>20.2}{:5}{:>20}",
             "Expense",
@@ -285,7 +286,7 @@ depending on the bookkeeping practices you employ.";
             auto_memo,
         )?;
 
-        // if (debits - credits) != d128!(0) {
+        // if (debits - credits) != dec!(0) {
         //     println!("Rounding issue on transaction #{}", txn_num);
         // }
 

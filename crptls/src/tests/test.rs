@@ -2,11 +2,12 @@
 // Redistributions must include the license: https://github.com/scoobybejesus/cryptools/blob/master/LEGAL.txt
 
 use std::fs;
-use std::collections::{HashMap};
+use std::collections::HashMap;
 
-use decimal::d128;
+use rust_decimal::Decimal;
+use rust_decimal_macros::dec;
 
-use crate::account::{Account};
+use crate::account::Account;
 use crate::transaction::{Transaction, ActionRecord};
 use crate::decimal_utils::*;
 
@@ -30,8 +31,8 @@ pub fn _run_tests(
         &account_map
     );
 
-    _test_quantize_from_incoming_multiple_lots_fn(d128!(20), d128!(200), d128!(50));
-    _test_quantize_from_incoming_multiple_lots_fn(d128!(1), d128!(6), d128!(1234567.1234567896));
+    _test_quantize_from_incoming_multiple_lots_fn(dec!(20), dec!(200), dec!(50));
+    _test_quantize_from_incoming_multiple_lots_fn(dec!(1), dec!(6), dec!(1234567.1234567896));
     // test_dec_rounded("123456789.123456789");
     // test_dec_rounded("123456.123456");
     // test_dec_rounded("1234567891234.1234567891234");
@@ -68,7 +69,7 @@ fn _compare_movements_across_implementations(
                 + &ar.amount.to_string() + &"\n".to_string()
             );
             let mvmts = ar.get_mvmts_in_ar_in_lot_date_order(&account_map, &transactions_map);
-            let mut amts = d128!(0);
+            let mut amts = dec!(0);
             for mvmt in mvmts {
                 amts += mvmt.amount;
                 line += &("Movement ".to_string() +
@@ -78,7 +79,7 @@ fn _compare_movements_across_implementations(
                                     &"\n".to_string());
             }
             line += &("Amount total: ".to_string() + &amts.to_string() + &"\n".to_string());
-            if amts - ar.amount != d128!(0) {
+            if amts - ar.amount != dec!(0) {
                 line += &("&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&".to_string());
                 println!("Movement amounts via get_mvmts_in_ar() different from actionRecord.amount.  Aborting.");
                 use std::process::exit; exit(1)
@@ -104,7 +105,7 @@ fn _compare_movements_across_implementations(
                 + &"\n".to_string()
             );
             // let mvmts = ar.get_mvmts_in_ar(&account_map);
-            let mut amts = d128!(0);
+            let mut amts = dec!(0);
             for mvmt in ar.movements.borrow().iter() {
                 amts += mvmt.amount;
                 line2 += &("Movement ".to_string() +
@@ -114,7 +115,7 @@ fn _compare_movements_across_implementations(
                                     &"\n".to_string());
             }
             line2 += &("Amount total: ".to_string() + &amts.to_string() + &"\n".to_string());
-            if amts - ar.amount != d128!(0) {
+            if amts - ar.amount != dec!(0) {
                 line2 += &("&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&".to_string());
                 println!("Movement amounts via ar.movements different from actionRecord.amount.  Aborting.");
                 use std::process::exit; exit(1)
@@ -144,9 +145,9 @@ pub fn _test_action_records_amts_vs_mvmt_amts(
     account_map: &HashMap<u16, Account>,
 ) {
 
-    let mut mvmt_amt_acct_lot: d128 = d128!(0);
-    let mut mvmt_amt_ar: d128 = d128!(0);
-    let mut ar_amts: d128 = d128!(0);
+    let mut mvmt_amt_acct_lot: Decimal = dec!(0);
+    let mut mvmt_amt_ar: Decimal = dec!(0);
+    let mut ar_amts: Decimal = dec!(0);
 
     for tx_num in 1..=transactions_map.len() {
 
@@ -195,18 +196,18 @@ pub fn _test_action_records_amts_vs_mvmt_amts(
 }
 
 fn _test_quantize_from_incoming_multiple_lots_fn (
-    outgoing_mvmt_amt: d128,
-    outgoing_ar_amt: d128,
-    incoming_ar_amt: d128,
+    outgoing_mvmt_amt: Decimal,
+    outgoing_ar_amt: Decimal,
+    incoming_ar_amt: Decimal,
 ) {
-    let rounded_example = d128::from(1).scaleb(d128::from(-8));
+    let rounded_example = Decimal::new(1,8);
     //
     println!("Og mvmt amt: {:?}, Og ar amt: {:?}, Ic ar amt: {:?}", outgoing_mvmt_amt, outgoing_ar_amt, incoming_ar_amt);
     let ratio_of_outgoing_to_total_ar = outgoing_mvmt_amt / outgoing_ar_amt; //  Negative divided by negative is positive
     println!("ratio_of_outgoing: {:.20}", ratio_of_outgoing_to_total_ar);
     let tentative_incoming_amt = ratio_of_outgoing_to_total_ar * incoming_ar_amt;
     println!("tentative_inc_amt: {:.20}", tentative_incoming_amt);
-    let corresponding_incoming_amt = tentative_incoming_amt.quantize(rounded_example);
+    let corresponding_incoming_amt = tentative_incoming_amt.round_dp(8);
     println!("corresponding_inc_amt: {}", corresponding_incoming_amt);
 }
 
@@ -221,23 +222,23 @@ fn _test_quantize_from_incoming_multiple_lots_fn (
 //     corresponding_inc_amt: 205761.18724280
 
 fn _test_dec_rounded(random_float_string: &str) {
-    let places_past_decimal = d128!(8);
-    let amt = random_float_string.parse::<d128>().unwrap();
+    let places_past_decimal = 8;
+    let amt = random_float_string.parse::<Decimal>().unwrap();
     let amt2 = round_d128_generalized(&amt, places_past_decimal);
-    println!("Float into d128: {:?}; d128 rounded to {}: {:?}", amt, places_past_decimal, amt2);
-    //  Results of this test suggest that quantize() is off by one.  round_d128_1e8() was adjusted accordingly.
+    println!("Float into dec: {:?}; dec rounded to {}: {:?}", amt, places_past_decimal, amt2);
+    //  Results of this test suggest that quantize() is off by one.  round_dec_1e8() was adjusted accordingly.
 }
 
 fn _test_dec_rounded_1e8(random_float_string: &str) {
-    let amt = random_float_string.parse::<d128>().unwrap();
+    let amt = random_float_string.parse::<Decimal>().unwrap();
     let amt2 = round_d128_1e8(&amt);
-    println!("Float into d128: {:?}; d128 rounded to 8 places: {:?}", amt, amt2);
-    //  Results of this test suggest that quantize() is off by one.  round_d128_1e8() was adjusted accordingly.
+    println!("Float into dec: {:?}; dec rounded to 8 places: {:?}", amt, amt2);
+    //  Results of this test suggest that quantize() is off by one.  round_dec_1e8() was adjusted accordingly.
 }
 
 fn _test_dec_rounded_1e2(random_float_string: &str) {
-    let amt = random_float_string.parse::<d128>().unwrap();
+    let amt = random_float_string.parse::<Decimal>().unwrap();
     let amt2 = round_d128_1e2(&amt);
-    println!("String into d128: {:?}; d128 rounded to 2 places: {:?}", amt, amt2);
-    //  Results of this test suggest that quantize() is off by one.  round_d128_1e8() was adjusted accordingly.
+    println!("String into dec: {:?}; dec rounded to 2 places: {:?}", amt, amt2);
+    //  Results of this test suggest that quantize() is off by one.  round_dec_1e8() was adjusted accordingly.
 }
