@@ -137,6 +137,11 @@ pub fn export(
 
     println!("Attempting to export:");
 
+    if app.to_print_by_idx.is_empty() {
+        println!("  None selected.");
+        return Ok(())
+    }
+
     for report_idx in app.to_print_by_idx.iter() {
 
         println!("    {}", reports[*report_idx]);
