@@ -9,7 +9,7 @@ use std::error::Error;
 use tui::Terminal;
 use tui::backend::TermionBackend;
 use termion::raw::IntoRawMode;
-use termion::screen::AlternateScreen;
+use termion::screen::IntoAlternateScreen;
 use termion::input::MouseTerminal;
 use termion::event::Key;
 
@@ -32,7 +32,7 @@ pub (crate) fn print_menu_tui(
 
     let stdout = io::stdout().into_raw_mode()?;
     let stdout = MouseTerminal::from(stdout);
-    let stdout = AlternateScreen::from(stdout);
+    let stdout = stdout.into_raw_mode()?.into_alternate_screen()?;
     let backend = TermionBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
     terminal.hide_cursor()?;
