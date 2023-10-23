@@ -7,6 +7,7 @@ use std::collections::HashMap;
 use crptls::transaction::{Transaction, ActionRecord};
 use crptls::account::{Account, RawAccount};
 use crptls::core_functions::ImportProcessParameters;
+use tui::widgets::ListState;
 
 use crate::export::{export_csv, export_je, export_txt};
 
@@ -24,36 +25,51 @@ pub (crate) const REPORTS: [&'static str; 11] = [
     "11. TXT: Bookkeeping journal entries",
 ];
 
-pub struct ListState<I> {
+pub struct StatefulList<I> {
     pub items: Vec<I>,
-    pub selected: usize,
+    pub state: ListState,
 }
 
-impl<I> ListState<I> {
+impl<T> StatefulList<T> {
 
-    fn new(items: Vec<I>) -> ListState<I> {
-        ListState { items, selected: 0 }
+    fn new(items: Vec<T>) -> StatefulList<T> {
+        StatefulList { items, state: ListState::default() }
     }
 
     fn select_previous(&mut self) {
-
-        if self.selected > 0 {
-            self.selected -= 1;
-        }
+        let i = match self.state.selected() {
+            Some(i) => {
+                if i == 0 {
+                    self.items.len() - 1
+                } else {
+                    i - 1
+                }
+            }
+            None => 0,
+        };
+        self.state.select(Some(i));
     }
 
     fn select_next(&mut self) {
-
-        if self.selected < self.items.len() - 1 {
-            self.selected += 1
-        }
+        let i = match self.state.selected() {
+            Some(i) => {
+                if i >= self.items.len() - 1 {
+                    0
+                } else {
+                    i + 1
+                }
+            }
+            None => 0,
+        };
+        self.state.select(Some(i));
     }
+
 }
 
 pub struct PrintWindow<'a> {
     pub title: &'a str,
     pub should_quit: bool,
-    pub tasks: ListState<&'a str>,
+    pub tasks: StatefulList<&'a str>,
     pub to_print_by_idx: Vec<usize>,
     pub to_print_by_title: Vec<&'a str>,
 }
@@ -61,10 +77,13 @@ pub struct PrintWindow<'a> {
 impl<'a> PrintWindow<'a> {
 
     pub fn new(title: &'a str) -> PrintWindow<'a> {
+        let mut tasks = StatefulList::new(REPORTS.to_vec());
+        tasks.state.select(Some(0));
+
         PrintWindow {
             title,
             should_quit: false,
-            tasks: ListState::new(REPORTS.to_vec()),
+            tasks,
             to_print_by_idx: Vec::with_capacity(REPORTS.len()),
             to_print_by_title: Vec::with_capacity(REPORTS.len()),
         }
@@ -78,7 +97,7 @@ impl<'a> PrintWindow<'a> {
         self.tasks.select_next();
     }
 
-    pub fn on_key(&mut self, c: char) {
+    pub fn on_key(&mut self, c: char) -> Result<(), Box<dyn Error>> {
 
         match c {
 
@@ -90,7 +109,7 @@ impl<'a> PrintWindow<'a> {
                 self.should_quit = true;
             }
             'x' => {
-                let selected = self.tasks.selected;
+                let selected = self.tasks.state.selected().unwrap();
                 if self.to_print_by_idx.contains(&selected) {} else {
                     self.to_print_by_idx.push(selected);
                     self.to_print_by_title.push(self.tasks.items[selected])
@@ -99,7 +118,7 @@ impl<'a> PrintWindow<'a> {
                 self.tasks.select_next();
             }
             'd' => {
-                let selected_idx = self.tasks.selected;
+                let selected_idx = self.tasks.state.selected().unwrap();
                 self.to_print_by_idx.retain(|&x| x != selected_idx );
                 let selected_str = self.tasks.items[selected_idx];
                 self.to_print_by_title.retain(|&x| x != selected_str );
@@ -107,6 +126,7 @@ impl<'a> PrintWindow<'a> {
             }
             _ => {}
         }
+        Ok(())
     }
 
     fn change_vecs_to_chrono_order(vec: &mut Vec<usize>, strvec: &mut Vec<&str>) {

@@ -46,14 +46,14 @@ pub (crate) fn print_menu_tui(
 
     loop {
 
-        ui::draw(&mut terminal, &app)?;
+        ui::draw(&mut terminal, &mut app)?;
 
         if let Event::Input(key) = events.next()? {
 
             match key {
 
                 Key::Char(c) => {
-                    app.on_key(c);
+                    app.on_key(c)?;
                 }
                 Key::Up => {
                     app.on_up();
