@@ -3,13 +3,13 @@
 
 use std::error::Error;
 
-use ::tui::Terminal;
-use ::tui::style::{Color, Modifier, Style};
-use ::tui::text::{Text, Span, Spans};
-use tui::widgets::{Wrap, ListItem};
-use ::tui::widgets::{Block, Borders, Paragraph, List};
-use ::tui::layout::{Layout, Constraint, Direction};
-use ::tui::backend::Backend;
+use ::ratatui::Terminal;
+use ::ratatui::style::{Color, Modifier, Style};
+use ::ratatui::text::{Text, Span, Line};
+use ratatui::widgets::{Wrap, ListItem};
+use ::ratatui::widgets::{Block, Borders, Paragraph, List};
+use ::ratatui::layout::{Layout, Constraint, Direction};
+use ::ratatui::backend::Backend;
 
 use crate::mytui::app::{PrintWindow, REPORTS};
 
@@ -19,33 +19,33 @@ pub fn draw<B: Backend>(terminal: &mut Terminal<B>, app: &mut PrintWindow) -> Re
     terminal.draw(|f| {
 
         let instructions = vec![
-            Spans::from(vec![Span::raw("")]),
+            Line::from(vec![Span::raw("")]),
 
-            Spans::from(vec![
+            Line::from(vec![
                 Span::raw("  Press '"),
                 Span::styled("x", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
                 Span::raw("' to add the selected report to the list of reports to print/export."),
             ]),
 
-            Spans::from(vec![Span::raw("")]),
+            Line::from(vec![Span::raw("")]),
             
-            Spans::from(vec![
+            Line::from(vec![
                 Span::raw("  Press '"),
                 Span::styled("d", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
                 Span::raw("' to delete the selected report from the list of reports to print/export."),
             ]),
             
-            Spans::from(vec![Span::raw("")]),
+            Line::from(vec![Span::raw("")]),
             
-            Spans::from(vec![
+            Line::from(vec![
                 Span::raw("  Press '"),
                 Span::styled("p", Style::default().fg(Color::Green).add_modifier(Modifier::BOLD)),
                 Span::raw("' to print/export the selected reports."),
             ]),
             
-            Spans::from(vec![Span::raw("")]),
+            Line::from(vec![Span::raw("")]),
             
-            Spans::from(vec![
+            Line::from(vec![
                 Span::raw("  Press '"),
                 Span::styled("q", Style::default().fg(Color::Red).add_modifier(Modifier::BOLD)),
                 Span::raw("' to quit without printing."),

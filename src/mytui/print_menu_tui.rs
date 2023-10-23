@@ -6,8 +6,8 @@ use std::time::Duration;
 use std::collections::HashMap;
 use std::error::Error;
 
-use tui::Terminal;
-use tui::backend::TermionBackend;
+use ratatui::Terminal;
+use ratatui::backend::TermionBackend;
 use termion::raw::IntoRawMode;
 use termion::screen::IntoAlternateScreen;
 use termion::input::MouseTerminal;
